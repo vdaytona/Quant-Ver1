@@ -49,7 +49,6 @@ class query:
     #return the query result in term of pandas
     def pandasQuery(self,sql):
         return psql.read_sql(sql, self.cnx)
-        
 
 # Exception for login MysqlDB server
 class connectionInfoMissingException(Exception):

@@ -31,10 +31,10 @@ def main():
     
 #write your work here
 def workingSpace(cnx):
-    sql = ("SELECT * from aac_historicalquotes_sydney")
+    sql = ("select * from newyorkexchange.ibm_historicalquotes_newyork")
     df = connectMysqlDB.query(cnx).pandasQuery(sql)
     print(df.head(100))
-    df['Open'].hist()
+    df['AdjClose'].hist()
     p.show()
     
 if __name__ == "__main__": main()
