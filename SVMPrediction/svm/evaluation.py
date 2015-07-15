@@ -58,10 +58,8 @@ class evaluation():
         """
         n = len(self.real)
         ds = 0
-        for i in range(1,n):
-            real_dif = self.real[i] - self.real[i-1]
-            pred_dif = self.pred[i] - self.pred[i-1]
-            if real_dif * pred_dif > 0 : ds += 1
+        for i in range(n):
+            if self.real[i] * self.pred[i] > 0 : ds += 1
         return ds
     
     # TODO @JP
@@ -70,38 +68,4 @@ class evaluation():
         weighted directional symmetry
         """
         pass
-    
-    def Profit(self):
-        '''
-        calculate profit
-        '''
-        n = len(self.real)
-        profit = 0.0
-        for i in range(1,n):
-            real_dif = self.real[i] - self.real[i-1]
-            pred_dif = self.pred[i] - self.pred[i-1]
-            diff = self.real[i] - self.real[i-1]
-            if real_dif * pred_dif > 0 :
-                profit += np.abs(diff)
-            else:
-                profit -= np.abs(diff)
-        return profit
-    
-    def ProfitTimeSeries(self):
-        '''
-        calculate profit change with time
-        '''
-        n = len(self.real)
-        profit_time = []
-        profit = 0.0
-        for i in range(1,n):
-            real_dif = self.real[i] - self.real[i-1]
-            pred_dif = self.pred[i] - self.pred[i-1]
-            diff = self.real[i] - self.real[i-1]
-            if real_dif * pred_dif > 0 :
-                profit += np.abs(diff)
-            else:
-                profit -= np.abs(diff)
-            profit_time.append(profit)
-        return profit_time
     

@@ -52,7 +52,7 @@ def collectData():
         cnx = connectMysqlDB.cnxStock(host=host,userName=userName,password=password,database=database).connect()
         
         # collecting IBM historical data
-        sql = ('select * from newyorkexchange.aapl_historicalquotes_newyork where Date > \'2010-1-1\'')
+        sql = ('select * from newyorkexchange.aapl_historicalquotes_newyork where Date > \'2014-1-1\'')
         df = connectMysqlDB.query(cnx).pandasQuery(sql)
     finally:
         cnx.close()
