@@ -7,6 +7,7 @@ Created on 2015/07/13
 '''
 
 from sklearn.svm import SVR
+from sklearn.metrics import r2_score
 import matplotlib.pyplot as plt
 import numpy as np
 import evaluation
@@ -31,6 +32,8 @@ class svr():
         ds_result = []
         profit_result = []
         profit_max = -100
+        doc_max = -1000 # R square
+        doc_result = []
         for C in c_set:
             for gamma in gamma_set:
                 for epsilon in epsilon_set:
@@ -40,31 +43,35 @@ class svr():
                     nmse = evaluation.evaluation(y_real.values,y_pred).NMSE()
                     ds = evaluation.evaluation(y_real.values,y_pred).DS()
                     profit = ljCao.profit.profitLjCao(y_real.values,y_pred).Profit()
+                    doc = r2_score(y_real.values,y_pred)
                     #corr = np.corrcoef(y_real.values, y_pred, bias = 0, ddof = None)[0,1]
-                    print("C = %f, gamma = %f, epsilon = %f, NMSE = %f, DS = %f, Profit = %f" %(C,gamma,epsilon,nmse,ds,profit))
+                    print("C = %f, gamma = %f, epsilon = %f, NMSE = %f, DS = %f, Profit = %f, DOC = %f" %(C,gamma,epsilon,nmse,ds,profit,doc))
                     nmse_result.append(nmse)
                     ds_result.append(ds)
-                    if (profit > profit_max):
+                    doc_result.append(doc)
+                    if (doc > doc_max):
                         c_min = C
                         gamma_min = gamma
                         epsilon_min = epsilon
-                        profit_max = profit
+                        doc_max = doc
         svr_rbf = SVR(kernel=kernel, C=c_min, gamma=gamma_min, epsilon = epsilon_min)
         y_pred = svr_rbf.fit(x_train, y_train).predict(x_test)
         nmse = evaluation.evaluation(y_real.values,y_pred).NMSE()
         ds = evaluation.evaluation(y_real.values,y_pred).DS()
         profit = ljCao.profit.profitLjCao(y_real.values,y_pred).Profit()
         profit_time = ljCao.profit.profitLjCao(y_real.values,y_pred).ProfitTimeSeries()
+        doc = r2_score(y_real.values,y_pred)
         print('MAX DS = %f' %ds)
         print('Hit rate = %f' %(float(ds) / float(len(y_pred))))
         print('NMSE = %f' %nmse)
         print('Profit = %f' %profit)
+        print('DOC = %f' %doc)
         print("C = %f, gamma = %f, epsilon = %f" %(c_min,gamma_min,epsilon_min))
         x = range(len(y_real.index))
         plt.figure(1)
         plt.scatter(x, y_real, c='k', label='data')
         plt.hold('on')
-        plt.plot(x, y_pred, c='g', label='RBF model')
+        plt.scatter(x, y_pred, c='r', label='RBF model')
         plt.xlabel('data')
         plt.ylabel('target')
         plt.title('Support Vector Regression')
@@ -79,7 +86,7 @@ class svr():
         plt.plot(x, nmse_result, c='g', label='NMSE')
         plt.xlabel('Times')
         plt.ylabel('NMSE')
-        plt.show()
+        #plt.show()
         pass
         #return svr_result
         
