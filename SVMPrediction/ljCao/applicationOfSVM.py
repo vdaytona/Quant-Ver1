@@ -13,17 +13,14 @@ Created on 2015/07/13
 import connectMysqlDB
 import mysql.connector
 import pandas
-import pylab as p
-
-from svm import svmCal
+import time
 from svm import evaluation
 from ljCao.indexCal import index_cal
-from theano.typed_list.basic import Length
 from svm.svmCal import svr
 
 # main program
 def main():
-    
+    t0 = time.time()
     # 1. collect data from DB
     raw_data = collectData()
     
@@ -38,7 +35,8 @@ def main():
     
     # 5. output result
     #output_result(svr_result, NMSE, MAE, DS, WDS)
-    
+    t1 = time.time()
+    print ('Processing %f times took' % (t1 - t0), 'seconds')
     print('finished')
 
 def collectData():
@@ -52,7 +50,7 @@ def collectData():
         cnx = connectMysqlDB.cnxStock(host=host,userName=userName,password=password,database=database).connect()
         
         # collecting IBM historical data
-        sql = ('select * from newyorkexchange.aapl_historicalquotes_newyork where Date > \'2014-1-1\'')
+        sql = ('select * from newyorkexchange.ibm_historicalquotes_newyork where Date > \'2015-1-1\'')
         df = connectMysqlDB.query(cnx).pandasQuery(sql)
     finally:
         cnx.close()
@@ -60,16 +58,26 @@ def collectData():
 
 # TODO @MJD
 def feature_engineering(raw_data):
-    input_data = raw_data[['Date','AdjClose']].dropna()
-    train_ratio = 0.8
+    input_data = raw_data[['Date','AdjClose','Volume']].dropna()
+    train_ratio = 0.9
+    
+    
     #print(input_data['AdjClose'].pct_change(periods = 5))
     
+    #Vol_5 = index_cal().VOL_n(input_data, 5)
+    #Vol_10 = index_cal().VOL_n(input_data, 10)
+    #Vol_15 = index_cal().VOL_n(input_data, 15)
+    #Vol_20 = index_cal().VOL_n(input_data, 20)
+    #RDV_5 = index_cal().RDV_n(input_data, 5)
+    #RDV_10 = index_cal().RDV_n(input_data, 10)
+    #RDV_15 = index_cal().RDV_n(input_data, 15)
+    #RDV_20 = index_cal().RDV_n(input_data, 20)
     RDP_5 = index_cal().RDP_n(input_data, 5)
     RDP_10 = index_cal().RDP_n(input_data, 10)
     RDP_15 = index_cal().RDP_n(input_data, 15)
     RDP_20 = index_cal().RDP_n(input_data, 20)
     RDP_plus_5 = index_cal().RDP_plus_n(input_data, 5)
-    #RDP_plus_5['RDP+5'].hist(bins=50)
+    #RDP_plus_5['RDP+90'].hist(bins=50)
     #p.ion()
     #p.show()
     features = mergeColumnByDate(RDP_5,RDP_10,RDP_15,RDP_20,RDP_plus_5)

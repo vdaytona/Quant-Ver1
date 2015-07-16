@@ -8,6 +8,7 @@ Created on 2015/07/13
 '''
 
 import numpy as np
+import scipy as sp
 
 class evaluation():
     def __init__(self, y_real, y_pred):
