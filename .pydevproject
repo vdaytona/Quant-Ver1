@@ -7,5 +7,6 @@
 <path>/${PROJECT_DIR_NAME}/Test</path>
 <path>/${PROJECT_DIR_NAME}/MysqlTest</path>
 <path>/${PROJECT_DIR_NAME}/SVMPrediction</path>
+<path>/${PROJECT_DIR_NAME}/SVMClassification</path>
 </pydev_pathproperty>
 </pydev_project>

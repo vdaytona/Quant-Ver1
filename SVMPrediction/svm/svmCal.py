@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import evaluation
 import ljCao.profit
+import svm
 
 class svr():
     def __init__(self):
@@ -19,10 +20,17 @@ class svr():
 
     # TODO @MJD
     def svr_timeseries(self, x_train, y_train, x_test, y_real, kernel):
-        #'''
+        '''
         c_set = [0.0001,0.001,0.01,0.1,1,10,100,1000]
         gamma_set = [0.0001,0.001,0.01,0.1,10,100,1000]
         epsilon_set = [0.0001,0.001,0.01,0.1,10,100,1000]
+        '''
+        parameter_start = 2e-10
+        parameter_stop = 2e10
+        count = 100
+        c_set = svm.svmCal.svr.numberGenerate(self, parameter_start, parameter_stop, count)
+        gamma_set = svm.svmCal.svr.numberGenerate(self, parameter_start, parameter_stop, count)
+        epsilon_set = svm.svmCal.svr.numberGenerate(self, parameter_start, parameter_stop, count)
         c_min = 0
         gamma_min = 0
         epsilon_min = 0
@@ -34,18 +42,22 @@ class svr():
         profit_max = -100
         doc_max = -1000 # R square
         doc_result = []
+        loop_number = count**3
+        loop_count = 0
+        percent_count = 0.05
         for C in c_set:
             for gamma in gamma_set:
                 for epsilon in epsilon_set:
+                    loop_count += 1
                     svr_rbf = SVR(kernel=kernel, C=C, gamma=gamma, epsilon = epsilon)
                     #svr_rbf.fit(x_train, y_train)
                     y_pred = svr_rbf.fit(x_train, y_train).predict(x_test)
-                    nmse = evaluation.evaluation(y_real.values,y_pred).NMSE()
-                    ds = evaluation.evaluation(y_real.values,y_pred).DS()
-                    profit = ljCao.profit.profitLjCao(y_real.values,y_pred).Profit()
-                    doc = r2_score(y_real.values,y_pred)
-                    #corr = np.corrcoef(y_real.values, y_pred, bias = 0, ddof = None)[0,1]
-                    print("C = %f, gamma = %f, epsilon = %f, NMSE = %f, DS = %f, Profit = %f, DOC = %f" %(C,gamma,epsilon,nmse,ds,profit,doc))
+                    nmse = evaluation.evaluation(y_real,y_pred).NMSE()
+                    ds = evaluation.evaluation(y_real,y_pred).DS()
+                    profit = ljCao.profit.profitLjCao(y_real,y_pred).Profit()
+                    doc = r2_score(y_real,y_pred)
+                    #corr = np.corrcoef(y_real, y_pred, bias = 0, ddof = None)[0,1]
+                    #print("C = %f, gamma = %f, epsilon = %f, NMSE = %f, DS = %f, Profit = %f, DOC = %f" %(C,gamma,epsilon,nmse,ds,profit,doc))
                     nmse_result.append(nmse)
                     ds_result.append(ds)
                     doc_result.append(doc)
@@ -54,42 +66,51 @@ class svr():
                         gamma_min = gamma
                         epsilon_min = epsilon
                         doc_max = doc
+                    finished_percent = float(loop_count / loop_number)
+                    if finished_percent > percent_count :
+                        print("%d%%" %(percent_count * 100))
+                        percent_count += 0.05
         svr_rbf = SVR(kernel=kernel, C=c_min, gamma=gamma_min, epsilon = epsilon_min)
         y_pred = svr_rbf.fit(x_train, y_train).predict(x_test)
-        nmse = evaluation.evaluation(y_real.values,y_pred).NMSE()
-        ds = evaluation.evaluation(y_real.values,y_pred).DS()
-        profit = ljCao.profit.profitLjCao(y_real.values,y_pred).Profit()
-        profit_time = ljCao.profit.profitLjCao(y_real.values,y_pred).ProfitTimeSeries()
-        doc = r2_score(y_real.values,y_pred)
+        nmse = evaluation.evaluation(y_real,y_pred).NMSE()
+        ds = evaluation.evaluation(y_real,y_pred).DS()
+        profit = ljCao.profit.profitLjCao(y_real,y_pred).Profit()
+        profit_time = ljCao.profit.profitLjCao(y_real,y_pred).ProfitTimeSeries()
+        doc = r2_score(y_real,y_pred)
         print('MAX DS = %f' %ds)
         print('Hit rate = %f' %(float(ds) / float(len(y_pred))))
         print('NMSE = %f' %nmse)
         print('Profit = %f' %profit)
         print('DOC = %f' %doc)
         print("C = %f, gamma = %f, epsilon = %f" %(c_min,gamma_min,epsilon_min))
-        x = range(len(y_real.index))
-        plt.figure(1)
+        x = range(len(y_real))
+        plt.figure()
+        plt.subplot2grid((2,2),(0, 0))
         plt.scatter(x, y_real, c='k', label='data')
-        plt.hold('on')
         plt.scatter(x, y_pred, c='r', label='RBF model')
         plt.xlabel('data')
         plt.ylabel('target')
         plt.title('Support Vector Regression')
-        plt.legend()
-        plt.figure(2)
+        #plt.legend()
+        #plt.figure(2)
+        plt.subplot2grid((2,2),(0, 1))
         x = range(len(profit_time))
         plt.plot(x, profit_time, c='g', label='profit')
         plt.xlabel('day')
         plt.ylabel('profit (times)')
-        plt.figure(3)
+        #plt.figure(3)
+        plt.subplot2grid((2,2),(1, 0))
         x = range(len(nmse_result))
         plt.plot(x, nmse_result, c='g', label='NMSE')
         plt.xlabel('Times')
         plt.ylabel('NMSE')
-        #plt.show()
+        plt.subplot2grid((2,2),(1, 1))
+        plt.show()
         pass
         #return svr_result
         
-    def numberGenerate(self,start, stop, times):
-        
-        pass
+    def numberGenerate(self,start, stop, count):
+        result = []
+        for i in range (count+1):
+            result.append(start +  (stop - start) / count * i)
+        return result

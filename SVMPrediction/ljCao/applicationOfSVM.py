@@ -14,16 +14,18 @@ import connectMysqlDB
 import mysql.connector
 import pandas
 import time
+import matplotlib.pyplot as p
+
+from sklearn.decomposition import PCA, KernelPCA
 from svm import evaluation
 from ljCao.indexCal import index_cal
 from svm.svmCal import svr
 
 # main program
 def main():
-    t0 = time.time()
     # 1. collect data from DB
     raw_data = collectData()
-    
+    t0 = time.time()
     # 2. Feature engineering
     (x_train, y_train, x_test ,y_real) = feature_engineering(raw_data)
     
@@ -50,7 +52,7 @@ def collectData():
         cnx = connectMysqlDB.cnxStock(host=host,userName=userName,password=password,database=database).connect()
         
         # collecting IBM historical data
-        sql = ('select * from newyorkexchange.ibm_historicalquotes_newyork where Date > \'2015-1-1\'')
+        sql = ('select * from newyorkexchange.ibm_historicalquotes_newyork where Date > \'2015-2-1\'')
         df = connectMysqlDB.query(cnx).pandasQuery(sql)
     finally:
         cnx.close()
@@ -59,7 +61,7 @@ def collectData():
 # TODO @MJD
 def feature_engineering(raw_data):
     input_data = raw_data[['Date','AdjClose','Volume']].dropna()
-    train_ratio = 0.9
+    train_ratio = 0.8
     
     
     #print(input_data['AdjClose'].pct_change(periods = 5))
@@ -80,14 +82,12 @@ def feature_engineering(raw_data):
     #RDP_plus_5['RDP+90'].hist(bins=50)
     #p.ion()
     #p.show()
-    features = mergeColumnByDate(RDP_5,RDP_10,RDP_15,RDP_20,RDP_plus_5)
-    (train_data, test_data) = divideTrainTest(features, train_ratio)
-    
-    x_train = train_data[['RDP-5','RDP-10','RDP-15','RDP-20']]
-    y_train = train_data['RDP+5']
-    x_test = test_data[['RDP-5','RDP-10','RDP-15','RDP-20']]
-    y_real = test_data['RDP+5']
-    
+    all_data = mergeColumnByDate(RDP_5,RDP_10,RDP_15,RDP_20,RDP_plus_5)
+    features = all_data[['RDP-5','RDP-5','RDP-15','RDP-20']]
+    features = PCA().fit_transform(features.values)
+    (x_train, x_test) = divideTrainTest(features, train_ratio)
+    objectives = all_data['RDP+5'].values
+    (y_train,y_real) = divideTrainTest(objectives, train_ratio)
     
     return (x_train,y_train,x_test,y_real)
     #EMA_15 = index_cal.EMA_n(input_data, 15)
@@ -95,7 +95,7 @@ def feature_engineering(raw_data):
 
     # split train and test data
 def divideTrainTest(raw_data,train_ratio):
-    raw_data_size = len(raw_data.index)
+    raw_data_size = len(raw_data)
     train_size = int(raw_data_size * train_ratio)
     train_data = raw_data[0:train_size-1]
     test_data = raw_data[train_size:raw_data_size]
