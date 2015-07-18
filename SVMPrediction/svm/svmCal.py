@@ -13,6 +13,8 @@ import numpy as np
 import evaluation
 import ljCao.profit
 import svm
+import math
+import time
 
 class svr():
     def __init__(self):
@@ -25,9 +27,9 @@ class svr():
         gamma_set = [0.0001,0.001,0.01,0.1,10,100,1000]
         epsilon_set = [0.0001,0.001,0.01,0.1,10,100,1000]
         '''
-        parameter_start = 2e-10
-        parameter_stop = 2e10
-        count = 100
+        parameter_start = -10
+        parameter_stop = 10
+        count = 10
         c_set = svm.svmCal.svr.numberGenerate(self, parameter_start, parameter_stop, count)
         gamma_set = svm.svmCal.svr.numberGenerate(self, parameter_start, parameter_stop, count)
         epsilon_set = svm.svmCal.svr.numberGenerate(self, parameter_start, parameter_stop, count)
@@ -42,33 +44,37 @@ class svr():
         profit_max = -100
         doc_max = -1000 # R square
         doc_result = []
-        loop_number = count**3
+        loop_number = (1+count)**3
         loop_count = 0
         percent_count = 0.05
+        t0 = time.time()
         for C in c_set:
             for gamma in gamma_set:
                 for epsilon in epsilon_set:
                     loop_count += 1
-                    svr_rbf = SVR(kernel=kernel, C=C, gamma=gamma, epsilon = epsilon)
-                    #svr_rbf.fit(x_train, y_train)
-                    y_pred = svr_rbf.fit(x_train, y_train).predict(x_test)
-                    nmse = evaluation.evaluation(y_real,y_pred).NMSE()
-                    ds = evaluation.evaluation(y_real,y_pred).DS()
-                    profit = ljCao.profit.profitLjCao(y_real,y_pred).Profit()
-                    doc = r2_score(y_real,y_pred)
-                    #corr = np.corrcoef(y_real, y_pred, bias = 0, ddof = None)[0,1]
-                    #print("C = %f, gamma = %f, epsilon = %f, NMSE = %f, DS = %f, Profit = %f, DOC = %f" %(C,gamma,epsilon,nmse,ds,profit,doc))
-                    nmse_result.append(nmse)
-                    ds_result.append(ds)
-                    doc_result.append(doc)
-                    if (doc > doc_max):
-                        c_min = C
-                        gamma_min = gamma
-                        epsilon_min = epsilon
-                        doc_max = doc
-                    finished_percent = float(loop_count / loop_number)
+                    if (C * gamma * epsilon != 0):
+                        svr_rbf = SVR(kernel=kernel, C=C, gamma=gamma, epsilon = epsilon)
+                        #svr_rbf.fit(x_train, y_train)
+                        y_pred = svr_rbf.fit(x_train, y_train).predict(x_test)
+                        nmse = evaluation.evaluation(y_real,y_pred).NMSE()
+                        ds = evaluation.evaluation(y_real,y_pred).DS()
+                        profit = ljCao.profit.profitLjCao(y_real,y_pred).Profit()
+                        doc = r2_score(y_real,y_pred)
+                        #corr = np.corrcoef(y_real, y_pred, bias = 0, ddof = None)[0,1]
+                        #print("C = %f, gamma = %f, epsilon = %f, NMSE = %f, DS = %f, Profit = %f, DOC = %f" %(C,gamma,epsilon,nmse,ds,profit,doc))
+                        nmse_result.append(nmse)
+                        ds_result.append(ds)
+                        doc_result.append(doc)
+                        if (doc > doc_max):
+                            c_min = C
+                            gamma_min = gamma
+                            epsilon_min = epsilon
+                            doc_max = doc
+                    finished_percent = float(loop_count) / float(loop_number)
+                    t1 = time.time()
                     if finished_percent > percent_count :
-                        print("%d%%" %(percent_count * 100))
+                        minutes_lfet = ((t1-t0) * (1.0 - finished_percent) / finished_percent) /60
+                        print("%d%% %f minutes left" %(percent_count * 100, minutes_lfet ))
                         percent_count += 0.05
         svr_rbf = SVR(kernel=kernel, C=c_min, gamma=gamma_min, epsilon = epsilon_min)
         y_pred = svr_rbf.fit(x_train, y_train).predict(x_test)
@@ -111,6 +117,7 @@ class svr():
         
     def numberGenerate(self,start, stop, count):
         result = []
-        for i in range (count+1):
-            result.append(start +  (stop - start) / count * i)
+        interval = (stop - start) / count
+        for i in range (0,count+1):
+            result.append(10**(start + i * interval) /2)
         return result
