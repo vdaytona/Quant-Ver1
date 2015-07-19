@@ -7,13 +7,12 @@ Created on 2015/07/13
 '''
 
 import copy
-import pandas
+import matplotlib.pyplot as p
 
 class index_cal():
     def __init__(self):
         pass
     
-    # TODO @JP
     def RDP_n(self, input_data, n):
         '''
         n day relative difference in percentage of price
@@ -32,12 +31,25 @@ class index_cal():
             Since it is a n day differential average, so first n day has no result
         '''
         result = copy.deepcopy(input_data)
-        col_name = str('RDP-%s' %str(n))
+        col_name = str('RDP-%s' % str(n))
         RDP_series = result['AdjClose'].pct_change(n)
-        result[col_name] = RDP_series * 100
-        return result[['Date',col_name]].dropna()
+        
+        # replace the outliers by the closest marginal values
+        double_standard_deviation = RDP_series.std() * 2
+        if abs(RDP_series[n]) > double_standard_deviation : RDP_series[n] = RDP_series[n] / (abs(RDP_series[n])) * double_standard_deviation
+        for i in range(n + 1 , len(RDP_series)) :
+            if abs(RDP_series[i]) > double_standard_deviation :
+                RDP_series[i] = RDP_series[i-1]
+        
+        # scalar data to [0 , 1] instead of [-0.9, 0.9] described in paper for better performance
+        max = RDP_series.max()
+        min = RDP_series.min()
+        # RDP_series = RDP_series.apply(lambda x: -0.9 + 1.8 * (x.astype(float) - min) / (max - min))
+        RDP_series = RDP_series.apply(lambda x: (x.astype(float) - min) / (max - min))
+        
+        result[col_name] = RDP_series
+        return result[['Date', col_name]].dropna()
     
-    # this is wrong because calculated as (p(i+5) - pi)/p(i+5)
     def RDP_plus_n(self, input_data, n):
         '''
         future n day relative difference in percentage of price 
@@ -54,18 +66,25 @@ class index_cal():
             {[date,RDP5], [2011-1-6, 0.23333],[2011-1-7,0.34556]}
             the date here refers to the last date of the n day duration (e.x. 2011-1-6 is duration from 2011-1-1)
             Since it is a n day differential average, so first n day has no result
+        
         '''
         result = copy.deepcopy(input_data)
-        result = result.sort_index(by = ['Date'], ascending = [False])
-        col_name = str('RDP+%s' %str(n))
-        RDP_series = result['AdjClose'].pct_change(n)
-        result[col_name] = RDP_series * 100
-        result = result.sort_index(by = ['Date'], ascending = [True])
-        return result[['Date',col_name]].dropna()
+        EMA_3 = self.EMA_n(result, 3)
+        col_name = str('RDP+%s' % str(n))
+        RDP_series = []
+        length = len(result.index)
+        for i in range(length) :
+            if i < 2 or i > (length - n - 1):
+                RDP_series.append(None)
+            else:
+                value = (result['AdjClose'][i + 5] - EMA_3['EMA'][i]) / (EMA_3['EMA'][i]) * 100
+                RDP_series.append(value)
+        result[col_name] = RDP_series
+        return result[['Date', col_name]].dropna()
     
-    # TODO @JP
-    def EMA_n(self, inputData, n):
+    def EMA_n(self, input_data, n):
         '''
+        in order to calculate EMAn
         n-day exponential moving average from the closing price
         
         Args:
@@ -79,23 +98,60 @@ class index_cal():
             example:
             {[date, EMA15], [2011-1-15, 81], [2011-1-16, 82]}
             Since it is a n day average, so first n day has no result
-        '''
         
-        pass
+        EMA:
+            EMA_today = EMA_yesterday + alpha(multiplier) x (pirce_today - EMA_yesterday)
+            Or (use here)
+            EMA_today = alpha(multiplier) x (p1 + (1 - alpha) x p2 + (1 - alpha)^2 x p3 + ....) until pn,
+            where p1 is the price today, p2 is price_yesterday
+        '''
+        result = copy.deepcopy(input_data)
+        col_name = str('EMA')
+        EMA_series = []
+        multiplier = float(2) / float(n + 1)
+        EMA_previous = 0.0
+        for i in range(len(result.index)) :
+            if i < n - 1:
+                EMA_series.append(None)
+            elif i == n - 1:
+                EMA = result['AdjClose'][i]
+                EMA_series.append(EMA)
+                EMA_previous = EMA
+            else:
+                EMA = multiplier * result['AdjClose'][i] + (1 - multiplier) * EMA_previous
+                EMA_series.append(EMA)
+                EMA_previous = EMA
+        result[col_name] = EMA_series
+        return result[['Date', col_name]]
     
-    def VOL_n(self,input_data,n):
+    def EMAn(self, input_data, n):
+        '''
+        EMAn = price_today-EMA_n
+        '''
+        result = self.EMA_n(copy.deepcopy(input_data), n)
+        col_name = str('EMA%s' % str(n))
+        EMAn_series = []
+        for i in range(len(result.index)) :
+            if i < n - 1:
+                EMAn_series.append(None)
+            else:
+                EMAn_series.append(input_data['AdjClose'][i] - result['EMA'][i])
+        result[col_name] = EMAn_series
+        return result[['Date', col_name]].dropna()
+    
+    def VOL_n(self, input_data, n):
         """
         Sum of past n day volume
         """
-        col_name = str('VOL-%s' %str(n))
+        col_name = str('VOL-%s' % str(n))
         length = len(input_data.index)
         sum_volumn = []
-        for i in range(0, n-1):
+        for i in range(0, n - 1):
             sum_volumn.append(None)
-        for i in range(n-1,length):
-            sum_volumn.append(input_data['Volume'][i+1-n:i+1].sum())
+        for i in range(n - 1, length):
+            sum_volumn.append(input_data['Volume'][i + 1 - n:i + 1].sum())
         input_data[col_name] = sum_volumn
-        return input_data[['Date',col_name]]
+        return input_data[['Date', col_name]]
         
     def RDV_n(self, input_data, n):
         '''
@@ -115,7 +171,7 @@ class index_cal():
             Since it is a n day differential average, so first n day has no result
         '''
         result = copy.deepcopy(input_data)
-        col_name = str('RDV-%s' %str(n))
+        col_name = str('RDV-%s' % str(n))
         RDP_series = result['Volume'].pct_change(n)
         result[col_name] = RDP_series * 100
-        return result[['Date',col_name]].dropna()
+        return result[['Date', col_name]].dropna()

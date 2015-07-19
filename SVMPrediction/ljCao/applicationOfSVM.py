@@ -52,20 +52,15 @@ def collectData():
         cnx = connectMysqlDB.cnxStock(host=host,userName=userName,password=password,database=database).connect()
         
         # collecting IBM historical data
-        sql = ('select * from newyorkexchange.ibm_historicalquotes_newyork where Date > \'2015-2-1\'')
+        sql = ('select * from newyorkexchange.ibm_historicalquotes_newyork where Date > \'2012-1-1\'')
         df = connectMysqlDB.query(cnx).pandasQuery(sql)
     finally:
         cnx.close()
     return df
 
-# TODO @MJD
 def feature_engineering(raw_data):
     input_data = raw_data[['Date','AdjClose','Volume']].dropna()
     train_ratio = 0.8
-    
-    
-    #print(input_data['AdjClose'].pct_change(periods = 5))
-    
     #Vol_5 = index_cal().VOL_n(input_data, 5)
     #Vol_10 = index_cal().VOL_n(input_data, 10)
     #Vol_15 = index_cal().VOL_n(input_data, 15)
@@ -74,24 +69,21 @@ def feature_engineering(raw_data):
     #RDV_10 = index_cal().RDV_n(input_data, 10)
     #RDV_15 = index_cal().RDV_n(input_data, 15)
     #RDV_20 = index_cal().RDV_n(input_data, 20)
+    EMA15 = index_cal().EMAn(input_data, 15)
     RDP_5 = index_cal().RDP_n(input_data, 5)
     RDP_10 = index_cal().RDP_n(input_data, 10)
     RDP_15 = index_cal().RDP_n(input_data, 15)
     RDP_20 = index_cal().RDP_n(input_data, 20)
     RDP_plus_5 = index_cal().RDP_plus_n(input_data, 5)
-    #RDP_plus_5['RDP+90'].hist(bins=50)
-    #p.ion()
-    #p.show()
-    all_data = mergeColumnByDate(RDP_5,RDP_10,RDP_15,RDP_20,RDP_plus_5)
-    features = all_data[['RDP-5','RDP-5','RDP-15','RDP-20']]
+    
+    all_data = mergeColumnByDate(RDP_5,RDP_10,RDP_15,RDP_20,EMA15,RDP_plus_5)
+    features = all_data[['RDP-5','RDP-10','RDP-15','RDP-20','EMA15']]
     features = PCA().fit_transform(features.values)
     (x_train, x_test) = divideTrainTest(features, train_ratio)
     objectives = all_data['RDP+5'].values
     (y_train,y_real) = divideTrainTest(objectives, train_ratio)
     
     return (x_train,y_train,x_test,y_real)
-    #EMA_15 = index_cal.EMA_n(input_data, 15)
-    pass
 
     # split train and test data
 def divideTrainTest(raw_data,train_ratio):

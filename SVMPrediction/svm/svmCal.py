@@ -27,8 +27,8 @@ class svr():
         gamma_set = [0.0001,0.001,0.01,0.1,10,100,1000]
         epsilon_set = [0.0001,0.001,0.01,0.1,10,100,1000]
         '''
-        parameter_start = -10
-        parameter_stop = 10
+        parameter_start = -5
+        parameter_stop = 5
         count = 10
         c_set = svm.svmCal.svr.numberGenerate(self, parameter_start, parameter_stop, count)
         gamma_set = svm.svmCal.svr.numberGenerate(self, parameter_start, parameter_stop, count)
