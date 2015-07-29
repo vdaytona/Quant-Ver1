@@ -73,18 +73,18 @@ def feature_engineering(raw_data):
     # RDV_20 = index_cal().RDV_n(input_data, 20)
     #===========================================================================
     
-    EMA15 = index_cal().EMAn(input_data, 30)
-    RDP_5 = index_cal().RDP_n(input_data, 20)
-    RDP_10 = index_cal().RDP_n(input_data, 30)
-    RDP_15 = index_cal().RDP_n(input_data, 45)
-    RDP_20 = index_cal().RDP_n(input_data, 80)
-    RDP_plus_5 = index_cal().RDP_plus_n(input_data, 20)
+    EMA15 = index_cal().EMAn(input_data, 15)
+    RDP_5 = index_cal().RDP_n(input_data, 5)
+    RDP_10 = index_cal().RDP_n(input_data, 10)
+    RDP_15 = index_cal().RDP_n(input_data, 15)
+    RDP_20 = index_cal().RDP_n(input_data, 20)
+    RDP_plus_5 = index_cal().RDP_plus_n(input_data, 5)
     
     all_data = mergeColumnByDate(RDP_5,RDP_10,RDP_15,RDP_20,EMA15,RDP_plus_5)
-    features = all_data[['RDP-20','RDP-30','RDP-45','RDP-80','EMA30']]
+    features = all_data[['RDP-5','RDP-10','RDP-15','RDP-20','EMA15']]
     features = PCA().fit_transform(features.values)
     (x_train, x_test) = divideTrainTest(features, train_ratio)
-    objectives = all_data['RDP+20'].values
+    objectives = all_data['RDP+5'].values
     (y_train,y_real) = divideTrainTest(objectives, train_ratio)
     
     return (x_train,y_train,x_test,y_real)
