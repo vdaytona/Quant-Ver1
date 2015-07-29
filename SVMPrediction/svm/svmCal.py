@@ -29,7 +29,7 @@ class svr():
         '''
         parameter_start = -5
         parameter_stop = 5
-        count = 10
+        count = 15
         c_set = svm.svmCal.svr.numberGenerate(self, parameter_start, parameter_stop, count)
         gamma_set = svm.svmCal.svr.numberGenerate(self, parameter_start, parameter_stop, count)
         epsilon_set = svm.svmCal.svr.numberGenerate(self, parameter_start, parameter_stop, count)
@@ -83,6 +83,7 @@ class svr():
         profit = ljCao.profit.profitLjCao(y_real,y_pred).Profit()
         profit_time = ljCao.profit.profitLjCao(y_real,y_pred).ProfitTimeSeries()
         doc = r2_score(y_real,y_pred)
+        
         print('MAX DS = %f' %ds)
         print('Hit rate = %f' %(float(ds) / float(len(y_pred))))
         print('NMSE = %f' %nmse)

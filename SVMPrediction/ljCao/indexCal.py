@@ -7,7 +7,6 @@ Created on 2015/07/13
 '''
 
 import copy
-import matplotlib.pyplot as p
 
 class index_cal():
     def __init__(self):
@@ -35,17 +34,10 @@ class index_cal():
         RDP_series = result['AdjClose'].pct_change(n)
         
         # replace the outliers by the closest marginal values
-        double_standard_deviation = RDP_series.std() * 2
-        if abs(RDP_series[n]) > double_standard_deviation : RDP_series[n] = RDP_series[n] / (abs(RDP_series[n])) * double_standard_deviation
-        for i in range(n + 1 , len(RDP_series)) :
-            if abs(RDP_series[i]) > double_standard_deviation :
-                RDP_series[i] = RDP_series[i-1]
+        RDP_series = self.substractOutliers(RDP_series, n)
         
-        # scalar data to [0 , 1] instead of [-0.9, 0.9] described in paper for better performance
-        max = RDP_series.max()
-        min = RDP_series.min()
-        # RDP_series = RDP_series.apply(lambda x: -0.9 + 1.8 * (x.astype(float) - min) / (max - min))
-        RDP_series = RDP_series.apply(lambda x: (x.astype(float) - min) / (max - min))
+        # scalar data to [0 , 1] instead of [-0.9, 0.9] described in paper for better performance        
+        RDP_series = self.scalerData(RDP_series, 1, 0)
         
         result[col_name] = RDP_series
         return result[['Date', col_name]].dropna()
@@ -149,10 +141,10 @@ class index_cal():
         for i in range(0, n - 1):
             sum_volumn.append(None)
         for i in range(n - 1, length):
-            sum_volumn.append(input_data['Volume'][i + 1 - n:i + 1].sum())
+            sum_volumn.append(input_data['AdjVolume'][i + 1 - n:i + 1].sum())
         input_data[col_name] = sum_volumn
         return input_data[['Date', col_name]]
-        
+    
     def RDV_n(self, input_data, n):
         '''
         n day relative difference in percentage of volume
@@ -172,6 +164,29 @@ class index_cal():
         '''
         result = copy.deepcopy(input_data)
         col_name = str('RDV-%s' % str(n))
-        RDP_series = result['Volume'].pct_change(n)
-        result[col_name] = RDP_series * 100
+        RDV_series = result['AdjVolume'].pct_change(n)
+        
+        # replace the outliers by the closest marginal values
+        RDV_series = self.substractOutliers(RDV_series, n)
+        
+        # scalar data to [0 , 1] instead of [-0.9, 0.9] described in paper for better performance
+        RDV_series = self.scalerData(RDV_series, 1, 0)
+        
+        result[col_name] = RDV_series
         return result[['Date', col_name]].dropna()
+    
+    # replace the outliers by the closest marginal values
+    def substractOutliers(self,input_data, n):
+        double_standard_deviation = input_data.std() * 2
+        if abs(input_data[n]) > double_standard_deviation : input_data[n] = input_data[n] / (abs(input_data[n])) * double_standard_deviation
+        for i in range(n + 1 , len(input_data)) :
+            if abs(input_data[i]) > double_standard_deviation :
+                input_data[i] = input_data[i-1]
+        return input_data
+    
+    # scalar data to [min_value , max_value]
+    def scalerData(self, input_data, max_value, min_value):
+        max = input_data.max()
+        min = input_data.min()
+        input_data = input_data.apply(lambda x: min_value + (max_value-min_value) * (x.astype(float) - min) / (max - min))
+        return input_data
