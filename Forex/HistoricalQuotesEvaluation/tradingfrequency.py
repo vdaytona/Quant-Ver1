@@ -24,6 +24,7 @@ def main():
     # evaluation
     evaluation(raw_data)
     # print result[(result['Time_Frame'] == 240) & (result['Pair'] == 'GBP_USD')].describe()
+    
     pass
 
 def dataCollection():
@@ -80,9 +81,10 @@ def dataCollection():
     # EUR_GBP_60
     #===========================================================================
     
+    # add all the pair record into one DataFrame variable
     result = df.concat([AUD_USD_240,AUD_USD_60,GBP_USD_240,GBP_USD_60, 
                         EUR_USD_240, EUR_USD_60, USD_JPY_240, USD_JPY_60, 
-                        USD_CAD_240, USD_CAD_60],ignore_index=True)
+                        USD_CAD_240, USD_CAD_60, EUR_JPY_240, EUR_JPY_60],ignore_index=True)
     #result = df.concat([AUD_USD_240,AUD_USD_60,GBP_USD_240,GBP_USD_60],ignore_index=True)
     return result
 
@@ -150,27 +152,36 @@ def volumeDistribution(input_data):
     input_data = input_data[['Time','Pair','Time_Frame','Volume']]
     
     # 4hour calculation
+    # get 4 hour record
     volume_240 = input_data[input_data['Time_Frame'] == 240]
+    # get unique Time / pair interval to group record
     time_frame = volume_240['Time'].unique()
     pair = volume_240['Pair'].unique()
+    # create new DataFrame index with time interval and column with pair
     df_volume_240 = df.DataFrame(index = time_frame, columns = pair)
+    # insert the sum of Volume of the specific time and pair into the created DataFrame
     for pair_name in pair:
         for time_name in time_frame:
-            df_volume_240.loc[[time_name],pair_name] = volume_240[(volume_240['Pair'] == str(pair_name)) & (volume_240['Time'] == str(time_name))][['Volume']].sum()[0]
+            df_volume_240.loc[[time_name],pair_name] = \
+            volume_240[(volume_240['Pair'] == str(pair_name)) & (volume_240['Time'] == str(time_name))][['Volume']].sum()[0]
+    # normalize data group by pair
     df_volume_240 = df_volume_240/df_volume_240.max().astype(np.float64)
+    # sort index
     df_volume_240.sort_index(inplace=True)
+    # plot bar graph legend by pair
     df_volume_240.plot(kind = 'bar')
     plt.show()
     
     # 1 hour calculation
+    # same as 4 hour calculation
     volume_60 = input_data[input_data['Time_Frame'] == 60]
     time_frame = volume_60['Time'].unique()
     pair = volume_60['Pair'].unique()
     df_volume_60 = df.DataFrame(index = time_frame, columns = pair)
     for pair_name in pair:
         for time_name in time_frame:
-            df_volume_60.loc[[time_name],pair_name] = volume_60[(volume_60['Pair'] == str(pair_name)) & (volume_60['Time'] == str(time_name))][['Volume']].sum()[0]
-    
+            df_volume_60.loc[[time_name],pair_name] = \
+            volume_60[(volume_60['Pair'] == str(pair_name)) & (volume_60['Time'] == str(time_name))][['Volume']].sum()[0]
     df_volume_60 = df_volume_60/df_volume_60.max().astype(np.float64)
     df_volume_60.sort_index(inplace=True)
     df_volume_60.plot(kind = 'bar')
