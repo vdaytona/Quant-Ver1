@@ -24,21 +24,6 @@ def main():
     # evaluation
     evaluation(raw_data)
     # print result[(result['Time_Frame'] == 240) & (result['Pair'] == 'GBP_USD')].describe()
-    
-    #===========================================================================
-    # GBP_USD_60
-    # GBP_USD_240
-    # EUR_JPY_60
-    # EUR_JPY_240
-    # USD_CAD_60
-    # USD_CAD_240
-    # AUD_JPY_60
-    # AUD_JPY_240
-    # AUD_USD_60
-    # AUD_USD_240
-    # EUR_GBP_60
-    # USD_JPY_240
-    #===========================================================================
     pass
 
 def dataCollection():
@@ -68,22 +53,36 @@ def dataCollection():
     EUR_USD_60['Pair'] = ('EUR_USD')
     EUR_USD_60['Time_Frame'] = 60
     
+    USD_JPY_240 = preprocessData(df.read_csv('../Data/USDJPY240.csv', header=None))
+    USD_JPY_240['Pair'] = ('USD_JPY')
+    USD_JPY_240['Time_Frame'] = 240
+    USD_JPY_60 = preprocessData(df.read_csv('../Data/USDJPY60.csv', header=None))
+    USD_JPY_60['Pair'] = ('USD_JPY')
+    USD_JPY_60['Time_Frame'] = 60
+    
+    USD_CAD_240 = preprocessData(df.read_csv('../Data/USDCAD240.csv', header=None))
+    USD_CAD_240['Pair'] = ('USD_CAD')
+    USD_CAD_240['Time_Frame'] = 240
+    USD_CAD_60 = preprocessData(df.read_csv('../Data/USDCAD60.csv', header=None))
+    USD_CAD_60['Pair'] = ('USD_CAD')
+    USD_CAD_60['Time_Frame'] = 60
+    
+    EUR_JPY_240 = preprocessData(df.read_csv('../Data/EURJPY240.csv', header=None))
+    EUR_JPY_240['Pair'] = ('EUR_JPY')
+    EUR_JPY_240['Time_Frame'] = 240
+    EUR_JPY_60 = preprocessData(df.read_csv('../Data/EURJPY60.csv', header=None))
+    EUR_JPY_60['Pair'] = ('EUR_JPY')
+    EUR_JPY_60['Time_Frame'] = 60
+    
     #===========================================================================
-    # GBP_USD_60
-    # GBP_USD_240
-    # EUR_JPY_60
-    # EUR_JPY_240
-    # USD_CAD_60
-    # USD_CAD_240
     # AUD_JPY_60
     # AUD_JPY_240
-    # AUD_USD_60
-    # AUD_USD_240
     # EUR_GBP_60
-    # USD_JPY_240
     #===========================================================================
     
-    result = df.concat([AUD_USD_240,AUD_USD_60,GBP_USD_240,GBP_USD_60, EUR_USD_240, EUR_USD_60],ignore_index=True)
+    result = df.concat([AUD_USD_240,AUD_USD_60,GBP_USD_240,GBP_USD_60, 
+                        EUR_USD_240, EUR_USD_60, USD_JPY_240, USD_JPY_60, 
+                        USD_CAD_240, USD_CAD_60],ignore_index=True)
     #result = df.concat([AUD_USD_240,AUD_USD_60,GBP_USD_240,GBP_USD_60],ignore_index=True)
     return result
 
@@ -140,7 +139,12 @@ def preprocessData(input_data):
 def evaluation(input_data):
     # volue distribution
     volumeDistribution(input_data)
-    pass
+    
+    # Bar change percent
+    barChange(input_data)
+    
+    # If trend keep
+    trendKeep(input_data)
 
 def volumeDistribution(input_data):
     input_data = input_data[['Time','Pair','Time_Frame','Volume']]
@@ -172,7 +176,70 @@ def volumeDistribution(input_data):
     df_volume_60.plot(kind = 'bar')
     plt.show()
     
-    pass
+def trendKeep(input_data):
+    input_data = input_data[['Time','Pair','Time_Frame','If_Trend_Keep']]
+    
+    # 4hour calculation
+    volume_240 = input_data[input_data['Time_Frame'] == 240]
+    time_frame = volume_240['Time'].unique()
+    pair = volume_240['Pair'].unique()
+    df_volume_240 = df.DataFrame(index = time_frame, columns = pair)
+    for pair_name in pair:
+        for time_name in time_frame:
+            df_volume_240.loc[[time_name],pair_name] = \
+            volume_240[(volume_240['Pair'] == str(pair_name)) & (volume_240['Time'] == str(time_name))][['If_Trend_Keep']].sum()[0] / \
+            len(volume_240[(volume_240['Pair'] == str(pair_name)) & (volume_240['Time'] == str(time_name))][['If_Trend_Keep']])
+    #df_volume_240 = df_volume_240/df_volume_240.max().astype(np.float64)
+    df_volume_240.sort_index(inplace=True)
+    df_volume_240.plot()
+    plt.show()
+    
+    # 1 hour calculation
+    volume_60 = input_data[input_data['Time_Frame'] == 60]
+    time_frame = volume_60['Time'].unique()
+    pair = volume_60['Pair'].unique()
+    df_volume_60 = df.DataFrame(index = time_frame, columns = pair)
+    for pair_name in pair:
+        for time_name in time_frame:
+            df_volume_60.loc[[time_name],pair_name] = \
+            volume_60[(volume_60['Pair'] == str(pair_name)) & (volume_60['Time'] == str(time_name))][['If_Trend_Keep']].sum()[0] / \
+            len(volume_60[(volume_60['Pair'] == str(pair_name)) & (volume_60['Time'] == str(time_name))][['If_Trend_Keep']])
+    
+    #df_volume_60 = df_volume_60/df_volume_60.max().astype(np.float64)
+    df_volume_60.sort_index(inplace=True)
+    df_volume_60.plot()
+    plt.show()
+
+def barChange(input_data):
+    input_data = input_data[['Time','Pair','Time_Frame','Bar_Change']]
+    
+    # 4hour calculation
+    volume_240 = input_data[input_data['Time_Frame'] == 240]
+    time_frame = volume_240['Time'].unique()
+    pair = volume_240['Pair'].unique()
+    df_volume_240 = df.DataFrame(index = time_frame, columns = pair)
+    for pair_name in pair:
+        for time_name in time_frame:
+            df_volume_240.loc[[time_name],pair_name] = volume_240[(volume_240['Pair'] == str(pair_name)) & (volume_240['Time'] == str(time_name))][['Bar_Change']].abs().sum()[0]
+    df_volume_240 = df_volume_240/df_volume_240.max().astype(np.float64)
+    df_volume_240.sort_index(inplace=True)
+    df_volume_240.plot()
+    plt.show()
+    
+    # 1 hour calculation
+    volume_60 = input_data[input_data['Time_Frame'] == 60]
+    time_frame = volume_60['Time'].unique()
+    pair = volume_60['Pair'].unique()
+    df_volume_60 = df.DataFrame(index = time_frame, columns = pair)
+    for pair_name in pair:
+        for time_name in time_frame:
+            df_volume_60.loc[[time_name],pair_name] = volume_60[(volume_60['Pair'] == str(pair_name)) & (volume_60['Time'] == str(time_name))][['Bar_Change']].abs().sum()[0]
+    
+    df_volume_60 = df_volume_60/df_volume_60.max().astype(np.float64)
+    df_volume_60.sort_index(inplace=True)
+    df_volume_60.plot()
+    plt.show()
+
 
 if __name__ == '__main__':
     main()
