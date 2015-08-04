@@ -9,5 +9,6 @@
 <path>/${PROJECT_DIR_NAME}/SVMPrediction</path>
 <path>/${PROJECT_DIR_NAME}/SVMClassification</path>
 <path>/${PROJECT_DIR_NAME}/WebQuery</path>
+<path>/${PROJECT_DIR_NAME}/Forex</path>
 </pydev_pathproperty>
 </pydev_project>

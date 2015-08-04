@@ -1,0 +1,178 @@
+'''
+Created on 2015/08/04
+Used to analyze the peak trading session for pair
+EUR/USD , GBP/USD, EUR/JPY, USD/CAD, AUD/JPY, AUD/USD, EUR/GBP, USD/JPY
+Evaluation :
+1. Volume distribution to time
+2. One bar change percent: (Close - Open) / Open
+3. N bar trend durative : What the possibility of the bar will keep trend for next n bar.
+
+@author: Daytona
+'''
+
+import pandas as df
+import pylab as P
+import copy
+import numpy as np
+import matplotlib.pyplot as plt
+
+def main():
+    
+    # import data from csv    
+    raw_data = dataCollection()
+    
+    # evaluation
+    evaluation(raw_data)
+    # print result[(result['Time_Frame'] == 240) & (result['Pair'] == 'GBP_USD')].describe()
+    
+    #===========================================================================
+    # GBP_USD_60
+    # GBP_USD_240
+    # EUR_JPY_60
+    # EUR_JPY_240
+    # USD_CAD_60
+    # USD_CAD_240
+    # AUD_JPY_60
+    # AUD_JPY_240
+    # AUD_USD_60
+    # AUD_USD_240
+    # EUR_GBP_60
+    # USD_JPY_240
+    #===========================================================================
+    pass
+
+def dataCollection():
+    # import data from csv
+    # Open, High, Low, CLose, Vol
+    # EUR_USD_60
+    
+    
+    AUD_USD_240 = preprocessData(df.read_csv('../Data/AUDUSD240.csv', header=None))
+    AUD_USD_240['Pair'] = ('AUD_USD')
+    AUD_USD_240['Time_Frame'] = 240
+    AUD_USD_60 = preprocessData(df.read_csv('../Data/AUDUSD60.csv', header=None))
+    AUD_USD_60['Pair'] = ('AUD_USD')
+    AUD_USD_60['Time_Frame'] = 60
+    
+    GBP_USD_240 = preprocessData(df.read_csv('../Data/GBPUSD240.csv', header=None))
+    GBP_USD_240['Pair'] = ('GBP_USD')
+    GBP_USD_240['Time_Frame'] = 240
+    GBP_USD_60 = preprocessData(df.read_csv('../Data/GBPUSD60.csv', header=None))
+    GBP_USD_60['Pair'] = ('GBP_USD')
+    GBP_USD_60['Time_Frame'] = 60
+    
+    EUR_USD_240 = preprocessData(df.read_csv('../Data/EURUSD240.csv', header=None))
+    EUR_USD_240['Pair'] = ('EUR_USD')
+    EUR_USD_240['Time_Frame'] = 240
+    EUR_USD_60 = preprocessData(df.read_csv('../Data/EURUSD60.csv', header=None))
+    EUR_USD_60['Pair'] = ('EUR_USD')
+    EUR_USD_60['Time_Frame'] = 60
+    
+    #===========================================================================
+    # GBP_USD_60
+    # GBP_USD_240
+    # EUR_JPY_60
+    # EUR_JPY_240
+    # USD_CAD_60
+    # USD_CAD_240
+    # AUD_JPY_60
+    # AUD_JPY_240
+    # AUD_USD_60
+    # AUD_USD_240
+    # EUR_GBP_60
+    # USD_JPY_240
+    #===========================================================================
+    
+    result = df.concat([AUD_USD_240,AUD_USD_60,GBP_USD_240,GBP_USD_60, EUR_USD_240, EUR_USD_60],ignore_index=True)
+    #result = df.concat([AUD_USD_240,AUD_USD_60,GBP_USD_240,GBP_USD_60],ignore_index=True)
+    return result
+
+
+def preprocessData(input_data):
+    # add precentage change, and trend counting
+    input_data.columns = ['Date','Time','Open','High','Low','Close','Volume']
+    input_data['Bar_Change'] = input_data[['Open']].pct_change(1)
+    
+    up_trend = []
+    down_trend = []
+    up_trend.append(None)
+    down_trend.append(None)
+    #print input_data['Bar_Change'][1]
+    if input_data['Bar_Change'][1] > 0:
+        up_trend.append(1)
+        down_trend.append(0)
+    elif input_data['Bar_Change'][1] < 0:
+        up_trend.append(0)
+        down_trend.append(1)
+    else:
+        up_trend.append(0)
+        down_trend.append(0)
+
+    for i in range(2, len(input_data['Bar_Change'])):
+        if input_data['Bar_Change'][i] > 0:
+            up_trend.append(up_trend[i - 1] + 1)
+            down_trend.append(0)
+        elif input_data['Bar_Change'][i] < 0:
+            up_trend.append(0)
+            down_trend.append(down_trend[i - 1] + 1)
+        else:
+            up_trend.append(0)
+            down_trend.append(0)
+    
+    input_data['Up_Trend'] = up_trend
+    input_data['Down_Trend'] = down_trend
+    input_data['Trend'] = input_data['Up_Trend'] + input_data['Down_Trend']
+    
+    if_trend_keep = []
+    if_trend_keep.append(None)
+    for i in range(1, len(input_data['Bar_Change'])-1):
+        if (input_data['Trend'][i+1] > input_data['Trend'][i]):
+            if_trend_keep.append(1)
+        else:
+            if_trend_keep.append(0)
+    if_trend_keep.append(None)
+    input_data['If_Trend_Keep'] = if_trend_keep
+    #print input_data.groupby(by = 'Time').describe()
+    #input_data['Down_Trend'].hist(bins=input_data['Down_Trend'].max())
+    #P.show()
+    return input_data
+
+def evaluation(input_data):
+    # volue distribution
+    volumeDistribution(input_data)
+    pass
+
+def volumeDistribution(input_data):
+    input_data = input_data[['Time','Pair','Time_Frame','Volume']]
+    
+    # 4hour calculation
+    volume_240 = input_data[input_data['Time_Frame'] == 240]
+    time_frame = volume_240['Time'].unique()
+    pair = volume_240['Pair'].unique()
+    df_volume_240 = df.DataFrame(index = time_frame, columns = pair)
+    for pair_name in pair:
+        for time_name in time_frame:
+            df_volume_240.loc[[time_name],pair_name] = volume_240[(volume_240['Pair'] == str(pair_name)) & (volume_240['Time'] == str(time_name))][['Volume']].sum()[0]
+    df_volume_240 = df_volume_240/df_volume_240.max().astype(np.float64)
+    df_volume_240.sort_index(inplace=True)
+    df_volume_240.plot(kind = 'bar')
+    plt.show()
+    
+    # 1 hour calculation
+    volume_60 = input_data[input_data['Time_Frame'] == 60]
+    time_frame = volume_60['Time'].unique()
+    pair = volume_60['Pair'].unique()
+    df_volume_60 = df.DataFrame(index = time_frame, columns = pair)
+    for pair_name in pair:
+        for time_name in time_frame:
+            df_volume_60.loc[[time_name],pair_name] = volume_60[(volume_60['Pair'] == str(pair_name)) & (volume_60['Time'] == str(time_name))][['Volume']].sum()[0]
+    
+    df_volume_60 = df_volume_60/df_volume_60.max().astype(np.float64)
+    df_volume_60.sort_index(inplace=True)
+    df_volume_60.plot(kind = 'bar')
+    plt.show()
+    
+    pass
+
+if __name__ == '__main__':
+    main()
