@@ -40,6 +40,13 @@ def dataCollection():
     AUD_USD_60['Pair'] = ('AUD_USD')
     AUD_USD_60['Time_Frame'] = 60
     
+    AUD_JPY_240 = preprocessData(df.read_csv('../Data/AUDJPY240.csv', header=None))
+    AUD_JPY_240['Pair'] = ('AUD_JPY')
+    AUD_JPY_240['Time_Frame'] = 240
+    AUD_JPY_60 = preprocessData(df.read_csv('../Data/AUDJPY60.csv', header=None))
+    AUD_JPY_60['Pair'] = ('AUD_JPY')
+    AUD_JPY_60['Time_Frame'] = 60
+    
     GBP_USD_240 = preprocessData(df.read_csv('../Data/GBPUSD240.csv', header=None))
     GBP_USD_240['Pair'] = ('GBP_USD')
     GBP_USD_240['Time_Frame'] = 240
