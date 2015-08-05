@@ -83,15 +83,14 @@ def dataCollection():
     EUR_JPY_60['Time_Frame'] = 60
     
     #===========================================================================
-    # AUD_JPY_60
-    # AUD_JPY_240
     # EUR_GBP_60
     #===========================================================================
     
     # add all the pair record into one DataFrame variable
     result = df.concat([AUD_USD_240,AUD_USD_60,GBP_USD_240,GBP_USD_60, 
                         EUR_USD_240, EUR_USD_60, USD_JPY_240, USD_JPY_60, 
-                        USD_CAD_240, USD_CAD_60, EUR_JPY_240, EUR_JPY_60],ignore_index=True)
+                        USD_CAD_240, USD_CAD_60, EUR_JPY_240, EUR_JPY_60,
+                        AUD_JPY_240,AUD_JPY_60],ignore_index=True)
     #result = df.concat([AUD_USD_240,AUD_USD_60,GBP_USD_240,GBP_USD_60],ignore_index=True)
     return result
 
