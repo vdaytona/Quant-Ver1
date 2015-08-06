@@ -181,9 +181,11 @@ def volumeDistribution(input_data):
     for pair_name in pair:
         for time_name in time_frame:
             df_volume_240.loc[[time_name],pair_name] = \
-            volume_240[(volume_240['Pair'] == str(pair_name)) & (volume_240['Time'] == str(time_name))][['Volume']].sum()[0]
-    # normalize data group by pair
-    df_volume_240 = df_volume_240/df_volume_240.max().astype(np.float64)
+            volume_240[(volume_240['Pair'] == str(pair_name)) & (volume_240['Time'] == str(time_name))][['Volume']].mean()[0]
+    #===========================================================================
+    # # normalize data group by pair
+    # df_volume_240 = df_volume_240/df_volume_240.max().astype(np.float64)
+    #===========================================================================
     # sort index
     df_volume_240.sort_index(inplace=True)
     # plot bar graph legend by pair
@@ -199,8 +201,8 @@ def volumeDistribution(input_data):
     for pair_name in pair:
         for time_name in time_frame:
             df_volume_60.loc[[time_name],pair_name] = \
-            volume_60[(volume_60['Pair'] == str(pair_name)) & (volume_60['Time'] == str(time_name))][['Volume']].sum()[0]
-    df_volume_60 = df_volume_60/df_volume_60.max().astype(np.float64)
+            volume_60[(volume_60['Pair'] == str(pair_name)) & (volume_60['Time'] == str(time_name))][['Volume']].mean()[0]
+    #df_volume_60 = df_volume_60/df_volume_60.max().astype(np.float64)
     df_volume_60.sort_index(inplace=True)
     df_volume_60.plot(kind = 'bar')
     plt.show()
