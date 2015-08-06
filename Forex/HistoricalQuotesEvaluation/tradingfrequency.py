@@ -249,8 +249,8 @@ def barChange(input_data):
     df_volume_240 = df.DataFrame(index = time_frame, columns = pair)
     for pair_name in pair:
         for time_name in time_frame:
-            df_volume_240.loc[[time_name],pair_name] = volume_240[(volume_240['Pair'] == str(pair_name)) & (volume_240['Time'] == str(time_name))][['Bar_Change']].abs().sum()[0]
-    df_volume_240 = df_volume_240/df_volume_240.max().astype(np.float64)
+            df_volume_240.loc[[time_name],pair_name] = volume_240[(volume_240['Pair'] == str(pair_name)) & (volume_240['Time'] == str(time_name))][['Bar_Change']].abs().mean()[0]
+    #df_volume_240 = df_volume_240/df_volume_240.max().astype(np.float64)
     df_volume_240.sort_index(inplace=True)
     df_volume_240.plot()
     plt.show()
@@ -262,9 +262,9 @@ def barChange(input_data):
     df_volume_60 = df.DataFrame(index = time_frame, columns = pair)
     for pair_name in pair:
         for time_name in time_frame:
-            df_volume_60.loc[[time_name],pair_name] = volume_60[(volume_60['Pair'] == str(pair_name)) & (volume_60['Time'] == str(time_name))][['Bar_Change']].abs().sum()[0]
+            df_volume_60.loc[[time_name],pair_name] = volume_60[(volume_60['Pair'] == str(pair_name)) & (volume_60['Time'] == str(time_name))][['Bar_Change']].abs().mean()[0]
     
-    df_volume_60 = df_volume_60/df_volume_60.max().astype(np.float64)
+    #df_volume_60 = df_volume_60/df_volume_60.max().astype(np.float64)
     df_volume_60.sort_index(inplace=True)
     df_volume_60.plot()
     plt.show()
