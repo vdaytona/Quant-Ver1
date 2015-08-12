@@ -10,5 +10,6 @@
 <path>/${PROJECT_DIR_NAME}/SVMClassification</path>
 <path>/${PROJECT_DIR_NAME}/WebQuery</path>
 <path>/${PROJECT_DIR_NAME}/Forex</path>
+<path>/${PROJECT_DIR_NAME}/GoogleTrend</path>
 </pydev_pathproperty>
 </pydev_project>
