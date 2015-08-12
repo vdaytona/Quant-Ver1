@@ -32,66 +32,70 @@ def dataCollection():
     # Open, High, Low, CLose, Vol
     # EUR_USD_60
     
+    time_after = '2015.04.01'
     
-    AUD_USD_240 = preprocessData(df.read_csv('../Data/AUDUSD240.csv', header=None))
+    AUD_USD_240 = preprocessData(df.read_csv('../Data/AUDUSD240.csv', header=None), time_after = time_after)
     AUD_USD_240['Pair'] = ('AUD_USD')
     AUD_USD_240['Time_Frame'] = 240
-    AUD_USD_60 = preprocessData(df.read_csv('../Data/AUDUSD60.csv', header=None))
+    AUD_USD_60 = preprocessData(df.read_csv('../Data/AUDUSD60.csv', header=None), time_after = time_after)
     AUD_USD_60['Pair'] = ('AUD_USD')
     AUD_USD_60['Time_Frame'] = 60
     
-    AUD_JPY_240 = preprocessData(df.read_csv('../Data/AUDJPY240.csv', header=None))
+    AUD_JPY_240 = preprocessData(df.read_csv('../Data/AUDJPY240.csv', header=None), time_after = time_after)
     AUD_JPY_240['Pair'] = ('AUD_JPY')
     AUD_JPY_240['Time_Frame'] = 240
-    AUD_JPY_60 = preprocessData(df.read_csv('../Data/AUDJPY60.csv', header=None))
+    AUD_JPY_60 = preprocessData(df.read_csv('../Data/AUDJPY60.csv', header=None), time_after = time_after)
     AUD_JPY_60['Pair'] = ('AUD_JPY')
     AUD_JPY_60['Time_Frame'] = 60
     
-    GBP_USD_240 = preprocessData(df.read_csv('../Data/GBPUSD240.csv', header=None))
+    GBP_USD_240 = preprocessData(df.read_csv('../Data/GBPUSD240.csv', header=None), time_after = time_after)
     GBP_USD_240['Pair'] = ('GBP_USD')
     GBP_USD_240['Time_Frame'] = 240
-    GBP_USD_60 = preprocessData(df.read_csv('../Data/GBPUSD60.csv', header=None))
+    GBP_USD_60 = preprocessData(df.read_csv('../Data/GBPUSD60.csv', header=None), time_after = time_after)
     GBP_USD_60['Pair'] = ('GBP_USD')
     GBP_USD_60['Time_Frame'] = 60
-    
-    EUR_USD_240 = preprocessData(df.read_csv('../Data/EURUSD240.csv', header=None))
+     
+    EUR_USD_240 = preprocessData(df.read_csv('../Data/EURUSD240.csv', header=None), time_after = time_after)
     EUR_USD_240['Pair'] = ('EUR_USD')
     EUR_USD_240['Time_Frame'] = 240
-    EUR_USD_60 = preprocessData(df.read_csv('../Data/EURUSD60.csv', header=None))
+    EUR_USD_60 = preprocessData(df.read_csv('../Data/EURUSD60.csv', header=None), time_after = time_after)
     EUR_USD_60['Pair'] = ('EUR_USD')
     EUR_USD_60['Time_Frame'] = 60
-    
-    USD_JPY_240 = preprocessData(df.read_csv('../Data/USDJPY240.csv', header=None))
+     
+    USD_JPY_240 = preprocessData(df.read_csv('../Data/USDJPY240.csv', header=None), time_after = time_after)
     USD_JPY_240['Pair'] = ('USD_JPY')
     USD_JPY_240['Time_Frame'] = 240
-    USD_JPY_60 = preprocessData(df.read_csv('../Data/USDJPY60.csv', header=None))
+    USD_JPY_60 = preprocessData(df.read_csv('../Data/USDJPY60.csv', header=None), time_after = time_after)
     USD_JPY_60['Pair'] = ('USD_JPY')
     USD_JPY_60['Time_Frame'] = 60
-    
-    USD_CAD_240 = preprocessData(df.read_csv('../Data/USDCAD240.csv', header=None))
+     
+    USD_CAD_240 = preprocessData(df.read_csv('../Data/USDCAD240.csv', header=None), time_after = time_after)
     USD_CAD_240['Pair'] = ('USD_CAD')
     USD_CAD_240['Time_Frame'] = 240
-    USD_CAD_60 = preprocessData(df.read_csv('../Data/USDCAD60.csv', header=None))
+    USD_CAD_60 = preprocessData(df.read_csv('../Data/USDCAD60.csv', header=None), time_after = time_after)
     USD_CAD_60['Pair'] = ('USD_CAD')
     USD_CAD_60['Time_Frame'] = 60
-    
-    EUR_JPY_240 = preprocessData(df.read_csv('../Data/EURJPY240.csv', header=None))
+     
+    EUR_JPY_240 = preprocessData(df.read_csv('../Data/EURJPY240.csv', header=None), time_after = time_after)
     EUR_JPY_240['Pair'] = ('EUR_JPY')
     EUR_JPY_240['Time_Frame'] = 240
-    EUR_JPY_60 = preprocessData(df.read_csv('../Data/EURJPY60.csv', header=None))
+    EUR_JPY_60 = preprocessData(df.read_csv('../Data/EURJPY60.csv', header=None), time_after = time_after)
     EUR_JPY_60['Pair'] = ('EUR_JPY')
     EUR_JPY_60['Time_Frame'] = 60
-    
-    EUR_GBP_240 = preprocessData(df.read_csv('../Data/EURGBP240.csv', header=None))
+     
+    EUR_GBP_240 = preprocessData(df.read_csv('../Data/EURGBP240.csv', header=None), time_after = time_after)
     EUR_GBP_240['Pair'] = ('EUR_GBP')
     EUR_GBP_240['Time_Frame'] = 240
-    EUR_GBP_60 = preprocessData(df.read_csv('../Data/EURGBP60.csv', header=None))
+    EUR_GBP_60 = preprocessData(df.read_csv('../Data/EURGBP60.csv', header=None), time_after = time_after)
     EUR_GBP_60['Pair'] = ('EUR_GBP')
     EUR_GBP_60['Time_Frame'] = 60
-    
-    #===========================================================================
-    # EUR_GBP_60
-    #===========================================================================
+     
+    GBP_JPY_240 = preprocessData(df.read_csv('../Data/GBPJPY240.csv', header=None), time_after = time_after)
+    GBP_JPY_240['Pair'] = ('GBP_JPY')
+    GBP_JPY_240['Time_Frame'] = 240
+    GBP_JPY_60 = preprocessData(df.read_csv('../Data/GBPJPY60.csv', header=None), time_after = time_after)
+    GBP_JPY_60['Pair'] = ('GBP_JPY')
+    GBP_JPY_60['Time_Frame'] = 60
     
     # add all the pair record into one DataFrame variable
     result = df.concat([EUR_USD_240, EUR_USD_60,
@@ -101,13 +105,14 @@ def dataCollection():
                         AUD_USD_240, AUD_USD_60, 
                         USD_CAD_240, USD_CAD_60,
                         USD_JPY_240, USD_JPY_60,
-                        AUD_JPY_240, AUD_JPY_60],
+                        AUD_JPY_240, AUD_JPY_60,
+                        GBP_JPY_240, GBP_JPY_60],
                         ignore_index=True)
-    #result = df.concat([AUD_USD_240,AUD_USD_60,GBP_USD_240,GBP_USD_60],ignore_index=True)
+    #result = df.concat([AUD_USD_240, AUD_USD_60],ignore_index=True)
     return result
 
 
-def preprocessData(input_data):
+def preprocessData(input_data, time_after = None):
     # add precentage change, and trend counting
     input_data.columns = ['Date','Time','Open','High','Low','Close','Volume']
     input_data['Bar_Change'] = input_data[['Open']].pct_change(1)
@@ -154,6 +159,9 @@ def preprocessData(input_data):
     #print input_data.groupby(by = 'Time').describe()
     #input_data['Down_Trend'].hist(bins=input_data['Down_Trend'].max())
     #P.show()
+    #print input_data
+    if time_after != None:
+        input_data = input_data[input_data['Date'] >= time_after]
     return input_data
 
 def evaluation(input_data):
