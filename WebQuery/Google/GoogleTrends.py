@@ -12,6 +12,7 @@ import urllib2
 import re
 import csv
 import logging
+import pandas as pd
 
 from cookielib import CookieJar
 
@@ -107,7 +108,8 @@ class pyGTrends( object ):
             section = ("Week","Year","Day","Month")
         else:
             section = (section,)
-            
+        
+        
         segments = self.raw_data.split('\n\n\n')
     
         # problem in that we didnt skip the first 4 lines which usually contain information
@@ -175,6 +177,6 @@ def main():
     #r.writer( "search_query_name.csv" )
     data = r.csv( section='Main',as_list= True)
     result = df.DataFrame(data)
-    print result
+    result.to_csv("test.csv", header = 1, columns= [0,1],index = False)
 
 if __name__ == '__main__': main()
