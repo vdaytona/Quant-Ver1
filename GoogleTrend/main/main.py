@@ -5,11 +5,11 @@ Created on 2015/08/12
 '''
 
 import pandas as pd
-import numpy as np
-from twisted.mail.pop3client import InsecureAuthenticationDisallowed
-from matplotlib.pyplot import plot
+import random
+import pylab as p
+from math import log10
 
-def main():
+def main():    
     # Acquiring data
     debt_data = pd.read_csv('../Data/debt_google_trend.csv',header = 1)
     nasdaq = pd.read_csv('../Data/nasdaq_historical_quotes.csv',header = 0)[['Date','Open','Close']]
@@ -18,11 +18,12 @@ def main():
     preprocess_raw_data = preprocessData(debt_data, nasdaq)
     
     # add indicator into data for trading strategy
-    excuteStrategy(preprocess_raw_data)
+    trade_data, random_data = excuteStrategy(preprocess_raw_data)
     
     # Strategy backtest
     
     # Result Output
+    writeToCSV(trade_data, random_data)
 
 def preprocessData(trend_data, nasdaq):
     # Insert week start date and end date
@@ -86,6 +87,8 @@ def excuteStrategy(raw_data):
     strategy_gross_return = []
     buy_hold_value = []
     buy_hold_gross_return = []
+    strategy_return_R = []
+    buy_hold_return_R = []
     win = []
     win_rate = []
     initial_invest_value = float(100)
@@ -97,33 +100,54 @@ def excuteStrategy(raw_data):
         else:
             strategy_invest_value = strategy_value[i-1]
             buy_hold_invest_value = buy_hold_value[i-1]
-        if trade_data['Buy_Or_Sell'][i] == 0:
-            # no trade happpen
-            strategy_value.append(strategy_invest_value)            
+        if trade_data['Strategy_Buy_Or_Sell'][i] == 0:
+            # no trade happened
+            strategy_value.append(strategy_invest_value)       
             win.append(0)
-        elif (trade_data['Nasdaq_Change'][i] >= 0 and trade_data['Buy_Or_Sell'][i] == 1) | (trade_data['Nasdaq_Change'][i] <= 0 and trade_data['Buy_Or_Sell'][i] == -1) :
+            if i == 0 :
+                strategy_return_R.append(0)
+            else :
+                strategy_return_R.append(strategy_return_R[i-1])
+        elif (trade_data['Nasdaq_Change'][i] >= 0 and trade_data['Strategy_Buy_Or_Sell'][i] == 1) | (trade_data['Nasdaq_Change'][i] <= 0 and trade_data['Strategy_Buy_Or_Sell'][i] == -1) :
             # win 
             strategy_value.append(strategy_invest_value*(1+abs(trade_data['Nasdaq_Change'][i])))
             win.append(1)
+            if i == 0:
+                strategy_return_R.append(abs(log10(trade_data['Nasdaq_Close'][i] / trade_data['Nasdaq_Open'][i])))
+            else :
+                strategy_return_R.append(strategy_return_R[i-1] + abs(log10(trade_data['Nasdaq_Close'][i] / trade_data['Nasdaq_Open'][i])))
         else:
             # loss
             strategy_value.append(strategy_invest_value*(1-abs(trade_data['Nasdaq_Change'][i])))
             win.append(0)
+            if i == 0:
+                strategy_return_R.append(-abs(log10(trade_data['Nasdaq_Close'][i] / trade_data['Nasdaq_Open'][i])))
+            else :
+                strategy_return_R.append(strategy_return_R[i-1] - abs(log10(trade_data['Nasdaq_Close'][i] / trade_data['Nasdaq_Open'][i])))
+        
+              
+        if i == 0 :
+            buy_hold_return_R.append(0)
+        else :
+            buy_hold_return_R.append(buy_hold_return_R[i-1] + log10(trade_data['Nasdaq_Close'][i] / trade_data['Nasdaq_Open'][i]))
+        
         buy_hold_value.append(buy_hold_invest_value * (1+trade_data['Nasdaq_Change'][i]))
         buy_hold_gross_return.append((buy_hold_value[i] - initial_invest_value) / initial_invest_value)
         strategy_gross_return.append((strategy_value[i] - initial_invest_value) / initial_invest_value)
         win_rate.append(float(sum(win)) / float(len(win)))
     
-    trade_data['Strategy_Position'], trade_data['Strategy_Gross_Return'],trade_data['Buy_Hold_Position'], trade_data['Buy_Hold_Gross_Return'], trade_data['Win'], trade_data['Win_Rate']\
-    = strategy_value, strategy_gross_return, buy_hold_value, buy_hold_gross_return, win, win_rate
+    trade_data['Strategy_Position'], trade_data['Strategy_Gross_Return'], trade_data['Strategy_Cumulative_Return_R'], trade_data['Buy_Hold_Position'], \
+    trade_data['Buy_Hold_Gross_Return'], trade_data['Buy_Hold_Cumulative_Return_R'], trade_data['Strategy_Win'], trade_data['Strategy_Win_Rate'],\
+    = strategy_value, strategy_gross_return, strategy_return_R, buy_hold_value, buy_hold_gross_return, buy_hold_return_R, win, win_rate
     print trade_data.describe()
-    trade_data.to_csv("test.csv")
-    return trade_data
-
+    
+    random_data = excuteRandomStrategy(raw_data.dropna())
+    
+    return trade_data, random_data
 
 def insertIndicator(raw_data, delta_t = 3):
     # calcualte the N(t-1,delta_t) = (n(t-1) + n(t-2) + n(t-3) + ...+ n(t-delta_t)) / delta_t
-    # if n > N , sell, buy_or_sell = -1, 
+    # if n > N , sell, Strategy_Buy_Or_Sell = -1, 
     N = []
     buy_sell = []
     for i in range(0, len(raw_data.index)):
@@ -142,10 +166,47 @@ def insertIndicator(raw_data, delta_t = 3):
             else:
                 buy_sell.append(0)
     raw_data['N'] = N
-    raw_data['Buy_Or_Sell'] = buy_sell
+    raw_data['Strategy_Buy_Or_Sell'] = buy_sell
     raw_data['Nasdaq_Change'] = (raw_data['Nasdaq_Close'] - raw_data['Nasdaq_Open']) / raw_data['Nasdaq_Open']
     return raw_data
 
+def excuteRandomStrategy(raw_data):
+    raw_data = raw_data.set_index([range(0,len(raw_data.index))])
+    loop = 1000
+    #random_strategy_return_R = zeroList(len(raw_data.index))
+    random_strategy_cumulative_return_R = []
+    for i in range(loop) :
+        # create n but or sell decision random
+        buy_or_sell = randomList(len(raw_data.index))
+        cumulative_return_R = 0
+        for j in range(len(buy_or_sell)):
+            if buy_or_sell[j] == 1:
+                cumulative_return_R += log10(raw_data['Nasdaq_Close'][j] / raw_data['Nasdaq_Open'][j])                
+            else:
+                cumulative_return_R += log10(raw_data['Nasdaq_Open'][j] / raw_data['Nasdaq_Close'][j])
+        random_strategy_cumulative_return_R.append(cumulative_return_R)
+    
+    result = pd.DataFrame(data = {'Random_Strategy_Cumulative_Return_R' : random_strategy_cumulative_return_R})
+    result.hist(bins = 100)
+    p.show()
+    print result.describe()
+    return result
+
+def zeroList(number):
+    result = []
+    for i in range(number):
+        result.append(0)
+    return result
+
+def randomList(number):
+    result = []
+    for i in range(number):
+        result.append(random.randint(0,1))
+    return result
+
+def writeToCSV(trade_data, random_data):
+    trade_data.to_csv("debt_strategy_result.csv")
+    random_data.to_csv("random_strategy_result.csv")
 
 if __name__ == '__main__':
     main()
