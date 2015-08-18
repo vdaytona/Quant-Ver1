@@ -15,11 +15,13 @@ import mysql.connector
 import pandas
 import time
 import matplotlib.pyplot as p
+import numpy as np
 
 from sklearn.decomposition import PCA, KernelPCA
 from svm import evaluation
 from ljCao.indexCal import index_cal
 from svm.svmCal import svr
+from pandas.core.frame import DataFrame
 
 # main program
 def main():
@@ -29,7 +31,8 @@ def main():
     # 2. Feature engineering
     (x_train, y_train, x_test ,y_real) = feature_engineering(raw_data)
     
-    # 3. SVM
+
+    #3. SVM
     svr().svr_timeseries(x_train, y_train, x_test, y_real, 'rbf')
     
     # 4. Evaluation
@@ -62,6 +65,8 @@ def feature_engineering(raw_data):
     input_data = raw_data[['Date','AdjClose','AdjVolume']].dropna()
     train_ratio = 0.8
     
+    savedata= DataFrame(input_data)
+    savedata.to_csv('/home/peng/workspace/datafortrainCao.csv', header=0)
     #===========================================================================
     # Vol_5 = index_cal().VOL_n(input_data, 5)
     # Vol_10 = index_cal().VOL_n(input_data, 10)

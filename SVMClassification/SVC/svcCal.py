@@ -85,7 +85,7 @@ class svc():
                     print("%d%% %f minutes left" %(percent_count * 100, minutes_lfet ))
                     percent_count += 0.05
         # print result
-        print('Test day: %d' %len(y_real))
+        print('hmmtest day: %d' %len(y_real))
         print('Max profit day:')
         print ('Profit day is %d for %f%% by SVM' % (max_profit_day, float(max_profit_day) / float(max_profit_day_all_day) * 100))
         print('Parameters : Gamma = %f , C = %f4d' %(gamma_max_profit_day, c_max_profit_day))
