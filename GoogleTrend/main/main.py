@@ -4,10 +4,14 @@ Created on 2015/08/12
 @author: Daytona
 '''
 
+import numpy as np
 import pandas as pd
 import random
 import pylab as p
 from math import log10
+from matplotlib.finance import quotes_historical_yahoo_ochl
+from matplotlib.dates import YearLocator, MonthLocator, DateFormatter
+from hmmlearn.hmm import GaussianHMM
 
 def main():    
     # Acquiring data
@@ -18,7 +22,7 @@ def main():
     preprocess_raw_data = preprocessData(debt_data, nasdaq)
     
     # add indicator into data for trading strategy
-    trade_data, random_data = excuteStrategy(preprocess_raw_data)
+    trade_data, random_data = excuteStrategy(preprocess_raw_data, excute_random_strategy = True)
     
     # Strategy backtest
     
@@ -78,7 +82,7 @@ def mergeTrendNasdaq(trend_data, nasdaq_data):
     trend_data['Nasdaq_Close'] = nasdaq_close
     return trend_data
 
-def excuteStrategy(raw_data):
+def excuteStrategy(raw_data, excute_random_strategy = False):
     trade_data = insertIndicator(raw_data).dropna()
     trade_data = trade_data.set_index([range(0,len(trade_data.index))])
     #print trade_data
@@ -139,11 +143,13 @@ def excuteStrategy(raw_data):
     trade_data['Strategy_Position'], trade_data['Strategy_Gross_Return'], trade_data['Strategy_Cumulative_Return_R'], trade_data['Buy_Hold_Position'], \
     trade_data['Buy_Hold_Gross_Return'], trade_data['Buy_Hold_Cumulative_Return_R'], trade_data['Strategy_Win'], trade_data['Strategy_Win_Rate'],\
     = strategy_value, strategy_gross_return, strategy_return_R, buy_hold_value, buy_hold_gross_return, buy_hold_return_R, win, win_rate
-    print trade_data.describe()
+    #print trade_data.describe()
     
-    random_data = excuteRandomStrategy(raw_data.dropna())
-    
-    return trade_data, random_data
+    if excute_random_strategy == True :
+        random_data = excuteRandomStrategy(raw_data.dropna())
+        return trade_data, random_data
+    else:
+        return  trade_data
 
 def insertIndicator(raw_data, delta_t = 3):
     # calcualte the N(t-1,delta_t) = (n(t-1) + n(t-2) + n(t-3) + ...+ n(t-delta_t)) / delta_t
@@ -203,6 +209,8 @@ def randomList(number):
     for i in range(number):
         result.append(random.randint(0,1))
     return result
+
+
 
 def writeToCSV(trade_data, random_data):
     trade_data.to_csv("debt_strategy_result.csv")
