@@ -26,10 +26,9 @@ def main():
     
     # process trade result data
     trade_data = processTradingData(trade_data)
-    print trade_data[['Strategy_Gross_Return','Strategy_Gross_Return_RDP_2']]
+
     # hmm model analyze
     hmmtest(trade_data, trade_data[['Nasdaq_Close_RDP_5','Strategy_Gross_Return_RDP_5']])
-    print (trade_data[['Strategy_Gross_Return_RDP_15']])
     columnName = []
     period = [1,2,5,15,30]
     column = ['Nasdaq_Close','Strategy_Gross_Return','Strategy_Cumulative_Return_R']
@@ -75,7 +74,6 @@ def RDPProcess(trade_data, column = None, period = 1):
         '''
     col_name = str('%s_RDP_%s' % (column, str(period))) 
     # print trade_data[column].pct_change(period)
-    print col_name
     #trade_data[col_name] = scalerData(substractOutliers(trade_data[column].pct_change(period), period),1,-1)
     trade_data[col_name] = substractOutliers(trade_data[column].pct_change(period) * trade_data[column] / period, period)
     return trade_data
@@ -92,10 +90,6 @@ def substractOutliers(input_data,n):
     mean = input_data.mean()
     up_limit = mean + double_standard_deviation
     down_limit = mean - double_standard_deviation
-    print input_data.mean()
-    print double_standard_deviation
-    print up_limit
-    print down_limit
     for i in range(n, len(input_data)) :
         if input_data[i] > up_limit or input_data[i] < down_limit:
             if i != n:
@@ -104,7 +98,6 @@ def substractOutliers(input_data,n):
                 input_data[i] = up_limit
             elif input_data[i] < down_limit:
                 input_data[i] = down_limit
-    print input_data
     return input_data
 
 def hmmtest(trade_data, test_data):
@@ -116,7 +109,7 @@ def hmmtest(trade_data, test_data):
     #print("fitting to HMM and decoding ...", end='')
     
     # make an HMM instance and execute fit
-    model = GaussianHMM(n_components=4, covariance_type="diag", n_iter=1000).fit(X)
+    model = GaussianHMM(n_components=4, covariance_type="full", n_iter=1000).fit(X)
     #model= GMMHMM(n_components=4,n_mix=3,covariance_type="diag", n_iter=100).fit(X)
     # model = MultinomialHMM(n_components=4, n_iter=100).fit(X)
     # predict the optimal sequence of internal hidden state
@@ -147,6 +140,7 @@ def hmmtest(trade_data, test_data):
         # use fancy indexing to plot data in each state
         idx = (hidden_states == i)
         ax.plot_date(trade_data.index[idx], trade_data[['Nasdaq_Close']][idx], 'o', label="%dth hidden state" % i)
+        print "%dth hidden state has %d element" % (i,len(trade_data.index[idx]))
     ax.legend()
     
     ax.plot(trade_data.index, trade_data[['Strategy_Gross_Return']]*500)
