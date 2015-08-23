@@ -108,6 +108,7 @@ def hmmtest(trade_data, test_data):
     # Run Gaussian HMM
     #print("fitting to HMM and decoding ...", end='')
     
+    
     # make an HMM instance and execute fit
     model = GaussianHMM(n_components=4, covariance_type="full", n_iter=1000).fit(X)
     #model= GMMHMM(n_components=4,n_mix=3,covariance_type="diag", n_iter=100).fit(X)
