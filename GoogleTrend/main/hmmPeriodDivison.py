@@ -9,6 +9,8 @@ import main as m
 import pandas as pd
 import numpy as np
 import pylab as p
+import matplotlib.pyplot as plt
+from matplotlib.ticker import NullFormatter
 from matplotlib.dates import YearLocator, MonthLocator, DateFormatter
 from hmmlearn.hmm import GaussianHMM, GMMHMM, MultinomialHMM
 
@@ -24,6 +26,7 @@ def main():
     # strategy excution
     trade_data = m.excuteStrategy(preprocess_raw_data, excute_random_strategy = False)
     
+    print trade_data.describe()
     # process trade result data
     trade_data = processTradingData(trade_data)
 
@@ -107,10 +110,12 @@ def hmmtest(trade_data, test_data):
     ###############################################################################
     # Run Gaussian HMM
     #print("fitting to HMM and decoding ...", end='')
-    
+    n_components = 4
+    covariance_type = 'full'
+    n_iter = 1000
     
     # make an HMM instance and execute fit
-    model = GaussianHMM(n_components=4, covariance_type="full", n_iter=1000).fit(X)
+    model = GaussianHMM(n_components=n_components, covariance_type=covariance_type, n_iter=n_iter).fit(X)
     #model= GMMHMM(n_components=4,n_mix=3,covariance_type="diag", n_iter=100).fit(X)
     # model = MultinomialHMM(n_components=4, n_iter=100).fit(X)
     # predict the optimal sequence of internal hidden state
@@ -134,7 +139,7 @@ def hmmtest(trade_data, test_data):
     years = YearLocator()   # every year
     months = MonthLocator()  # every month
     yearsFmt = DateFormatter('%Y')
-    fig = p.figure()
+    fig = plt.figure(1)
     ax = fig.add_subplot(111)
     
     for i in range(model.n_components):
@@ -158,7 +163,47 @@ def hmmtest(trade_data, test_data):
     ax.grid(True)
     
     #fig.autofmt_xdate()
-    p.show()
+    plt.show()
+    
+    for i in range(model.n_components):
+        # use fancy indexing to plot data in each state
+        idx = (hidden_states == i)
+        plotScatterHist(trade_data[['Nasdaq_Close_RDP_2']][idx].values[:24], trade_data[['Strategy_Gross_Return_RDP_2']][idx].values[:24])
+        plotScatterHist(trade_data[['Nasdaq_Close_RDP_2']][idx].values[24:], trade_data[['Strategy_Gross_Return_RDP_2']][idx].values[24:])
+        #print trade_data[['Strategy_Gross_Return_RDP_2']][idx].values[:24]
+        #=======================================================================
+        # output = []
+        # print trade_data[['Nasdaq_Close_RDP_2']][idx].values
+        # output['Nasdaq_Close_RDP_2'] = trade_data[['Nasdaq_Close_RDP_2']][idx]
+        # output['Strategy_Gross_Return_RDP_2'] = trade_data[['Strategy_Gross_Return_RDP_2']][idx].values
+        # output.to_csv('./result_%dstate.csv' %i)
+        #=======================================================================
+    
+def plotScatterHist(x_data,y_data):
+    # definitions for the axes
+    left, width = 0.1, 0.65
+    bottom, height = 0.1, 0.65
+    bottom_h = left_h = left+width+0.02
+    
+    rect_scatter = [left, bottom, width, height]
+    rect_histx = [left, bottom_h, width, 0.2]
+    rect_histy = [left_h, bottom, 0.2, height]
+    
+    # start with a rectangular Figure
+    plt.figure(2, figsize=(8,8))
+    
+    axScatter = plt.axes(rect_scatter)
+    axHistx = plt.axes(rect_histx)
+    axHisty = plt.axes(rect_histy)
+    
+    
+    # the scatter plot:
+    axScatter.scatter(x_data, y_data)
+    
+    axHistx.hist(x_data,bins = 20)
+    axHisty.hist(y_data, bins = 20,orientation='horizontal')
+    
+    plt.show()
 
 if __name__ == '__main__':
     main()
