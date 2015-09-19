@@ -17,16 +17,18 @@ from hmmlearn.hmm import GaussianHMM, GMMHMM, MultinomialHMM
 def main():
     # read data
     
-    debt_data = pd.read_csv('../Data/debt_google_trend.csv',header = 1)
+    key_word = 'rare earths'
+    debt_data = pd.read_csv('../Data/%s_google_trend.csv' %key_word,header = 1)
     nasdaq = pd.read_csv('../Data/nasdaq_historical_quotes.csv',header = 0)[['Date','Open','Close']]
     
     # preprocess data
-    preprocess_raw_data = m.preprocessData(debt_data, nasdaq)
+    preprocess_raw_data = m.preprocessData(debt_data, key_word, nasdaq)
     
     # strategy excution
-    trade_data = m.excuteStrategy(preprocess_raw_data, excute_random_strategy = False)
+    trade_data = m.excuteStrategy(preprocess_raw_data,key_word, excute_random_strategy = False)
     
-    print trade_data.describe()
+    #print trade_data.describe()
+    
     # process trade result data
     trade_data = processTradingData(trade_data)
 
@@ -53,7 +55,7 @@ def processTradingData(trade_data):
     for col in column:
         for i in period:
             trade_data = RDPProcess(trade_data, col, i)
-    print trade_data.describe()
+    #print trade_data.describe()
     
     return trade_data.dropna()
 
@@ -105,8 +107,9 @@ def substractOutliers(input_data,n):
 
 def hmmtest(trade_data, test_data):
     # pack diff and volume for training
+    # delete record containng infinity    
+    X = test_data[test_data['Strategy_Gross_Return_RDP_5'] != float("inf")]
     X = test_data
-    
     ###############################################################################
     # Run Gaussian HMM
     #print("fitting to HMM and decoding ...", end='')
@@ -121,20 +124,40 @@ def hmmtest(trade_data, test_data):
     # predict the optimal sequence of internal hidden state
     hidden_states = model.predict(X)
     
-    print("done\n")
+    #print("done\n")
     
     ###############################################################################
     # print trained parameters and plot
-    print("Transition matrix")
-    print(model.transmat_)
-    print()
+    #print("Transition matrix")
+    #print(model.transmat_)
+    #print()
     
     print("means and vars of each hidden state")
     for i in range(model.n_components):
         print("%dth hidden state" % i)
         print("mean = ", model.means_[i])
         print("var = ", np.diag(model.covars_[i]))
-        print()
+        
+        
+    plotHmmState(model, hidden_states, trade_data)
+    
+    return model
+    
+    #for i in range(model.n_components):
+        # use fancy indexing to plot data in each state
+        #idx = (hidden_states == i)
+        #plotScatterHist(trade_data[['Nasdaq_Close_RDP_2']][idx].values[:24], trade_data[['Strategy_Gross_Return_RDP_2']][idx].values[:24])
+        #plotScatterHist(trade_data[['Nasdaq_Close_RDP_2']][idx].values[24:], trade_data[['Strategy_Gross_Return_RDP_2']][idx].values[24:])
+        #print trade_data[['Strategy_Gross_Return_RDP_2']][idx].values[:24]
+        #=======================================================================
+        # output = []
+        # print trade_data[['Nasdaq_Close_RDP_2']][idx].values
+        # output['Nasdaq_Close_RDP_2'] = trade_data[['Nasdaq_Close_RDP_2']][idx]
+        # output['Strategy_Gross_Return_RDP_2'] = trade_data[['Strategy_Gross_Return_RDP_2']][idx].values
+        # output.to_csv('./result_%dstate.csv' %i)
+        #=======================================================================
+    
+def plotHmmState(model, hidden_states, trade_data):
     
     years = YearLocator()   # every year
     months = MonthLocator()  # every month
@@ -146,7 +169,7 @@ def hmmtest(trade_data, test_data):
         # use fancy indexing to plot data in each state
         idx = (hidden_states == i)
         ax.plot_date(trade_data.index[idx], trade_data[['Nasdaq_Close']][idx], 'o', label="%dth hidden state" % i)
-        print "%dth hidden state has %d element" % (i,len(trade_data.index[idx]))
+        #print "%dth hidden state has %d element" % (i,len(trade_data.index[idx]))
     ax.legend()
     
     ax.plot(trade_data.index, trade_data[['Strategy_Gross_Return']]*500)
@@ -164,20 +187,6 @@ def hmmtest(trade_data, test_data):
     
     #fig.autofmt_xdate()
     plt.show()
-    
-    for i in range(model.n_components):
-        # use fancy indexing to plot data in each state
-        idx = (hidden_states == i)
-        plotScatterHist(trade_data[['Nasdaq_Close_RDP_2']][idx].values[:24], trade_data[['Strategy_Gross_Return_RDP_2']][idx].values[:24])
-        plotScatterHist(trade_data[['Nasdaq_Close_RDP_2']][idx].values[24:], trade_data[['Strategy_Gross_Return_RDP_2']][idx].values[24:])
-        #print trade_data[['Strategy_Gross_Return_RDP_2']][idx].values[:24]
-        #=======================================================================
-        # output = []
-        # print trade_data[['Nasdaq_Close_RDP_2']][idx].values
-        # output['Nasdaq_Close_RDP_2'] = trade_data[['Nasdaq_Close_RDP_2']][idx]
-        # output['Strategy_Gross_Return_RDP_2'] = trade_data[['Strategy_Gross_Return_RDP_2']][idx].values
-        # output.to_csv('./result_%dstate.csv' %i)
-        #=======================================================================
     
 def plotScatterHist(x_data,y_data):
     # definitions for the axes

@@ -19,7 +19,7 @@ def main():
     nasdaq = pd.read_csv('../Data/nasdaq_historical_quotes.csv',header = 0)[['Date','Open','Close']]
     
     # Processing data
-    preprocess_raw_data = preprocessData(debt_data, nasdaq)
+    preprocess_raw_data = preprocessData(debt_data, 'debt',nasdaq)
     
     # add indicator into data for trading strategy
     trade_data, random_data = excuteStrategy(preprocess_raw_data, excute_random_strategy = True)
@@ -29,16 +29,16 @@ def main():
     # Result Output
     writeToCSV(trade_data, random_data)
 
-def preprocessData(trend_data, nasdaq):
+def preprocessData(trend_data, key_word, nasdaq):
     # Insert week start date and end date
-    debt_data = processGoogleTrendData(trend_data)
+    debt_data = processGoogleTrendData(trend_data, key_word)
     # merge google trend data and nasdaq quotes
     merged_raw_data = mergeTrendNasdaq(debt_data,nasdaq)
     
     return merged_raw_data
     
 
-def processGoogleTrendData(input_data):
+def processGoogleTrendData(input_data, key_word):
     # create list to store start date and end date of ecah google trend record
     start_date_list = []
     end_date_list = []
@@ -61,7 +61,7 @@ def processGoogleTrendData(input_data):
         end_date_list.append(end_date)
     input_data['Start_Date'] = start_date_list
     input_data['End_Date'] = end_date_list
-    return input_data[['Start_Date','End_Date','debt']]
+    return input_data[['Start_Date','End_Date',key_word]]
 
 def mergeTrendNasdaq(trend_data, nasdaq_data):
     # because nasdaq is daily quote,  so change the record into weekly record, and merge with google trend record
@@ -82,8 +82,8 @@ def mergeTrendNasdaq(trend_data, nasdaq_data):
     trend_data['Nasdaq_Close'] = nasdaq_close
     return trend_data
 
-def excuteStrategy(raw_data, excute_random_strategy = False):
-    trade_data = insertIndicator(raw_data).dropna()
+def excuteStrategy(raw_data,key_word, excute_random_strategy = False):
+    trade_data = insertIndicator(raw_data, key_word).dropna()
     trade_data = trade_data.set_index([range(0,len(trade_data.index))])
     #print trade_data
     
@@ -151,7 +151,7 @@ def excuteStrategy(raw_data, excute_random_strategy = False):
     else:
         return  trade_data
 
-def insertIndicator(raw_data, delta_t = 3):
+def insertIndicator(raw_data, key_word,delta_t = 3):
     # calcualte the N(t-1,delta_t) = (n(t-1) + n(t-2) + n(t-3) + ...+ n(t-delta_t)) / delta_t
     # if n > N , sell, Strategy_Buy_Or_Sell = -1, 
     N = []
@@ -163,11 +163,11 @@ def insertIndicator(raw_data, delta_t = 3):
         else:
             n_sum = 0
             for j in range(1,delta_t+1):
-                n_sum += raw_data['debt'][i-j]
+                n_sum += raw_data[key_word][i-j]
             N.append(float(n_sum) / float(delta_t))
-            if raw_data['debt'][i] < float(n_sum) / float(delta_t):
+            if raw_data[key_word][i] < float(n_sum) / float(delta_t):
                 buy_sell.append(1)
-            elif raw_data['debt'][i] > float(n_sum) / float(delta_t):
+            elif raw_data[key_word][i] > float(n_sum) / float(delta_t):
                 buy_sell.append(-1)
             else:
                 buy_sell.append(0)
