@@ -4,14 +4,10 @@ Created on 2015/08/12
 @author: Daytona
 '''
 
-import numpy as np
 import pandas as pd
 import random
 import pylab as p
 from math import log10
-from matplotlib.finance import quotes_historical_yahoo_ochl
-from matplotlib.dates import YearLocator, MonthLocator, DateFormatter
-from hmmlearn.hmm import GaussianHMM
 
 def main():    
     # Acquiring data
