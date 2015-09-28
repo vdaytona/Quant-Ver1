@@ -90,20 +90,20 @@ class test():
     def testforest(self, test, testlabel,forest):
         outputtest= forest.predict(test) 
         accuracytrain = accuracy_score(testlabel, outputtest)
-        #----------------------------------- print "The size of the test set is"
-        #------------------------------------------------- print  np.shape(test)
-        # print "The accuracy for the test set is %r" %accuracytrain, "and the confusion matrix is"
-        #-------------------------- print confusion_matrix(outputtest,testlabel)
-        #-------------------- print classification_report(testlabel, outputtest)
+        print "The size of the test set is"
+        print  np.shape(test)
+        print "The accuracy for the test set is %r" %accuracytrain, "and the confusion matrix is"
+        print confusion_matrix(outputtest,testlabel)
+        print classification_report(testlabel, outputtest)
         # generate probability
-        #-------------------------------- outputproba=forest.predict_proba(test)
-        # outperfor={'prob0':outputproba[:,0],'prob1':outputproba[:,1],'output':outputtest,'target':testlabel}
-        #----------------------------------------- outframe=DataFrame(outperfor)
-        #print outframe
+        outputproba=forest.predict_proba(test)
+        outperfor={'prob0':outputproba[:,0],'prob1':outputproba[:,1],'output':outputtest,'target':testlabel}
+        outframe=DataFrame(outperfor)
+        print outframe
         #outframe.to_csv(r'D:\allprob.csv', header=0)
-        return accuracytrain
+        return accuracytrain, outframe
         #return (outframe)
         
-         
+   
 
 
