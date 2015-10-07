@@ -16,5 +16,4 @@ def trainRF(train_x, train_y, n_estimator):
 
 def testRF(test_x, test_y, forest):
     output_RF = rf.test().testforest(test_x, test_y, forest)
-    
 
