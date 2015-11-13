@@ -31,7 +31,7 @@ def getGoogleTrendsDataFromCsv(file_name_list):
     # import google trends data in pandas from .csv
     google_trends_result_list = []
     for file_name in file_name_list:
-        google_trends_result_list.append(pandas.read_csv(file_name,header = 1))
+        google_trends_result_list.append(pandas.read_csv(file_name,header = 1, index_col = 0))
     return google_trends_result_list
 
 
