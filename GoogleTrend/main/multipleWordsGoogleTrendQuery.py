@@ -1,4 +1,6 @@
 '''
+used to calculate the hmm state for the google trend based strategy
+There are more than 40 words (from 'Quantifying Trading Behavior in Financial markets Using Google Trends') are used for google trend search 
 Created on 2015/09/12
 
 @author: Daytona
@@ -21,10 +23,10 @@ def main():
     #     result.to_csv(fileName, header = 1, columns= [0,1],index = False)
     #===========================================================================
     result_csv = pd.DataFrame(columns = ['Key_Word','Mean_Nasdaq_Change','Mean_Return','Variance_Nasdaq_Change','Variance_Return'])
-    i = 0
+    
     for word in getSearchWords():
-        if i < 5 :
-            hmmAnalyze(word, result_csv)
+        hmmAnalyze(word, result_csv)
+    
     print result_csv
     result_csv.to_csv('../Result/multipleWordsGoogleTrendsQuery.csv')
 
@@ -72,12 +74,6 @@ def hmmAnalyze(key_word, result_csv):
     outputResult(key_word,result_model, result_csv,trade_data)
     
     print('-------------------------')
-    
-    # Strategy backtest
-    
-    # Result Output
-    #ma.writeToCSV(trade_data, random_data)
-    pass
 
 def outputResult(key_word, model, result_csv, trade_data):
     for i in range(model.n_components):

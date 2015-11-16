@@ -15,7 +15,7 @@ class training(object):
     def __init__(self):
         print "This is for training set**************************************"
         
-    def trainforest(self, seed, train, trainlabel, number_trees):
+    def trainforest(self, seed, train, trainlabel, number_trees, accuracy_train_calculation = False):
         seed_of_tree = {'rf': RandomForestClassifier(n_estimators= number_trees, max_features=8), 
                       'adb': AdaBoostClassifier(n_estimators= number_trees),
                       'bag': BaggingClassifier(n_estimators= number_trees, max_features=8),
@@ -24,14 +24,15 @@ class training(object):
         rawforest=seed_of_tree[seed]
         forest=rawforest.fit(train,trainlabel)
         outputtrain= forest.predict(train)
-        accuracytrain = accuracy_score(trainlabel, outputtrain)        
+        if accuracy_train_calculation == True : 
+            accuracytrain = accuracy_score(trainlabel, outputtrain)        
         print "The size of the training set is %r , %r" %(np.shape(train)[0],np.shape(train)[1])
         #---------------------------------------- print "The method is %r" %seed
         # print "The accuracy for the training set is %r" %accuracytrain, "and the confusion matrix is"
         #------------------------ print confusion_matrix(outputtrain,trainlabel)
         return (forest)
     
-    def importance(self, forest, n):
+    def importance(self, forest):
         print "************************this is the output of relative importance**************"
         print(forest.feature_importances_)
         importances=forest.feature_importances_

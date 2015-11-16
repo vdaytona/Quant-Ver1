@@ -4,8 +4,9 @@ Using 44 words google trend result as input, to predict the Nasdaq 500 variation
 @author: Daytona
 '''
 
-
+import numpy as np
 import pandas as pd
+import RFclass as rf
 import multipleWordsCommonApp as mwca
 from pandas.tslib import Timestamp
 from pandas.tseries.offsets import DateOffset
@@ -31,6 +32,7 @@ def main():
     
     # training
     # TODO
+    forest, importances = train(merged_data, RDP_period = 5, train_percent = 0.5)
     
     # test
     
@@ -116,8 +118,31 @@ def merge(google_trends_result_list, nasdaq_quotes):
     merged_google_result = google_trends_result_list[0]
     for index in range(1, google_trends_result_list.__len__()) :
         merged_google_result = merged_google_result.join(google_trends_result_list[index],how = 'inner')
-    print merged_google_result.join(nasdaq_quotes,how='outer').dropna()
-    return merged_google_result.join(nasdaq_quotes,how='outer').dropna()
+    merged_result = merged_google_result.join(nasdaq_quotes,how='outer').replace([np.inf, -np.inf], np.nan)
+    return merged_result.dropna()
+
+def train(input_data, RDP_period, train_percent):
+    feature_set = getTrainColumnName(RDP_period)
+    train_size = int(train_percent * len(input_data))
+    
+    train_x = input_data[feature_set][ : train_size]
+    train_y = input_data[str('%s_RDP_%s' % ("Nasdaq_Close", str(RDP_period)))][ : train_size]
+    
+    forest = rf.training().trainforest('rf', train_x, train_y, 1000)
+    
+    rf.training().importance(forest)
+    rf.training().dependence(forest, train_x, feature_set)
+    rf.training().dependence3d(forest, train_x, feature_set)
+    
+    return forest
+
+def getTrainColumnName(RDP_period):
+    file_name_list = mwca.getGoogleTrendsResultFileName()
+    word_list = []
+    for word in file_name_list :
+        word_list.append(str('%s_RDP_%s' % (word.split("\\")[1].split("_")[0], str(RDP_period))))
+    return word_list
+    
 
 if __name__ == '__main__':
     main()
