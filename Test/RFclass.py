@@ -24,13 +24,16 @@ class training(object):
         rawforest=seed_of_tree[seed]
         forest=rawforest.fit(train,trainlabel)
         outputtrain= forest.predict(train)
-        if accuracy_train_calculation == True : 
-            accuracytrain = accuracy_score(trainlabel, outputtrain)        
+        
         print "The size of the training set is %r , %r" %(np.shape(train)[0],np.shape(train)[1])
+        if accuracy_train_calculation == True : 
+            accuracytrain = accuracy_score(trainlabel, outputtrain)
+            print "The accuracy for the training set is %r" %accuracytrain
+        
         #---------------------------------------- print "The method is %r" %seed
         # print "The accuracy for the training set is %r" %accuracytrain, "and the confusion matrix is"
         #------------------------ print confusion_matrix(outputtrain,trainlabel)
-        return (forest)
+        return forest
     
     def importance(self, forest):
         print "************************this is the output of relative importance**************"
@@ -94,7 +97,7 @@ class test():
         print "The size of the test set is"
         print  np.shape(test)
         print "The accuracy for the test set is %r" %accuracytrain, "and the confusion matrix is"
-        print confusion_matrix(outputtest,testlabel)
+        #print confusion_matrix(outputtest,testlabel)
         print classification_report(testlabel, outputtest)
         # generate probability
         outputproba=forest.predict_proba(test)
@@ -104,7 +107,3 @@ class test():
         #outframe.to_csv(r'D:\allprob.csv', header=0)
         return accuracytrain, outframe
         #return (outframe)
-        
-   
-
-
