@@ -43,6 +43,8 @@ def main():
     test(test_x, test_y, forest)
     
     # result analysis
+    # anlyze the relative importance of all the words
+    
     
     print "finished"
 
@@ -150,10 +152,11 @@ def prepareTrainTestData(input_data, RDP_period = 1, train_percent = 0.7):
     return train_x, train_y, test_x, test_y
 
 def train(train_x, train_y):
-    forest = rf.training().trainforest('gbt', train_x, train_y, 1000, accuracy_train_calculation = True)
+    forest = rf.training().trainforest('rf', train_x, train_y, 1000, accuracy_train_calculation = True)
+    
     
     #===========================================================================
-    # rf.training().importance(forest)
+    rf.training().importance(forest,np.shape(train_x)[1])
     # rf.training().dependence(forest, train_x, feature_set)
     # rf.training().dependence3d(forest, train_x, feature_set)
     #===========================================================================
