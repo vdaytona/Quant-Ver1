@@ -34,7 +34,7 @@ def main():
     merged_data = merge(google_trends_result_list, nasdaq_quotes_weekly)
     
     # split train and test data
-    train_x, train_y, test_x, test_y = prepareTrainTestData(merged_data, RDP_period = RDP_period, train_percent = 0.7)
+    train_x, train_y, test_x, test_y = prepareTrainTestData(merged_data, RDP_period = RDP_period, train_percent = 0.8)
     
     # training
     forest = train(train_x, train_y )
@@ -156,7 +156,17 @@ def train(train_x, train_y):
     
     
     #===========================================================================
-    rf.training().importance(forest,np.shape(train_x)[1])
+    importance = rf.training().importance(forest,np.shape(train_x)[1])
+    
+    feature_list = list(train_x.columns.values)
+    
+    print feature_list
+    
+    importance["keyword"] = importance["Ranking"].map(lambda x : feature_list[x])
+    
+    print importance
+    
+    
     # rf.training().dependence(forest, train_x, feature_set)
     # rf.training().dependence3d(forest, train_x, feature_set)
     #===========================================================================

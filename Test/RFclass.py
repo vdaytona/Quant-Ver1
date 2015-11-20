@@ -44,9 +44,18 @@ class training(object):
         #std=np.std([tree.feature_importances_ for tree in forest.estimators_],axis=0)
         indices=np.argsort(importances)[::-1]
         print indices
+#        return indices
         print("Feature ranking:")
+        #----------------------------------------- for f in range(no_of_dimens):
+              # print("%d. feature %d (%f)" % (f + 1, indices[f], importances[indices[f]]))
+        indice_index = []
+        importance_measure = []      
         for f in range(no_of_dimens):
-              print("%d. feature %d (%f)" % (f + 1, indices[f], importances[indices[f]]))
+            indice_index.append(indices[f])
+            importance_measure.append(importances[indices[f]])
+        df= pd.DataFrame({'Ranking':indice_index, 'importance':importance_measure})
+        return df           
+        
         plt.figure(figsize=(18,6.5))
         plt.bar(range(no_of_dimens), importances[indices],
             color="c", align="center")
