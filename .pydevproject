@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?eclipse-pydev version="1.0"?><pydev_project>
-<pydev_property name="org.python.pydev.PYTHON_PROJECT_INTERPRETER">python2.7</pydev_property>
+<pydev_property name="org.python.pydev.PYTHON_PROJECT_INTERPRETER">Python 2.7.9</pydev_property>
 <pydev_property name="org.python.pydev.PYTHON_PROJECT_VERSION">python 2.7</pydev_property>
 <pydev_pathproperty name="org.python.pydev.PROJECT_SOURCE_PATH">
 <path>/${PROJECT_DIR_NAME}/SqlDataBaseAquisition</path>
@@ -11,5 +11,6 @@
 <path>/${PROJECT_DIR_NAME}/WebQuery</path>
 <path>/${PROJECT_DIR_NAME}/Forex</path>
 <path>/${PROJECT_DIR_NAME}/GoogleTrend</path>
+<path>/${PROJECT_DIR_NAME}/XiaoHong</path>
 </pydev_pathproperty>
 </pydev_project>
