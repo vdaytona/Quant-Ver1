@@ -7,9 +7,11 @@ Using 44 words google trend result as input, to predict the Nasdaq 500 variation
 import numpy as np
 import pandas as pd
 import RFclass as rf
+import sklearn as sk
 import multipleWordsCommonApp as mwca
 from pandas.tslib import Timestamp
 from pandas.tseries.offsets import DateOffset
+from sklearn.decomposition import PCA
 
 def main():
     
@@ -34,7 +36,7 @@ def main():
     merged_data = merge(google_trends_result_list, nasdaq_quotes_weekly)
     
     # split train and test data
-    train_x, train_y, test_x, test_y = prepareTrainTestData(merged_data, RDP_period = RDP_period, train_percent = 0.8)
+    train_x, train_y, test_x, test_y = prepareTrainTestData(merged_data, RDP_period = RDP_period, train_percent = 0.7)
     
     # training
     forest = train(train_x, train_y )
@@ -43,8 +45,6 @@ def main():
     test(test_x, test_y, forest)
     
     # result analysis
-    # anlyze the relative importance of all the words
-    
     
     print "finished"
 
@@ -63,9 +63,10 @@ def preprocessGoogleTrendsData(google_trends_result_list, RDP_period = 1):
         col_name = str('%s_RDP_%s' % (key_word, str(RDP_period)))
         single_result = RDPProcess(single_result, key_word, col_name, RDP_period)
         
-        new_list.append(single_result)
+        new_list.append(single_result[col_name])
         
     return new_list
+
 
 def preprocessNasdaqData(nasdaq_quotes, RDP_period = 1):
     # change to week scale quotes
@@ -144,6 +145,12 @@ def prepareTrainTestData(input_data, RDP_period = 1, train_percent = 0.7):
     feature_set = getTrainColumnName(RDP_period)
     train_size = int(train_percent * len(input_data))
     
+    train_data = input_data[feature_set]
+    
+    #PCA
+    train_data = PCAprocess(train_data)
+    
+    
     train_x = input_data[feature_set][ : train_size]
     train_y = input_data['Close_Change'][ : train_size]
     test_x = input_data[feature_set][ train_size : ]
@@ -151,22 +158,17 @@ def prepareTrainTestData(input_data, RDP_period = 1, train_percent = 0.7):
     
     return train_x, train_y, test_x, test_y
 
+def PCAprocess(input):
+    pca = PCA(n_components = 5)
+    result = pca.fit(input)
+    print result
+    return result
+
 def train(train_x, train_y):
-    forest = rf.training().trainforest('rf', train_x, train_y, 1000, accuracy_train_calculation = True)
-    
+    forest = rf.training().trainforest('gbt', train_x, train_y, 1000, accuracy_train_calculation = True)
     
     #===========================================================================
-    importance = rf.training().importance(forest,np.shape(train_x)[1])
-    
-    feature_list = list(train_x.columns.values)
-    
-    print feature_list
-    
-    importance["keyword"] = importance["Ranking"].map(lambda x : feature_list[x])
-    
-    print importance
-    
-    
+    # rf.training().importance(forest)
     # rf.training().dependence(forest, train_x, feature_set)
     # rf.training().dependence3d(forest, train_x, feature_set)
     #===========================================================================
