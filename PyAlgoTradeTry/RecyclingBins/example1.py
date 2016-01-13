@@ -3,9 +3,19 @@ Created on 8 Jan 2016
 
 @author: purewin7
 '''
+import datetime
+import pandas_feed_mysql
+import connectMysqlDB
+import mysql.connector
+
+from pandas.io import data
 from pyalgotrade import strategy
 from pyalgotrade.barfeed import yahoofeed
 from pyalgotrade.technical import ma
+from pyalgotrade import barfeed
+from connectMysqlDBTest import workingSpace
+
+
 
 
 class MyStrategy(strategy.BacktestingStrategy):
@@ -50,10 +60,32 @@ class MyStrategy(strategy.BacktestingStrategy):
 
 
 def run_strategy(smaPeriod):
+    
+    host='149.171.37.73'
+    userName='PengJiang'
+    password='jiangpengjun'
+    database='sydneyexchange'
+    cnx = mysql.connector.connect();
+    pandasResult = None
+    try:
+        #get cnx used for connecting DB
+        cnx = connectMysqlDB.cnxStock(host=host,userName=userName,password=password,database=database).connect()
+        
+        #write anything you want to do in the workingSpace
+        pandasResult = workingSpace(cnx)
+        
+    finally:
+        cnx.close()
+    #print pandasResult
+    
     # Load the yahoo feed from the CSV file
-    feed = yahoofeed.Feed()
-    feed.addBarsFromCSV("orcl", "orcl-2000.csv")
-
+    #feed = yahoofeed.Feed()
+    #feed.addBarsFromCSV("orcl", "orcl-2000.csv")
+    instrument = 'orcl'
+    #df = data.DataReader(instrument, 'yahoo', datetime.datetime(2011,1,1), datetime.datetime(2012,1,1))
+    
+    feed = pandas_feed_mysql.DataFrameBarFeed(pandasResult, instrument, barfeed.Frequency.DAY)
+    #print feed
     # Evaluate the strategy with the feed.
     myStrategy = MyStrategy(feed, "orcl", smaPeriod)
     myStrategy.run()

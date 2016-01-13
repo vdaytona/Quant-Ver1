@@ -7,7 +7,6 @@ Created on 2015/06/03
 '''
 import connectMysqlDB
 import mysql.connector
-import pylab as p
 
 def main():
     
@@ -33,8 +32,9 @@ def main():
 def workingSpace(cnx):
     sql = ("select * from newyorkexchange.ibm_historicalquotes_newyork")
     df = connectMysqlDB.query(cnx).pandasQuery(sql)
-    print(df.head(100))
-    df['AdjClose'].hist()
-    p.show()
+    #print(df.head(100))
+    #df['AdjClose'].hist()
+    #p.show()
+    return df
     
 if __name__ == "__main__": main()
