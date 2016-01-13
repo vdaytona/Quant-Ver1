@@ -35,27 +35,40 @@ class training(object):
         #------------------------ print confusion_matrix(outputtrain,trainlabel)
         return forest
     
-    def importance(self, forest):
+    def importance(self, forest, no_of_dimens):
         print "************************this is the output of relative importance**************"
         print(forest.feature_importances_)
         importances=forest.feature_importances_
-        return importances
-#        std=np.std([tree.feature_importances_ for tree in forest.estimators_],axis=0)
-        #--------------------------------- indices=np.argsort(importances)[::-1]
-        #--------------------------------------------------------- print indices
-        #--------------------------------------------- print("Feature ranking:")
-        #--------------------------------------------------- for f in range(12):
-             # print("%d. feature %d (%f)" % (f + 1, indices[f], importances[indices[f]]))
-        #---------------------------------------------------------- plt.figure()
-        #------------------------------ plt.bar(range(12), importances[indices],
-            #---------------------------------------- color="c", align="center")
-        # #------------------------------ plt.bar(range(12), importances[indices],
-            # #--------------------- color="c", yerr=std[indices], align="center")
-        #--------------------------------------- plt.xticks(range(n), indices+1)
-        #----------------------------------------------------- plt.xlim([-1, n])
-        #-------------------------- plt.xlabel('The input feature', fontsize=16)
-        #------------------------ plt.ylabel('Relative importance', fontsize=16)
-        #------------------------------------------------------------ plt.show()
+        
+        #return importances
+        #std=np.std([tree.feature_importances_ for tree in forest.estimators_],axis=0)
+        indices=np.argsort(importances)[::-1]
+        print indices
+#        return indices
+        print("Feature ranking:")
+        #----------------------------------------- for f in range(no_of_dimens):
+              # print("%d. feature %d (%f)" % (f + 1, indices[f], importances[indices[f]]))
+        indice_index = []
+        importance_measure = []      
+        for f in range(no_of_dimens):
+            indice_index.append(indices[f])
+            importance_measure.append(importances[indices[f]])
+        df= pd.DataFrame({'Ranking':indice_index, 'importance':importance_measure})
+        return df           
+        
+        plt.figure(figsize=(18,6.5))
+        plt.bar(range(no_of_dimens), importances[indices],
+            color="c", align="center")
+         #------------------------------ plt.bar(range(12), importances[indices],
+             #--------------------- color="c", yerr=std[indices], align="center")
+        plt.xticks(range(no_of_dimens), indices+1, fontsize=8)
+        plt.yticks(fontsize = 8)
+        plt.xlim([-1, no_of_dimens])
+#        plt.ylim([0.00,0.30])
+        plt.xlabel('The input feature', fontsize=24)
+        plt.ylabel('Relative importance', fontsize=24)
+        plt.show()
+#        return importances
     
     
     def dependence(self, forest, train, feature_set):

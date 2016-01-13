@@ -1,9 +1,8 @@
 '''
-Created on 2016/01/12
+Created on 13 Jan 2016
 
-@author: Daytona
+@author: purewin7
 '''
-
 from pyalgotrade import strategy
 from pyalgotrade import plotter
 from pyalgotrade.tools import yahoofinance
