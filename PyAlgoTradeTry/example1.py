@@ -6,6 +6,8 @@ Created on 8 Jan 2016
 from pyalgotrade import strategy
 from pyalgotrade.barfeed import yahoofeed
 from pyalgotrade.technical import ma
+from pyalgotrade.tools import yahoofinance
+from ToolForPyAlgoTrade import Feed
 
 
 class MyStrategy(strategy.BacktestingStrategy):
@@ -50,8 +52,17 @@ class MyStrategy(strategy.BacktestingStrategy):
 
 
 def run_strategy(smaPeriod):
+    
+    instruments = ["gld", "gdx"]
+    windowSize = 50
+
+    # Download the bars.
+    #feed = yahoofinance.build_feed(instruments, 2006, 2012, ".")
+    print ("downloaded")
+    
+    
     # Load the yahoo feed from the CSV file
-    feed = yahoofeed.Feed()
+    feed = Feed()
     feed.addBarsFromCSV("orcl", "orcl-2000.csv")
 
     # Evaluate the strategy with the feed.

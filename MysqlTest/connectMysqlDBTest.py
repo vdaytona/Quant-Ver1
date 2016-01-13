@@ -22,7 +22,10 @@ def main():
         cnx = connectMysqlDB.cnxStock(host=host,userName=userName,password=password,database=database).connect()
         
         #write anything you want to do in the workingSpace
-        workingSpace(cnx)
+        #workingSpace(cnx)
+        print " nice"
+        #csvOutput
+        outputCsv(cnx)
         
     finally:
         cnx.close()
@@ -36,5 +39,10 @@ def workingSpace(cnx):
     print(df.head(100))
     df['AdjClose'].hist()
     p.show()
+    
+def outputCsv(cnx):
+    sql = (" SELECT all FROM newyorkexchange.ibm_historicalquotes_newyork INTO OUTFILE \'ibm.csv\' FIELDS TERMINATED \',\' BY ENCLOSED BY \'\"\' LINES TERMINATED BY \'\\n\' ")
+    print sql
+    df = connectMysqlDB.query(cnx).pandasQuery(sql)
     
 if __name__ == "__main__": main()
