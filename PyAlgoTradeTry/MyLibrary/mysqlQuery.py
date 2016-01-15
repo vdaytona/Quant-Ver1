@@ -9,11 +9,15 @@ import pandas.io.sql as psql
 class historicalPriceQuery:
     def __init__(self, instruments, tableNames):
         self.__instruments = instruments
-        print instruments
         self.__tableNames = tableNames
-        print tableNames
     
     def pandasQuerySingle(self, connection):
         sql = str("select * from %s" % self.__tableNames)
         return psql.read_sql(sql, connection)
-        
+    
+    def pandasQueryMultiple(self, connection):
+        ret = []
+        for tableName in self.__tableNames:
+            sql = str("select * from %s" % tableName)
+            ret.append(psql.read_sql(sql, connection))
+        return ret
