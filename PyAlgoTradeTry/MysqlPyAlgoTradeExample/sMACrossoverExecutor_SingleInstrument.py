@@ -1,6 +1,6 @@
 '''
 Created on 13 Jan 2016
-example for using mysql feed function with one instrument strategy
+an example to show feeding the bar using data from mysql
 @author: purewin7
 '''
 
@@ -12,7 +12,6 @@ from pyalgotrade.stratanalyzer import sharpe
 from MyLibrary.connectMysqlDB import cnxStock
 from MyLibrary.mysqlQuery import historicalPriceQuery
 from pyalgotrade import barfeed
-
 
 def main(plot):
     

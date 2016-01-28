@@ -27,6 +27,7 @@ class DataFrameBarFeed(barfeed.BaseBarFeed):
         ret = None
         if not self.eof():
             date = self.__df["Date"].values[self.__df.index[self.__next]]
+            #print type(datetime.datetime(date.year, date.month, date.day))
             ret = datetime.datetime(date.year, date.month, date.day)
         return ret
 
