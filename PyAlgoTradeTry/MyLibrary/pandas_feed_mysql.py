@@ -33,30 +33,6 @@ class DataFrameBarFeed(barfeed.BaseBarFeed):
 
     def barsHaveAdjClose(self):
         return True
-
-    #===========================================================================
-    # def getNextBars(self):
-    #     ret = None
-    #     if not self.eof():
-    #         # Convert the dataframe row into a bar.BasicBar
-    #         rowkey = self.__df.index[self.__next]
-    #         row = self.__df.ix[rowkey]
-    #         bar_dict = {
-    #             self.__instrument: bar.BasicBar(
-    #                 rowkey.to_datetime(),
-    #                 row["Open"],
-    #                 row["High"],
-    #                 row["Low"],
-    #                 row["Close"],
-    #                 row["Volume"],
-    #                 row["Adj Close"],
-    #                 self.getFrequency()
-    #             )
-    #         }
-    #         ret = bar.Bars(bar_dict)
-    #         self.__next += 1
-    #     return ret
-    #===========================================================================
     
     def getNextBars(self):
         ret = None

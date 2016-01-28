@@ -5,11 +5,14 @@ Created on 13 Jan 2016
 '''
 from pyalgotrade import strategy
 from pyalgotrade import plotter
-from pyalgotrade.tools import yahoofinance
 from pyalgotrade.technical import ma
 from pyalgotrade.technical import cumret
 from pyalgotrade.stratanalyzer import sharpe
 from pyalgotrade.stratanalyzer import returns
+from pyalgotrade import barfeed
+from MyLibrary.connectMysqlDB import cnxStock
+from MyLibrary.mysqlQuery import historicalPriceQuery
+from MyLibrary.pandas_mulitple_feed_mysql import DataFrameMulitpleBarFeed
 
 
 class MarketTiming(strategy.BacktestingStrategy):
@@ -135,19 +138,34 @@ class MarketTiming(strategy.BacktestingStrategy):
 def main(plot):
     initialCash = 10000
     instrumentsByClass = {
-        "US Stocks": ["VTI"],
-        "Foreign Stocks": ["VEU"],
-        "US 10 Year Government Bonds": ["IEF"],
-        "Real Estate": ["VNQ"],
-        "Commodities": ["DBC"],
+        "US Stocks": ["ibm"],
+        "Foreign Stocks": ["ulbi"],
+        "US 10 Year Government Bonds": ["alex"],
+        "Real Estate": ["cx"],
+        "Commodities": ["tpvg"],
     }
 
     # Download the bars.
-    instruments = ["SPY"]
+    instruments = ["umc"]
     for assetClass in instrumentsByClass:
         instruments.extend(instrumentsByClass[assetClass])
-    feed = yahoofinance.build_feed(instruments, 2007, 2013, "data", skipErrors=True)
+    tableNames = dict()
+    for instrument  in instruments :
+        tableName = str("newyorkexchange.%s_historicalquotes_newyork" %instrument)
+        tableNames[instrument] = tableName
     
+    try :
+        # create instance to connect Mysql
+        cnx = cnxStock()
+        # create instance to query Mysql data base
+        query = historicalPriceQuery(instruments, tableNames)
+        dfs = query.pandasQueryMulitple(cnx.connect())
+        #close connection
+    finally:
+        cnx.close_connection()
+    
+    feed = DataFrameMulitpleBarFeed(dfs,barfeed.Frequency.DAY)
+    feed.addMultipleBars()
     
     strat = MarketTiming(feed, instrumentsByClass, initialCash)
     sharpeRatioAnalyzer = sharpe.SharpeRatio()
@@ -159,10 +177,11 @@ def main(plot):
         plt = plotter.StrategyPlotter(strat, False, False, True)
         plt.getOrCreateSubplot("cash").addCallback("Cash", lambda x: strat.getBroker().getCash())
         # Plot strategy vs. SPY cumulative returns.
-        plt.getOrCreateSubplot("returns").addDataSeries("SPY", cumret.CumulativeReturn(feed["SPY"].getPriceDataSeries()))
+        plt.getOrCreateSubplot("returns").addDataSeries("umc", cumret.CumulativeReturn(feed["umc"].getPriceDataSeries()))
         plt.getOrCreateSubplot("returns").addDataSeries("Strategy", returnsAnalyzer.getCumulativeReturns())
 
     strat.run()
+    
     print "Sharpe ratio: %.2f" % sharpeRatioAnalyzer.getSharpeRatio(0.05)
     print "Returns: %.2f %%" % (returnsAnalyzer.getCumulativeReturns()[-1] * 100)
 
