@@ -17,6 +17,8 @@ class SMACrossOver(strategy.BacktestingStrategy):
         self.setUseAdjustedValues(True)
         self.__prices = feed[instrument].getPriceDataSeries()
         self.__sma = ma.SMA(self.__prices, smaPeriod)
+        for i in  self.__sma.getDataSeries():
+            print i 
 
     def getSMA(self):
         return self.__sma
@@ -32,6 +34,12 @@ class SMACrossOver(strategy.BacktestingStrategy):
         self.__position.exitMarket()
 
     def onBars(self, bars):
+        if len(self.getActivePositions()) > 0 :
+            print self.getActivePositions()
+        print self.getLastPrice(self.__instrument)
+        print self.getFeed()
+        print self.getBarsProcessedEvent()
+        
         # If a position was not opened, check if we should enter a long position.
         if self.__position is None:
             if cross.cross_above(self.__prices, self.__sma) > 0:

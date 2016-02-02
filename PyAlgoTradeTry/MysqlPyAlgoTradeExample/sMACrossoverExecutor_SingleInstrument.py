@@ -31,6 +31,8 @@ def main(plot):
     feed = MyLibrary.pandas_feed_mysql.DataFrameBarFeed(df, instrument, barfeed.Frequency.DAY)
     
     smaPeriod = 163
+    
+    
     strat = sma_crossover.SMACrossOver(feed, instrument, smaPeriod)
     sharpeRatioAnalyzer = sharpe.SharpeRatio()
     strat.attachAnalyzer(sharpeRatioAnalyzer)
