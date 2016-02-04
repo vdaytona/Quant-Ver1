@@ -84,22 +84,68 @@ class StatArbHelper:
 
 
 class StatArb(strategy.BacktestingStrategy):
-    def __init__(self, feed, instrument1, instrument2, windowSize):
-        strategy.BacktestingStrategy.__init__(self, feed)
+    def __init__(self, feed, instruments, windowSize, initialCash ):
+        strategy.BacktestingStrategy.__init__(self, feed, initialCash)
         self.setUseAdjustedValues(True)
-        self.__statArbHelper = StatArbHelper(feed[instrument1].getAdjCloseDataSeries(), feed[instrument2].getAdjCloseDataSeries(), windowSize)
-        self.__i1 = instrument1
-        self.__i2 = instrument2
-
+        self.__statArbHelper = StatArbHelper(feed, instruments, windowSize)
+        self.__shareToBuy = {}
         # These are used only for plotting purposes.
         self.__spread = dataseries.SequenceDataSeries()
         self.__hedgeRatio = dataseries.SequenceDataSeries()
+        self.__instruments = instruments
+    
+    
+#===============================================================================
+#     def __init__(self, feed, instrument1, instrument2, windowSize):
+#         strategy.BacktestingStrategy.__init__(self, feed)
+#         self.setUseAdjustedValues(True)
+#         self.__statArbHelper = StatArbHelper(feed[instrument1].getAdjCloseDataSeries(), feed[instrument2].getAdjCloseDataSeries(), windowSize)
+#         self.__i1 = instrument1
+#         self.__i2 = instrument2
+# 
+#         # These are used only for plotting purposes.
+#         self.__spread = dataseries.SequenceDataSeries()
+#         self.__hedgeRatio = dataseries.SequenceDataSeries()
+#===============================================================================
 
     def getSpreadDS(self):
         return self.__spread
 
     def getHedgeRatioDS(self):
         return self.__hedgeRatio
+    
+    def rebalancePortofolio(self, currentPortfolio, unitSize):
+        # currentPortofolio "Dict" type : {[instrumentName : position], }
+        for instrument in self.__instruments:
+            newShare = currentPortfolio[instrument] * unitSize
+            currentShare = self.getBroker().getShares(instrument)
+            changeShare = newShare - currentShare
+            self.__shareToBuy[instrument] = changeShare
+    
+    def placeOrders(self):
+        # place orders to change position
+        # have not considered remaining cash yet
+        for instrument in self.__instruments : 
+            if self.__shareToBuy[instrument] != 0:
+                self.marketOrder(instrument, self.__shareToBuy[instrument])
+            
+    
+    
+    
+        
+    
+    #===========================================================================
+    #do not need change order size 
+    #def __getOrderSize(self, bars, hedgeRatio):
+    #     cash = self.getBroker().getCash(False)
+    #     prices = []
+    #     sizes = []
+    #     for instrument in self.__instruments:
+    #         price = bars[instrument].getAdjClose()            
+    #         prices.append(price)
+    #         sizes.append(int(cash / (price + hedgeRatio[instrument] * price2)))
+    #===========================================================================
+        
 
     def __getOrderSize(self, bars, hedgeRatio):
         cash = self.getBroker().getCash(False)
@@ -150,6 +196,13 @@ class StatArb(strategy.BacktestingStrategy):
 
 
 def main(plot):
+    # 1. import data
+    
+    # 2. clean data, time aligned
+    
+    # 3. feed data
+    
+    # 4. strategy
     instruments = ["gld", "gdx"]
     windowSize = 50
 
