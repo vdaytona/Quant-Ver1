@@ -29,7 +29,7 @@ class input():
     def getAllHistoricalQuotes(self,cnx, instruments):
         tableNames = dict()
         for instrument  in instruments :
-            tableName = str("newyorkexchange.%s_historicalquotes_newyork" %instrument)
+            tableName = str("newyorkexchange.`%s_historicalquotes_newyork`" %instrument)
             tableNames[instrument] = tableName
          
         query = historicalPriceQuery(instruments, tableNames)
@@ -65,15 +65,16 @@ class input():
         return alignedSeries
     
     def JohansenTest(self, instruments, quotes):
-        input = pd()
+        data = pd()
         for instrument in instruments :
-            input[instrument] = quotes[instrument]["AdjClose"]
-        jres = johansen.coint_johansen(input, 0, 1)
+            data[instrument] = quotes[instrument]["AdjClose"]
+        jres = johansen.coint_johansen(data, 0, 1)
         #johansen.print_johan_stats(jres)
         return jres
     
     def Output(self,instrumens, jres, fileName):
         row, fieldsName = self.parseRowField(instrumens, jres)
+        #print row
         if self.checkIfHasTodayFile(fileName) is True :
             self.addNewRow(row, fieldsName, fileName)
         else :
@@ -106,46 +107,59 @@ class input():
                 return True
         return False
     
-    def addNewRow(self,row, fieldName, fileName):
-        with open(fileName, 'w') as csvfile :
+    def addNewRow(self, row, fieldName, fileName):
+        with open(fileName, 'a') as csvfile :
             self.__writer = csv.DictWriter(csvfile,fieldnames=fieldName)
             self.__writer.writerow(row)
     
     def createNewCsv(self,row, fieldName, fileName):
         # create New Csv to save data
         with open(fileName, 'w') as csvfile :
-            print fieldName
+            #print fieldName
             self.__writer = csv.DictWriter(csvfile, fieldnames=fieldName)
             self.__writer.writeheader()
             self.__writer.writerow(row)
     
     def run(self):
-            # 1. output csv file name
+        # 1. output csv file name
         currentTime = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
         fileName = ("./Result/Pair-Cointegration-Record-%s.csv" % currentTime)
         
         # 1. connect database
         cnx = Mysql.cnxStock()
         try:
+            connection = cnx.connect()
             # 2. import instruments name from database
-            instruments = self.getInstrumentList(cnx.connect())["Local_Code"]
-            instruments = ("ibm","aapl")
+            instrumentList = self.getInstrumentList(connection)["Local_Code"].values
+            #instrumentList = ("A","ibm","aapl")
+            
             print ("Instruments Name import finished")
             
-            # 3. import data from database, as Dict{instrument_Name : dataseries}
-            quotes = self.getAllHistoricalQuotes(cnx.connect(), instruments)
-            print ("All instruments quotes imported")
-            # Loop start
-            
-            # 4 Align time
-            alignedSeries = self.alignTime(quotes)
-            
-            # 5 JohansenTest
-            jres = self.JohansenTest(instruments,alignedSeries)
-            
-            # 6 output result
-            self.Output(instruments, jres, fileName)
-            self.Output(instruments, jres, fileName)                   
+            loopNumber = len(instrumentList) * (len(instrumentList)-1)
+            count = 0
+            for i in range(len(instrumentList)) :
+                for k in range(i+1 , len(instrumentList)) :
+                    instrumentA = instrumentList[i]
+                    instrumentB = instrumentList[k]
+                    print "start %s and %s pair, this %s to process (%s in all)" %(instrumentA, instrumentB, str(count) , str(loopNumber))
+                    if instrumentA is not instrumentB :
+                        instruments = [instrumentA, instrumentB]
+                        # 3. import data from database, as Dict{instrument_Name : dataseries}
+                        try :
+                            quotes = self.getAllHistoricalQuotes(connection, instruments)
+                            # 4 Align time
+                            alignedSeries = self.alignTime(quotes)
+                            # 5 JohansenTest
+                            jres = self.JohansenTest(instruments,alignedSeries)
+                            #if jres.lr1[0] > 19.9349 and jres.lr1[1] > 6.6349
+                            if jres.lr1[0] > 19.1 and jres.lr1[1] > 4.1 :
+                                # 6 output result
+                                self.Output(instruments, jres, fileName)
+                        except :
+                            print "%s and %s has problem" %(instrumentA, instrumentB)
+                        
+                    count += 1
+                        
             
         finally:
             cnx.close_connection()
