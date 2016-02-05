@@ -17,6 +17,7 @@ class historicalPriceQuery:
         return psql.read_sql(sql, connection)
         
     def pandasQueryMulitple(self, connection):
+        # return BarsDict = {instrumentsName : quotes}
         barsDict = dict()
         for instrument in self.__tableNames :
             tableName = self.__tableNames[instrument]
