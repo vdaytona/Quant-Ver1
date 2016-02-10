@@ -130,8 +130,8 @@ class input():
         try:
             connection = cnx.connect()
             # 2. import instruments name from database
-            instrumentList = self.getInstrumentList(connection)["Local_Code"].values
-            #instrumentList = ("A","ibm","aapl")
+            #instrumentList = self.getInstrumentList(connection)["Local_Code"].values
+            instrumentList = ("A","ibm","aapl")
             
             print ("Instruments Name import finished")
             
@@ -152,6 +152,7 @@ class input():
                             # 5 JohansenTest
                             jres = self.JohansenTest(instruments,alignedSeries)
                             #if jres.lr1[0] > 19.9349 and jres.lr1[1] > 6.6349
+                            johansen.print_johan_stats(jres)
                             if jres.lr1[0] > 19.1 and jres.lr1[1] > 4.1 :
                                 # 6 output result
                                 self.Output(instruments, jres, fileName)

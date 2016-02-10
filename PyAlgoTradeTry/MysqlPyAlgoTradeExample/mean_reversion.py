@@ -14,32 +14,69 @@ from pyalgotrade import plotter
 from pyalgotrade.tools import yahoofinance
 from pyalgotrade.stratanalyzer import sharpe
 from statsmodels.tsa.stattools import adfuller
+from MyLibrary import johansen
+
 import numpy as np
 import statsmodels.api as sm
+import pandas as pd
 
 
-def get_beta(values1, values2):
-    # get beta value (shares of instrument in unit Portfolio) through Johansen Test
-    
-    
-    rarray=np.random.random(size=50)
-    model = sm.OLS(values1, values2, rarray)
-    results = model.fit()
-    return results.params[0]
+
+#===============================================================================
+# def get_beta(values1, values2):
+#     # get beta value (shares of instrument in unit Portfolio) through Johansen Test
+#     
+#     
+#     rarray=np.random.random(size=50)
+#     model = sm.OLS(values1, values2, rarray)
+#     results = model.fit()
+#     return results.params[0]
+#===============================================================================
+
+
 
 
 class StatArbHelper:
-    def __init__(self, ds1, ds2, windowSize):
-        # We're going to use datetime aligned versions of the dataseries.
-        self.__ds1, self.__ds2 = aligned.datetime_aligned(ds1, ds2)
+    def __init__(self, inputDs, windowSize):
+        # 1. aligning time
+        self.__ds = self.multipleDatetimeAligned(inputDs)
         
+        # 2. initial parameters
+        self.__instrumentList = input.key()
         self.__windowSize = windowSize
         self.__hedgeRatio = None
         self.__spread = None
         self.__spreadMean = None
         self.__spreadStd = None
         self.__zScore = None
-
+        
+    def multipleDatetimeAligned(self, input):
+        # in case of multiple dataseries, add multiple datatime aligned function
+        # input : Dictionary(instrumentName : dataseries)
+        alignedSeries = dict()
+        instrumentList = input.key()
+        k = 0;
+        while k < 2:
+            k += 1
+            for i in range(1,len(instrumentList)) :
+                alignedSeries[instrumentList[0]],alignedSeries[instrumentList[i]] = aligned.datetime_aligned(input[instrumentList[0]], input[instrumentList[i]])
+        return alignedSeries
+    
+    def get_beta(self,inputDs):
+        # doing johanson test and return 
+        data = dict()
+        for i in range(len(self.__instrumentList)) :
+            data[self.__instrumentList[i]] = inputDs[self.__instrumentList[i]]["AdjClose"]
+        jres = johansen.coint_johansen(data, 0, 1)
+        result = dict()
+        for i in range(len(self.__instrumentList)) :
+            result[self.__instrumentList[i]] = jres.evec[i,0]
+        return result
+    
+    
+    
+    
+    
     def getSpread(self):
         return self.__spread
 
@@ -55,8 +92,16 @@ class StatArbHelper:
     def getHedgeRatio(self):
         return self.__hedgeRatio
 
-    def __updateHedgeRatio(self, values1, values2):
-        self.__hedgeRatio = get_beta(values1, values2)
+    #===========================================================================
+    # def __updateHedgeRatio(self, values1, values2):
+    #     self.__hedgeRatio = get_beta(values1, values2)
+    #     
+    #===========================================================================
+
+
+    def __updateHedgeRatio(self,currentValues):
+        self.__hedgeRatio = self.get_beta(currentValues)
+        pass
 
     def __updateSpreadMeanAndStd(self, values1, values2):
         if self.__hedgeRatio is not None:
@@ -64,16 +109,33 @@ class StatArbHelper:
             self.__spreadMean = spread.mean()
             self.__spreadStd = spread.std(ddof=1)
 
+    #===========================================================================
+    # def __updateSpread(self):
+    #     if self.__hedgeRatio is not None:
+    #         self.__spread = self.__ds1[-1] - self.__hedgeRatio * self.__ds2[-1]
+    #===========================================================================
     def __updateSpread(self):
-        if self.__hedgeRatio is not None:
-            self.__spread = self.__ds1[-1] - self.__hedgeRatio * self.__ds2[-1]
+       if self.__hedgeRatio is not None:
+           self.__spread = self.__
+        pass
 
     def __updateZScore(self):
         if self.__spread is not None and self.__spreadMean is not None and self.__spreadStd is not None:
             self.__zScore = (self.__spread - self.__spreadMean) / float(self.__spreadStd)
 
     def update(self):
+        # check if the bar has gone the length of windowSize, otherwise parameters can not be calculated
+        if len(self.__ds[self.__instrumentList[0]]) >= self.windowSize :
+            currentValues = dict()
+            for i in range(len(self.__instrumentList)) :
+                currentValues[self.__instrumentList[i]] = np.asarray(self.__ds[self.__instrumentList[i]][-1*self.__windowSize:])
+            self.__updateHedgeRatio(currentValues)
+            
+            self.__updateSpread()
+            pass
+        
         # need to update hedgeratio (Johansen test), unit portofolio, position
+        
         if len(self.__ds1) >= self.__windowSize:
             values1 = np.asarray(self.__ds1[-1*self.__windowSize:])
             values2 = np.asarray(self.__ds2[-1*self.__windowSize:])
