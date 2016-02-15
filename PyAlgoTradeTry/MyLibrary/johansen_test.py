@@ -53,6 +53,8 @@ from johansen import coint_johansen, print_johan_stats
 #===============================================================================
 
 cols = ['ewc','ewa','ige']
+print type(df[cols])
+print df[cols]
 res3 = coint_johansen(df[cols], 0, 1)
 print_johan_stats(res3)
 

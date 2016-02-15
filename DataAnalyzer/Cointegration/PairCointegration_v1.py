@@ -1,5 +1,7 @@
 '''
 Created on 2016/02/02
+version 1
+# select all the newyork exchange to do johansen test for all two pairs
 
 @author: Daytona
 '''

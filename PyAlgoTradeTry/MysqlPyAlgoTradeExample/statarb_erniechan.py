@@ -27,6 +27,7 @@ class StatArbHelper:
     def __init__(self, ds1, ds2, windowSize):
         # We're going to use datetime aligned versions of the dataseries.
         self.__ds1, self.__ds2 = aligned.datetime_aligned(ds1, ds2)
+        print self.__ds1
         
         self.__windowSize = windowSize
         self.__hedgeRatio = None
@@ -62,6 +63,7 @@ class StatArbHelper:
     def __updateSpread(self):
         if self.__hedgeRatio is not None:
             self.__spread = self.__ds1[-1] - self.__hedgeRatio * self.__ds2[-1]
+        
 
     def __updateZScore(self):
         if self.__spread is not None and self.__spreadMean is not None and self.__spreadStd is not None:
@@ -101,6 +103,7 @@ class StatArb(strategy.BacktestingStrategy):
         price2 = bars[self.__i2].getAdjClose()
         size1 = int(cash / (price1 + hedgeRatio * price2))
         size2 = int(size1 * hedgeRatio)
+        #print size1, size2
         return (size1, size2)
 
     def buySpread(self, bars, hedgeRatio):
