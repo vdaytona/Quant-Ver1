@@ -7,14 +7,20 @@ Created on 2016/02/25
 import matplotlib.pyplot as plt
 import numpy as np
 import datetime as dt
-from datetime import timedelta
+from datetime import timedelta, date, datetime
 import pandas as pd
 import sys
 import time
 from pandas.core.series import TimeSeries
 
-raw_data = pd.read_csv("2013.csv")
+raw_data = pd.read_csv("./Data/2005-2016.csv")
 print len(raw_data)
+#===============================================================================
+# start_date = datetime.strptime("01 01 2005" , "%d %m %Y")
+# end_date = datetime.strptime("01 01 2005" , "%d %m %Y")
+# raw_data = raw_data[raw_data["Buy_date"] >= start_date]
+# raw_data = raw_data[raw_data["Buy_date"] <= end_date]
+#===============================================================================
 # Highest return and lowest return appearing in trading
 
 high = []
@@ -43,11 +49,11 @@ for i in range(len(raw_data)) :
 ##############################################
 sl_list = []
 st_list = []
-for selllimit in range(0, int(max(high)*1000) + 40 , 20) :
+for selllimit in range(0, int(max(high)*1000) + 20 , 10) :
     sl = selllimit / 1000.0
     sl_list.append(sl)
 
-for sellstop in range(0, int(abs(min(low))*1000) + 40 , 20) :
+for sellstop in range(0, int(abs(min(low))*1000) + 20 , 10) :
     st = (sellstop / 1000.0) * -1
     st_list.append(st)
 
@@ -83,21 +89,21 @@ for sl in sl_list :
         print str(sl) +  "  " + str(st)
         #t = st_list[i]
         success_count = 0.0
-        fail_count = 0.0
+        loss_count = 0.0
         trade_return = 0.0
         failed_count = 0.0
         for i in range(len(raw_data)) :
             difference = len(raw_data.loc[i]) - len(raw_data.loc[i].dropna())
-            #print difference
+            # if no enough data , it may paused in the 2nd day, so delete at present
             if difference >= 240 :
                 failed_count += 1
                 continue
-            # lower than sell stop, fail
-            time_series = raw_data.loc[i].dropna()[-240:]
+            # choose the data for the 2nd day
+            time_series = raw_data.loc[i].dropna()[-239:]
             
             if time_series[0] < sl or time_series[0] > st :
-                # if 2nd day open not hit sl or st
-                # iterate each value to find if hit sl or st first
+                # if 2nd day open do not hit sl or st
+                # 
                 if time_series.max() >= sl and time_series.min() > st :
                     # if max value > stop limit and min value > sell stop, close positio at sell limit
                     success_count += 1
@@ -105,29 +111,37 @@ for sl in sl_list :
                     continue
                 elif time_series.max() < sl and time_series.min() <= st :
                     # if max value < stop limit and min value < sell stop, close position at sell stop
-                    fail_count += 1
+                    loss_count += 1
                     trade_return += st
                     continue
                 else :
+                    # iterate each value to find if hit sl or st first
                     for j in range(len(time_series)) :
-                        if time_series[j] >= sl :
-                                success_count += 1
-                                trade_return += sl
-                                break
-                        elif time_series[j] <= st:
-                                fail_count += 1
-                                trade_return += st
-                                break
+                        if time_series[j] >= sl and j != len(time_series) -1:
+                            success_count += 1
+                            trade_return += sl
+                            break
+                        elif time_series[j] <= st and j != len(time_series) -1:
+                            loss_count += 1
+                            trade_return += st
+                            break
+                        elif time_series[-1] >= 0 and j == len(time_series) -1 :
+                            success_count += 1
+                            trade_return += time_series[-1]
+                        elif time_series[-1] <= 0  and j == len(time_series) -1 :
+                            loss_count += 1
+                            trade_return += time_series[-1]                            
                     continue
             elif time_series[0] >= 0 :
                 # if 2nd open is already hit sl or st
                 success_count += 1
                 trade_return += time_series[0]
             else :
-                fail_count += 1
+                loss_count += 1
                 trade_return += time_series[0]
-        win_ratio_list.append(success_count / (success_count + fail_count))
-        average_return_list.append(trade_return / (success_count + fail_count))
+        trade_count = len(raw_data) - failed_count
+        win_ratio_list.append(success_count / trade_count)
+        average_return_list.append(trade_return / trade_count)
     win_ratio_matrix.append(win_ratio_list)
     average_return_matrix.append(average_return_list)
 
@@ -140,14 +154,14 @@ average_return_matrix = np.transpose(average_return_matrix)
 win_ratio_matrix = np.asarray(win_ratio_matrix)
 win_ratio_matrix = np.transpose(win_ratio_matrix)
 #print average_return_matrix.shape
-np.savetxt("sl.csv", sl_list, delimiter=",")
-np.savetxt("st.csv", st_list, delimiter=",")
-np.savetxt("return.csv", average_return_matrix, delimiter=",")
-np.savetxt("win_ratio.csv", win_ratio_matrix, delimiter=",")
+np.savetxt("./Data/sl.csv", sl_list, delimiter=",")
+np.savetxt("./Data/st.csv", st_list, delimiter=",")
+np.savetxt("./Data/return.csv", average_return_matrix, delimiter=",")
+np.savetxt("./Data/win_ratio.csv", win_ratio_matrix, delimiter=",")
 print "finished"
     
-#===============================================================================
-# from mpl_toolkits.mplot3d import Axes3D
+
+#from mpl_toolkits.mplot3d import Axes3D
 # from matplotlib import cm
 # from matplotlib.ticker import LinearLocator, FormatStrFormatter
 # import matplotlib.pyplot as plt
