@@ -13,15 +13,15 @@ import sys
 import time
 from copy import deepcopy
 
-raw_data = pd.read_csv("2005-2016.csv")
-print len(raw_data)
+raw_year_data = pd.read_csv("2005-2016.csv")
+print len(raw_year_data)
 # Highest return and lowest return appearing in trading
 
 high = []
 low = []
-for i in range(len(raw_data)) :
-    high.append(raw_data.loc[i][3:].max())
-    low.append(raw_data.loc[i][3:].min())
+for i in range(len(raw_year_data)) :
+    high.append(raw_year_data.loc[i][3:].max())
+    low.append(raw_year_data.loc[i][3:].min())
     
 
 sl_list = []
@@ -47,14 +47,14 @@ average_sell_at_close_return_win_ratio = 0.0
 # calculate averaae return and win ratio if close position at 2nd close price
 win_ratio_close = 0.0
 average_return_close = 0.0
-for i in range(len(raw_data)) :
-    time_series = raw_data.loc[i][3:].dropna()
+for i in range(len(raw_year_data)) :
+    time_series = raw_year_data.loc[i][3:].dropna()
     close_return = time_series[-1]
     if close_return > 0 :
         win_ratio_close += 1
     average_return_close += close_return
-print ("Win ratio close : %s" %(win_ratio_close / len(raw_data)))
-print ("average return close : %s" %(average_return_close / len(raw_data)))
+print ("Win ratio close : %s" %(win_ratio_close / len(raw_year_data)))
+print ("average return close : %s" %(average_return_close / len(raw_year_data)))
         
 
 # calculate the win ratio and return for set sell stop and sell limit
@@ -66,28 +66,28 @@ for tracking_sell_stop in range(2, 8 , 1):
     no_count = 0.0
     average_return = 0.0
     print tracking_sell_stop
-    for i in range(len(raw_data)) :
+    for i in range(len(raw_year_data)) :
         # find the start of second day
-        difference = len(raw_data.loc[i]) - len(raw_data.loc[i].dropna())
+        difference = len(raw_year_data.loc[i]) - len(raw_year_data.loc[i].dropna())
         #print difference
         if difference >= 240 :
             no_count += 1
             continue
         #print i 
-        sell_stop = raw_data.loc[i][3 + 240 -difference] - tracking_sell_stop
-        for j in range( 3 + 240 - difference , len(raw_data.loc[i].dropna())) :
-            if sell_stop  < raw_data.loc[i][j] - tracking_sell_stop :
-                sell_stop = raw_data.loc[i][j] - tracking_sell_stop
+        sell_stop = raw_year_data.loc[i][3 + 240 -difference] - tracking_sell_stop
+        for j in range( 3 + 240 - difference , len(raw_year_data.loc[i].dropna())) :
+            if sell_stop  < raw_year_data.loc[i][j] - tracking_sell_stop :
+                sell_stop = raw_year_data.loc[i][j] - tracking_sell_stop
                 
-            #print str(sell_stop) + "  " + str(raw_data.loc[i][j])
+            #print str(sell_stop) + "  " + str(raw_year_data.loc[i][j])
             # first check if hit sell stop or if close time
-            if raw_data.loc[i][j] <= sell_stop or j == len(raw_data.loc[i][3:].dropna()) - 1:
-                if sell_stop >= 0 or raw_data.loc[i][3:].dropna()[-1] >= 0:
+            if raw_year_data.loc[i][j] <= sell_stop or j == len(raw_year_data.loc[i][3:].dropna()) - 1:
+                if sell_stop >= 0 or raw_year_data.loc[i][3:].dropna()[-1] >= 0:
                     win_count += 1
                 average_return += sell_stop
                 break
-    win_count_list.append(win_count / (len(raw_data) - no_count))
-    average_return_list.append(average_return / (len(raw_data) - no_count))
+    win_count_list.append(win_count / (len(raw_year_data) - no_count))
+    average_return_list.append(average_return / (len(raw_year_data) - no_count))
 print win_count_list
 print average_return_list
     
@@ -103,9 +103,9 @@ print average_return_list
 #         success_count = 0.0
 #         fail_count = 0.0
 #         trade_return = 0.0
-#         for i in range(len(raw_data)) :
+#         for i in range(len(raw_year_data)) :
 #             # lower than sell stop, fail
-#             time_series = raw_data.loc[i][3:].dropna()
+#             time_series = raw_year_data.loc[i][3:].dropna()
 #             if time_series.max() >= sl and time_series.min() > st :
 #                 # if max value > stop limit and min value > sell stop, close positio at sell limit
 #                 success_count += 1
@@ -123,17 +123,17 @@ print average_return_list
 #                 trade_return += time_series[-1]
 #             else :
 #                 # iterate each value to find if hit sl or st first
-#                 for j in range(3 , len(raw_data.loc[i].dropna())) :
-#                     if raw_data.loc[i][j] >= sl :
+#                 for j in range(3 , len(raw_year_data.loc[i].dropna())) :
+#                     if raw_year_data.loc[i][j] >= sl :
 #                             success_count += 1
 #                             trade_return += sl
 #                             break
-#                     elif raw_data.loc[i][j] <= st:
+#                     elif raw_year_data.loc[i][j] <= st:
 #                             fail_count += 1
 #                             trade_return += st
 #                             break
 #         win_ratio_list.append(success_count / (success_count + fail_count))
-#         average_return_list.append(trade_return / len(raw_data))
+#         average_return_list.append(trade_return / len(raw_year_data))
 #     win_ratio_matrix.append(win_ratio_list)
 #     average_return_matrix.append(average_return_list)
 # 

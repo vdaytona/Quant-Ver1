@@ -19,10 +19,10 @@ import matplotlib.pyplot as plt
 def main():
     
     # import data from csv    
-    raw_data = dataCollection()
+    raw_year_data = dataCollection()
     
     # evaluation
-    evaluation(raw_data)
+    evaluation(raw_year_data)
     # print result[(result['Time_Frame'] == 240) & (result['Pair'] == 'GBP_USD')].describe()
     
     pass

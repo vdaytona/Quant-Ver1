@@ -12,8 +12,8 @@ import pandas as pd
 import sys
 import time
 
-raw_data = pd.read_csv("2005-2016.csv")
-print len(raw_data)
+raw_year_data = pd.read_csv("2005-2016.csv")
+print len(raw_year_data)
 # Highest return and lowest return appearing in trading
 
 high = []
@@ -21,14 +21,14 @@ low = []
 high_time = []
 low_time = []
 
-for i in range(len(raw_data)) :
-    difference = len(raw_data.loc[i]) - len(raw_data.loc[i].dropna())
+for i in range(len(raw_year_data)) :
+    difference = len(raw_year_data.loc[i]) - len(raw_year_data.loc[i].dropna())
     start_index = 3 + 240 - difference
     if start_index >= 240 :
-        high.append(raw_data.loc[i][start_index:].max())
-        high_time.append(list(raw_data.loc[i][start_index:].values).index(raw_data.loc[i][start_index:].max()))
-        low.append(raw_data.loc[i][start_index:].min())
-        low_time.append(list(raw_data.loc[i][start_index:].values).index(raw_data.loc[i][start_index:].min()))
+        high.append(raw_year_data.loc[i][start_index:].max())
+        high_time.append(list(raw_year_data.loc[i][start_index:].values).index(raw_year_data.loc[i][start_index:].max()))
+        low.append(raw_year_data.loc[i][start_index:].min())
+        low_time.append(list(raw_year_data.loc[i][start_index:].values).index(raw_year_data.loc[i][start_index:].min()))
 
 plt.hist(high_time, bins=100, normed=True, cumulative=True)
 plt.title("Highest return appearing in trading")

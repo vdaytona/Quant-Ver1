@@ -1,6 +1,8 @@
 '''
 Created on 2016/02/25
 
+processing v2 data
+
 @author: Daytona
 '''
 # calculate the minute highest and lowest return distribution
@@ -9,75 +11,62 @@ import numpy as np
 import datetime as dt
 from datetime import timedelta, date, datetime
 import pandas as pd
-import sys
-import time
 from pandas.core.series import TimeSeries
 
-raw_data = pd.read_csv("./Data/2005-2016.csv")
-print len(raw_data)
-#===============================================================================
-# start_date = datetime.strptime("01 01 2005" , "%d %m %Y")
-# end_date = datetime.strptime("01 01 2005" , "%d %m %Y")
-# raw_data = raw_data[raw_data["Buy_date"] >= start_date]
-# raw_data = raw_data[raw_data["Buy_date"] <= end_date]
-#===============================================================================
-# Highest return and lowest return appearing in trading
+raw_year_data = pd.read_csv("./Data/2005-2016_v2.csv").dropna()
+print len(raw_year_data)
+
+# filter data using date
+start_date = datetime.strptime("01 01 2016" , "%d %m %Y")
+end_date = datetime.strptime("01 02 2016" , "%d %m %Y")
+raw_year_data = raw_year_data[raw_year_data["Buy_Date"] >= "2005/01/01"]
+raw_year_data = raw_year_data[raw_year_data["Buy_Date"] <= "2016/02/28"]
+raw_year_data = raw_year_data.reset_index(drop = True)
+
+
+#Highest return and lowest return appearing in trading
+
 
 high = []
 low = []
-for i in range(len(raw_data)) :
-    high.append(raw_data.loc[i][3:].max())
-    low.append(raw_data.loc[i][3:].min())
+for i in range(len(raw_year_data)) :
+    high.append(raw_year_data.loc[i][-480:].max())
+    low.append(raw_year_data.loc[i][-480:].min())
 
-#===============================================================================
-# plt.hist(high, bins=50, normed=True)
-# plt.title("Highest return appearing in trading")
-# plt.show()
-# plt.hist(low, bins=50, normed=True)
-# plt.title("Lowest return appearing in trading")
-# plt.show()
-# plt.scatter(high, low)
-# plt.xlabel("Highest return appearing in trading")
-# plt.ylabel("Lowest return appearing in trading")
-# plt.title("Highest vs lowest return appearing in trading")
-# plt.show()
-#===============================================================================
-
-
-
-
-##############################################
+print max(high)
+print min(low)
+ 
 sl_list = []
 st_list = []
 for selllimit in range(0, int(max(high)*1000) + 20 , 10) :
     sl = selllimit / 1000.0
     sl_list.append(sl)
-
+ 
 for sellstop in range(0, int(abs(min(low))*1000) + 20 , 10) :
     st = (sellstop / 1000.0) * -1
     st_list.append(st)
-
+ 
 print sl_list
-
+ 
 win_ratio_matrix = []
-
+ 
 average_return_matrix = []
 average_sell_at_close_return = 0.0
 average_sell_at_close_return_win_ratio = 0.0
-
+ 
 # calculate averaae return and win ratio if close position at 2nd close price
 win_ratio_close = 0.0
 average_return_close = 0.0
-for i in range(len(raw_data)) :
-    time_series = raw_data.loc[i][3:].dropna()
+for i in range(len(raw_year_data)) :
+    time_series = raw_year_data.loc[i][-240:].dropna()
     close_return = time_series[-1]
     if close_return > 0 :
         win_ratio_close += 1
     average_return_close += close_return
-print ("Win ratio close : %s" %(win_ratio_close / len(raw_data)))
-print ("average return close : %s" %(average_return_close / len(raw_data)))
-        
-
+print ("Win ratio sell at close : %s" %(win_ratio_close / len(raw_year_data)))
+print ("average return sell at close : %s" %(average_return_close / len(raw_year_data)))
+         
+ 
 # calculate the win ratio and return for set sell stop and sell limit
 print "sl_list " + str(len(sl_list))
 print "st_list " + str(len(st_list))
@@ -92,15 +81,9 @@ for sl in sl_list :
         loss_count = 0.0
         trade_return = 0.0
         failed_count = 0.0
-        for i in range(len(raw_data)) :
-            difference = len(raw_data.loc[i]) - len(raw_data.loc[i].dropna())
-            # if no enough data , it may paused in the 2nd day, so delete at present
-            if difference >= 240 :
-                failed_count += 1
-                continue
-            # choose the data for the 2nd day
-            time_series = raw_data.loc[i].dropna()[-239:]
-            
+        for i in range(len(raw_year_data)) :
+            time_series = raw_year_data.loc[i].dropna()[-240:]
+             
             if time_series[0] < sl or time_series[0] > st :
                 # if 2nd day open do not hit sl or st
                 # 
@@ -139,13 +122,13 @@ for sl in sl_list :
             else :
                 loss_count += 1
                 trade_return += time_series[0]
-        trade_count = len(raw_data) - failed_count
+        trade_count = len(raw_year_data) - failed_count
         win_ratio_list.append(success_count / trade_count)
         average_return_list.append(trade_return / trade_count)
     win_ratio_matrix.append(win_ratio_list)
     average_return_matrix.append(average_return_list)
-
-
+ 
+ 
 sl_list, st_list = np.meshgrid(sl_list, st_list)
 #print sl_list.shape
 #print st_list.shape
@@ -160,6 +143,20 @@ np.savetxt("./Data/return.csv", average_return_matrix, delimiter=",")
 np.savetxt("./Data/win_ratio.csv", win_ratio_matrix, delimiter=",")
 print "finished"
     
+    
+#===============================================================================
+# plt.hist(high, bins=50, normed=True)
+# plt.title("Highest return appearing in trading")
+# plt.show()
+# plt.hist(low, bins=50, normed=True)
+# plt.title("Lowest return appearing in trading")
+# plt.show()
+# plt.scatter(high, low)
+# plt.xlabel("Highest return appearing in trading")
+# plt.ylabel("Lowest return appearing in trading")
+# plt.title("Highest vs lowest return appearing in trading")
+# plt.show()
+#===============================================================================
 
 #from mpl_toolkits.mplot3d import Axes3D
 # from matplotlib import cm
