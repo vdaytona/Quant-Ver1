@@ -65,7 +65,7 @@ average_return_matrix = []
 average_sell_at_close_return = 0.0
 average_sell_at_close_return_win_ratio = 0.0
 
-# calculate averaae return and win ratio if close position at 2nd close price
+# calculate average return and win ratio if close position at 2nd close price
 win_ratio_close = 0.0
 average_return_close = 0.0
 for i in range(len(raw_year_data)) :
@@ -99,13 +99,11 @@ for sl in sl_list :
                 failed_count += 1
                 continue
             # choose the data for the 2nd day
-            time_series = raw_year_data.loc[i].dropna()[-239:]
+            time_series = raw_year_data.loc[i].dropna()[-240:]
             
             if time_series[0] < sl or time_series[0] > st :
-                # if 2nd day open do not hit sl or st
-                # 
                 if time_series.max() >= sl and time_series.min() > st :
-                    # if max value > stop limit and min value > sell stop, close positio at sell limit
+                    # if max value > stop limit and min value > sell stop, close position at sell limit
                     success_count += 1
                     trade_return += sl
                     continue
@@ -156,8 +154,8 @@ win_ratio_matrix = np.transpose(win_ratio_matrix)
 #print average_return_matrix.shape
 np.savetxt("./Data/sl.csv", sl_list, delimiter=",")
 np.savetxt("./Data/st.csv", st_list, delimiter=",")
-np.savetxt("./Data/return.csv", average_return_matrix, delimiter=",")
-np.savetxt("./Data/win_ratio.csv", win_ratio_matrix, delimiter=",")
+np.savetxt("./Data/return_v2.csv", average_return_matrix, delimiter=",")
+np.savetxt("./Data/win_ratio_v2.csv", win_ratio_matrix, delimiter=",")
 print "finished"
     
 

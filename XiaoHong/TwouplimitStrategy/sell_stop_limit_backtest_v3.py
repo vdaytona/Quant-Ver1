@@ -1,7 +1,8 @@
 '''
 Created on 2016/02/25
 
-processing v2 data
+processing v3 data
+buy the stock even if the open price is lower than the target price 
 
 @author: Daytona
 '''
@@ -38,11 +39,11 @@ print min(low)
  
 sl_list = []
 st_list = []
-for selllimit in range(0, int(max(high)*1000) + 20 , 30) :
+for selllimit in range(0, 270 , 30) :
     sl = selllimit / 1000.0
     sl_list.append(sl)
  
-for sellstop in range(0, int(abs(min(low))*1000) + 20 , 30) :
+for sellstop in range(0, 190, 30) :
     st = (sellstop / 1000.0) * -1
     st_list.append(st)
  
@@ -83,8 +84,8 @@ for sl in sl_list :
         failed_count = 0.0
         for i in range(len(raw_year_data)) :
             # rebuild the return series if open price is lower than target price
-            if raw_year_data.loc[i][2] < raw_year_data.loc[i][3] :
-                time_series = raw_year_data.loc[i].dropna()[243: 483] / raw_year_data.loc[i][3] - 1
+            if raw_year_data.loc[i][2] > raw_year_data.loc[i][3] :
+                time_series = raw_year_data.loc[i].dropna()[243: 483] / raw_year_data.loc[i][2] - 1
             else :
                 time_series = raw_year_data.loc[i].dropna()[-240:]
              
@@ -143,45 +144,6 @@ win_ratio_matrix = np.transpose(win_ratio_matrix)
 #print average_return_matrix.shape
 np.savetxt("./Data/sl.csv", sl_list, delimiter=",")
 np.savetxt("./Data/st.csv", st_list, delimiter=",")
-np.savetxt("./Data/return.csv", average_return_matrix, delimiter=",")
-np.savetxt("./Data/win_ratio.csv", win_ratio_matrix, delimiter=",")
+np.savetxt("./Data/return_v3.csv", average_return_matrix, delimiter=",")
+np.savetxt("./Data/win_ratio_v3.csv", win_ratio_matrix, delimiter=",")
 print "finished"
-    
-    
-#===============================================================================
-# plt.hist(high, bins=50, normed=True)
-# plt.title("Highest return appearing in trading")
-# plt.show()
-# plt.hist(low, bins=50, normed=True)
-# plt.title("Lowest return appearing in trading")
-# plt.show()
-# plt.scatter(high, low)
-# plt.xlabel("Highest return appearing in trading")
-# plt.ylabel("Lowest return appearing in trading")
-# plt.title("Highest vs lowest return appearing in trading")
-# plt.show()
-#===============================================================================
-
-#from mpl_toolkits.mplot3d import Axes3D
-# from matplotlib import cm
-# from matplotlib.ticker import LinearLocator, FormatStrFormatter
-# import matplotlib.pyplot as plt
-# import numpy as np
-# 
-# fig = plt.figure()
-# ax = fig.gca(projection='3d')
-# #X = np.arange(-5, 5, 0.25)
-# #Y = np.arange(-5, 5, 0.25)
-# #X, Y = np.meshgrid(X, Y)
-# #R = np.sqrt(X**2 + Y**2)
-# #Z = np.sin(R)
-# surf = ax.plot_surface(sl_list, st_list, average_return_matrix, rstride=1, cstride=1, cmap=cm.coolwarm,
-#                        linewidth=0, antialiased=False)
-# 
-# ax.zaxis.set_major_locator(LinearLocator(10))
-# ax.zaxis.set_major_formatter(FormatStrFormatter('%.02f'))
-# 
-# fig.colorbar(surf, shrink=0.5, aspect=5)
-# 
-# plt.show()
-#===============================================================================

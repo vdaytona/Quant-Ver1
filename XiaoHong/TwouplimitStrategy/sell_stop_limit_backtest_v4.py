@@ -2,7 +2,7 @@
 Created on 2016/02/25
 
 processing v2 data
-
+exclude the trade when target price is satified at 1st day afternoon
 @author: Daytona
 '''
 # calculate the minute highest and lowest return distribution
@@ -17,7 +17,7 @@ import copy
 raw_data = pd.read_csv("./Data/2005-2016_v2.csv").dropna()
 print len(raw_data)
 #date_list = ["2005/01/01","2006/01/01","2007/01/01","2008/01/01","2009/01/01","2010/01/01","2011/01/01","2012/01/01","2013/01/01","2014/01/01","2015/01/01","2016/02/28"]
-date_list = ["2005/01/01","2015/01/01"]
+date_list = ["2005/01/01","2016/02/14"]
 for i in range(0, len(date_list) - 1) :
 # filter data using date
     start_date = date_list[i]
@@ -85,11 +85,14 @@ for i in range(0, len(date_list) - 1) :
             trade_return = 0.0
             failed_count = 0.0
             for i in range(len(raw_year_data)) :
+                # exclude trade when open position at 1st day afternoon
+                if raw_year_data.loc[i].dropna()[3:123].min() < raw_year_data.loc[i].dropna()[2] :
+                    failed_count += 1
+                    continue
                 time_series = raw_year_data.loc[i].dropna()[-240:]
                  
                 if time_series[0] < sl or time_series[0] > st :
                     # if 2nd day open do not hit sl or st
-                    # 
                     if time_series.max() >= sl and time_series.min() > st :
                         # if max value > stop limit and min value > sell stop, close positio at sell limit
                         success_count += 1
@@ -141,8 +144,8 @@ for i in range(0, len(date_list) - 1) :
     win_ratio_matrix = np.transpose(win_ratio_matrix)
     #print average_return_matrix.shape
     #year = start_date.split["/"][0]
-    np.savetxt("./Data/return_sell_v2_2005_2015.csv" , average_return_matrix, delimiter=",")
-    np.savetxt("./Data/win_ratio_v2_2005_2015.csv" , win_ratio_matrix, delimiter=",")
+    np.savetxt("./Data/return_sell_v4_2015_2016.csv" , average_return_matrix, delimiter=",")
+    np.savetxt("./Data/win_ratio_v4_2015_2016.csv" , win_ratio_matrix, delimiter=",")
 print "finished"
         
         
