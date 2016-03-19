@@ -28,6 +28,7 @@ def main():
     # 1. collect data from DB
     raw_year_data = collectData()
     t0 = time.time()
+    
     # 2. Feature engineering
     (x_train, y_train, x_test ,y_real) = feature_engineering(raw_year_data)
     

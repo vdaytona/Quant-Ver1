@@ -83,7 +83,7 @@ for sl in sl_list :
         failed_count = 0.0
         for i in range(len(raw_year_data)) :
             time_series = raw_year_data.loc[i].dropna()[-240:]
-             
+            
             if time_series[0] < sl or time_series[0] > st :
                 # if 2nd day open do not hit sl or st
                 # 

@@ -102,6 +102,7 @@ for sl in sl_list :
             time_series = raw_year_data.loc[i].dropna()[-240:]
             
             if time_series[0] < sl or time_series[0] > st :
+                # if 2nd day open do not hit sl or st
                 if time_series.max() >= sl and time_series.min() > st :
                     # if max value > stop limit and min value > sell stop, close position at sell limit
                     success_count += 1

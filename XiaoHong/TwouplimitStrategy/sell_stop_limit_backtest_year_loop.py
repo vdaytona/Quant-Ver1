@@ -89,7 +89,6 @@ for i in range(0, len(date_list) - 1) :
                  
                 if time_series[0] < sl or time_series[0] > st :
                     # if 2nd day open do not hit sl or st
-                    # 
                     if time_series.max() >= sl and time_series.min() > st :
                         # if max value > stop limit and min value > sell stop, close positio at sell limit
                         success_count += 1
