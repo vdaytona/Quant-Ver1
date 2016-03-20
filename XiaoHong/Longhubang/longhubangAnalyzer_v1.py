@@ -50,7 +50,7 @@ def calculateCorrealtion(vectors):
         print i 
         for j in range(i+1, len(keys)) :
             if findNonZeroNumber(vectors[keys[i]]) >= 3 and findNonZeroNumber(vectors[keys[j]]) >= 3 :
-                cor, val = stats.pearsonr(vectors[keys[i]], vectors[keys[j]])
+                cor, val= stats.pearsonr(vectors[keys[i]], vectors[keys[j]])
                 result.append(cor)
     print max(result)
 
