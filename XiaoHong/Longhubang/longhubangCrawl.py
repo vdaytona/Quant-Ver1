@@ -59,13 +59,23 @@ resultList = []
 for i in range(len(dateList)) :
     download(dateList[i],resultList)
     
-print resultList
+#print resultList
 
-csvfile = file('./Data/allData.txt', 'wb')
-writer = csv.writer(csvfile)
-for line in resultList :
-    writer.writerow(line)
-csvfile.close()
+interval = 100
+group = len(resultList) / interval 
+if len(resultList) % interval != 0 :
+    group += 1
+
+for i in range(group) :
+    fileName = "./Data/allData-" + str(i) + ".txt"
+    csvfile = file(fileName, 'wb')
+    end_number = (i + 1) * interval
+    if end_number > len(resultList) :
+        end_number = len(resultList)
+    for j in range(i * interval , end_number) :
+        writer = csv.writer(csvfile)
+        writer.writerow(resultList[j])
+    csvfile.close()
 
 
 # readout
