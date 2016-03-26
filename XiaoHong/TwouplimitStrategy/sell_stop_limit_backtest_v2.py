@@ -48,14 +48,14 @@ for i in range(len(raw_year_data)) :
 
 ##############################################
 sl_list = []
-st_list = []
+trace_st_list = []
 for selllimit in range(0, int(max(high)*1000) + 20 , 10) :
     sl = selllimit / 1000.0
     sl_list.append(sl)
 
 for sellstop in range(0, int(abs(min(low))*1000) + 20 , 10) :
     st = (sellstop / 1000.0) * -1
-    st_list.append(st)
+    trace_st_list.append(st)
 
 print sl_list
 
@@ -80,14 +80,14 @@ print ("average return close : %s" %(average_return_close / len(raw_year_data)))
 
 # calculate the win ratio and return for set sell stop and sell limit
 print "sl_list " + str(len(sl_list))
-print "st_list " + str(len(st_list))
+print "trace_st_list " + str(len(trace_st_list))
 for sl in sl_list :
     #l = sl_list[i]
     average_return_list = []
     win_ratio_list = []
-    for st in st_list :
+    for st in trace_st_list :
         print str(sl) +  "  " + str(st)
-        #t = st_list[i]
+        #t = trace_st_list[i]
         success_count = 0.0
         loss_count = 0.0
         trade_return = 0.0
@@ -145,16 +145,16 @@ for sl in sl_list :
     average_return_matrix.append(average_return_list)
 
 
-sl_list, st_list = np.meshgrid(sl_list, st_list)
+sl_list, trace_st_list = np.meshgrid(sl_list, trace_st_list)
 #print sl_list.shape
-#print st_list.shape
+#print trace_st_list.shape
 average_return_matrix = np.asarray(average_return_matrix)
 average_return_matrix = np.transpose(average_return_matrix)
 win_ratio_matrix = np.asarray(win_ratio_matrix)
 win_ratio_matrix = np.transpose(win_ratio_matrix)
 #print average_return_matrix.shape
 np.savetxt("./Data/sl.csv", sl_list, delimiter=",")
-np.savetxt("./Data/st.csv", st_list, delimiter=",")
+np.savetxt("./Data/st.csv", trace_st_list, delimiter=",")
 np.savetxt("./Data/return_v2.csv", average_return_matrix, delimiter=",")
 np.savetxt("./Data/win_ratio_v2.csv", win_ratio_matrix, delimiter=",")
 print "finished"
@@ -173,7 +173,7 @@ print "finished"
 # #X, Y = np.meshgrid(X, Y)
 # #R = np.sqrt(X**2 + Y**2)
 # #Z = np.sin(R)
-# surf = ax.plot_surface(sl_list, st_list, average_return_matrix, rstride=1, cstride=1, cmap=cm.coolwarm,
+# surf = ax.plot_surface(sl_list, trace_st_list, average_return_matrix, rstride=1, cstride=1, cmap=cm.coolwarm,
 #                        linewidth=0, antialiased=False)
 # 
 # ax.zaxis.set_major_locator(LinearLocator(10))

@@ -1,5 +1,4 @@
 '''
-MLfkhwL8
 Created on 2016/03/07
  1.2.1
  input : {open(D1), close (D1), high(D1), low(D1) } 
@@ -13,6 +12,7 @@ import pandas as pd
 from svmCal import svr
 import numpy
 from sklearn.decomposition import PCA
+from sklearn.cluster import KMeans
 
 # read raw file and clean data
 raw_data = pd.read_csv("./Data/2005-2016_v2.csv").dropna().reset_index(drop = True)
@@ -50,33 +50,72 @@ target["High_2"] = target_series
 #print input
 #print target
 
-train_ratio = 0.9
+train_ratio = 0.8
 
 index_train = int (len(input) * train_ratio)
-input_train = input[:index_train]
-target_train = target[:index_train]
-input_test = input[index_train :]
-target_test = target[index_train: ]
+input_train = input[:index_train].values
+target_train = target[:index_train]["High_2"].values
+input_test = input[index_train :].values
+target_test = target[index_train: ]["High_2"].values
 
-from sknn.mlp import Classifier, Layer
+svr().svr_timeseries(input_train, target_train, input_test, target_test, 'rbf')
 
-nn = Classifier(
-    layers=[
-        Layer("Rectifier", units=100),
-        Layer("Linear")],
-    learning_rate=0.02,
-    n_iter=10)
 
-print input_train.values
+#print input_test
 
-nn.fit(input_train.values, target_train["High_2"].values)
+#===============================================================================
+# svr().svr_timeseries(input_train, target_train["High_2"].values, input_test, target_test["High_2"].values, 'rbf')
+# 
+# # predict after classify the input using k-means
+# random_state = 170
+# n_clusters = 2
+# y_pred = KMeans(n_clusters=n_clusters, random_state=random_state).fit_predict(input_train)
+# print y_pred
+# 
+# input_train_group = []
+# target_train_group = []
+# input_test_group = []
+# target_test_group = []
+# for i in range(0, n_clusters) :
+#     input_train_list = []
+#     target_train_list = []
+#     input_test_list = []
+#     target_test_list = []
+#     for j in range(len(y_pred)) :
+#         if y_pred[j] == i :
+#             input_train_list.append(input_train[j])
+#             target_train_list.append(target_train[j])
+#             input_test_list.append(input_test[j])
+#             input_test_list.append(target_test[j])
+#     input_train_group.append(input_train_list)
+#     target_train_group.append(target_train_list)
+#     input_test_group.append(input_test_list)
+#     target_test_group.append(target_test_list)
+# 
+# svr().svr_timeseries(input_train_group[0], target_train_group[0], input_test_group[0], target_test_group[0], 'rbf')
+#===============================================================================
 
-y_valid = nn.predict(input_test.values)
 
-score = nn.score(y_valid, target_test["High_2"].values)
+#===============================================================================
+# from sknn.mlp import Classifier, Layer
+# 
+# nn = Classifier(
+#     layers=[
+#         Layer("Rectifier", units=100),
+#         Layer("Linear")],
+#     learning_rate=0.02,
+#     n_iter=10)
+# 
+# print input_train.values
+# 
+# nn.fit(input_train.values, target_train["High_2"].values)
+# 
+# y_valid = nn.predict(input_test.values)
+# 
+# score = nn.score(y_valid, target_test["High_2"].values)
+# 
+# print score
+#===============================================================================
 
-print score
-
-#svr().svr_timeseries(input_train, target_train["High_2"].values, input_test, target_test["High_2"].values, 'rbf')
 
 

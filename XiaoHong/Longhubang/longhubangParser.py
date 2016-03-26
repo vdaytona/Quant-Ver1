@@ -8,7 +8,6 @@ Created on 2016/03/19
 '''
 
 import csv
-import datetime
 import code
 import copy
 import pandas as pd
@@ -36,28 +35,7 @@ def readOut(fileName):
     for line in fileContent :
         result.extend(parserUpDeviationSeven(line))
     return result
-        #=======================================================================
-        # readout = ''.join(line)
-        # readlinst = readout.split(",")
-        # #=======================================================================
-        # # for element in readlinst :
-        # #     print element
-        # #=======================================================================
-        # flag = False
-        # start_line = 0
-        # end_line = 0
-        # for i in range(len(readlinst)) :
-        #     line = readlinst[i][1:-1]
-        #     # print line
-        #     if "有价格涨跌幅限制的日收盘价格涨幅偏离值达到7%的前三只证券" in line :
-        #         start_line = i
-        #     if "B股" in line :
-        #         end_line = i
-        #         break
-        # for i in range(start_line,end_line) :
-        #     #print readlinst[i][1:-1]
-        #     pass
-        #=======================================================================
+
 def findLineIndex(key_word, string_list):
     for i in range(len(string_list)) :
         line = string_list[i][1:-1]
@@ -74,6 +52,7 @@ def dateConvert(dateString):
 
 def parserUpDeviationSeven(input):
     final_result_container = []
+    #print input
     string_list = ''.join(input).split(",")
     # see if has record
     start_index = findLineIndex("1、", string_list)
@@ -110,8 +89,10 @@ def parserUpDeviationSeven(input):
     security_container = dict()
     for i in range(start_index, end_index) :
         line = string_list[i][1:-1].strip()
-        #print line
-        code = line[8:14]
+        print line
+        # find code
+        code = codeParser(line)
+        # find code_name
         name_end_index = 0
         for i in range (16,len(line)) :
             if line[i].isdigit() :
@@ -168,11 +149,6 @@ def parserUpDeviationSeven(input):
             if "卖出" in line :
                 buy_end_index = i-1
                 sell_start_index = i + 1
-        #=======================================================================
-        #         break
-        # for i in range(start_index, end_index) :
-        #     print string_list[i][1:-1].strip()
-        #=======================================================================
         # find buy
         for i in range(buy_start_index,buy_end_index) :
             line = string_list[i][1:-1].strip().split(" ")
@@ -204,6 +180,18 @@ def parserUpDeviationSeven(input):
                 record.__marketDep = "A"
                 final_result_container.append(record)
     return final_result_container
+
+def codeParser(input):
+    start_index = 0
+    end_index = 0
+    for i in range(3,len(input)) :
+        if start_index == 0 and input[i].isdigit() :
+            start_index = i
+        elif start_index != 0 and not input[i].isdigit() :
+            end_index = i
+            break
+    code = input[start_index:end_index]
+    return code
 
 def getResultRecord():
     result = []
@@ -237,7 +225,9 @@ def writeToCsv(result):
     resultDataFrame.to_csv("./Data/allData.csv", index=False)
     
 if __name__ == "__main__":
+    # parser result form raw downloaded data
     result = getResultRecord()
+    # write to csv "allData.csv"
     writeToCsv(result)
     print("finished")
     

@@ -25,8 +25,8 @@ class svr():
         epsilon_set = [0.0001,0.001,0.01,0.1,10,100,1000]
         '''
         parameter_start = -4
-        parameter_stop = 2.5
-        count = 10.0
+        parameter_stop = 3
+        count = 50.0
         c_set = self.numberGenerate(parameter_start, parameter_stop, count)
         gamma_set = self.numberGenerate(parameter_start, parameter_stop, count)
         epsilon_set = self.numberGenerate(parameter_start, parameter_stop, count)
