@@ -9,12 +9,8 @@ using tracing sell stop
 @author: Daytona
 '''
 # calculate the minute highest and lowest return distribution
-import matplotlib.pyplot as plt
 import numpy as np
-import datetime as dt
-from datetime import timedelta, date, datetime
 import pandas as pd
-from pandas.core.series import TimeSeries
 import copy
 
 raw_data = pd.read_csv("./Data/2005-2016_v2.csv").dropna()
@@ -48,11 +44,9 @@ for i in range(0, len(date_list) - 1) :
         sl = selllimit / 1000.0
         sl_list.append(sl)
      
-    for sellstop in range(0, int(0.2*1000) + 10 , 10) :
+    for sellstop in range(0, int(0.3*1000) + 10 , 10) :
         st = (sellstop / 1000.0)
         trace_st_list.append(st)
-    
-    sl_list = [0.22]
      
     win_ratio_matrix = []
      
@@ -92,10 +86,6 @@ for i in range(0, len(date_list) - 1) :
                     success_count += 1
                     trade_return += time_series[0]
                     continue
-                if time_series[0] < -0.04 :
-                    loss_count += 1
-                    trade_return += time_series[0]
-                    continue
                 tracing_st = time_series[0] - st
                 # iterate each value to find if hit sl or st first
                 for j in range(len(time_series)) :
@@ -117,10 +107,12 @@ for i in range(0, len(date_list) - 1) :
                         # if it is last minute, clear position
                         success_count += 1
                         trade_return += time_series[-1]
+                        break
                     elif time_series[-1] <= 0  and j == len(time_series) -1 :
                         # if it is last minute, clear position
                         loss_count += 1
                         trade_return += time_series[-1]
+                        break
                     else :
                         # if nothing happen, update the tracing_st
                         if time_series[j] - tracing_st > st :
@@ -140,8 +132,8 @@ for i in range(0, len(date_list) - 1) :
     win_ratio_matrix = np.transpose(win_ratio_matrix)
     #print average_return_matrix.shape
     #year = start_date.split["/"][0]
-    np.savetxt("./Data/return_sell_v5_2015_2016.csv" , average_return_matrix, delimiter=",")
-    np.savetxt("./Data/win_ratio_v5_2015_2016.csv" , win_ratio_matrix, delimiter=",")
+    np.savetxt("./Data/return_sell_v5_tracing_sl_2015_2016.csv" , average_return_matrix, delimiter=",")
+    np.savetxt("./Data/win_ratio_v5_tracing_sl_2015_2016.csv" , win_ratio_matrix, delimiter=",")
 print "finished"
         
         
