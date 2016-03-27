@@ -4,6 +4,15 @@ Created on 2016/03/07
  input : {open(D1), close (D1), high(D1), low(D1) } 
  target : {high(D2) / low(D2) / close(D2)}
  
+2015-2016 :
+MAX DS = 143.000000
+Hit rate = 0.871951
+NMSE = 0.204611
+DOC = 0.794134
+MAE = 0.029204
+C = 0.019905, gamma = 158.113883, epsilon = 0.019905
+ 
+ 
 @author: Daytona
 '''
 print(__doc__)
@@ -50,7 +59,7 @@ target["High_2"] = target_series
 #print input
 #print target
 
-train_ratio = 0.8
+train_ratio = 0.9
 
 index_train = int (len(input) * train_ratio)
 input_train = input[:index_train].values

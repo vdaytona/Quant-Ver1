@@ -25,8 +25,8 @@ class svr():
         epsilon_set = [0.0001,0.001,0.01,0.1,10,100,1000]
         '''
         parameter_start = -4
-        parameter_stop = 3
-        count = 50.0
+        parameter_stop = 2.5
+        count = 10.0
         c_set = self.numberGenerate(parameter_start, parameter_stop, count)
         gamma_set = self.numberGenerate(parameter_start, parameter_stop, count)
         epsilon_set = self.numberGenerate(parameter_start, parameter_stop, count)
@@ -50,9 +50,11 @@ class svr():
         loop_count = 0
         percent_count = 0.05
         t0 = time.time()
-        c_set = [0.012559]
-        gamma_set = [25.059362]
-        epsilon_set = [0.012559]
+        #=======================================================================
+        # c_set = [0.012559]
+        # gamma_set = [25.059362]
+        # epsilon_set = [0.012559]
+        #=======================================================================
         for C in c_set:
             for gamma in gamma_set:
                 for epsilon in epsilon_set:
@@ -64,17 +66,19 @@ class svr():
                         result = pd.DataFrame()
                         result["Y_real"] = y_real
                         result["y_pred"] = y_pred
-                        x_axis = range(len(y_real))
+                        #x_axis = range(len(y_real))
                         #plt.plot(x_axis, y_real[:100], color = "r", )
                         #plt.plot(x_axis, y_pred[:100])
-                        plt.scatter(x_axis, y_real - y_pred)
-                        plt.xlabel("Trade Count")
-                        plt.ylabel("Real High - Pred High")
-                        plt.legend()
-                        plt.show()
-                        plt.scatter(x_axis, y_real, color = "r", )
-                        plt.plot(x_axis, y_pred)
-                        plt.show()
+                        #=======================================================
+                        # plt.scatter(x_axis, y_real - y_pred)
+                        # plt.xlabel("Trade Count")
+                        # plt.ylabel("Real High - Pred High")
+                        # plt.legend()
+                        # plt.show()
+                        # plt.scatter(x_axis, y_real, color = "r", )
+                        # plt.plot(x_axis, y_pred)
+                        # plt.show()
+                        #=======================================================
                         
                         nmse = evaluation.evaluation(y_real,y_pred).NMSE()
                         ds = evaluation.evaluation(y_real,y_pred).DS()

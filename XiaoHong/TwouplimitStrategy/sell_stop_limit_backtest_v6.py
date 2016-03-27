@@ -95,8 +95,8 @@ for i in range(0, len(date_list) - 1) :
             loss_count = 0.0
             trade_return = 0.0
             for i in range(len(raw_year_data)) :
-                buy_price =  raw_year_data.loc[i][2]
-                open_price_ratio = raw_year_data.loc[i][-721] / raw_year_data.loc[i][-720]
+                open_price_ratio = raw_year_data.loc[i][-720] / raw_year_data.loc[i][-721]
+                # print open_price_ratio
                 # sell the stock if second day open / close is higher than 1.04, but no high limit
                 time_series = raw_year_data.loc[i].dropna()[-240:]
                 if open_price_ratio > 1.04 and open_price_ratio < 1.099 :
@@ -109,12 +109,12 @@ for i in range(0, len(date_list) - 1) :
                         trade_return += time_series[0]
                         continue
                 elif open_price_ratio >= 1.099 :
-                    
-                # sell the stock when the high limit is broken
+                    # sell the stock when the high limit is broken
+                    print open_price_ratio           
                     for j in range(len(time_series)) :
-                        if raw_year_data.loc[i][-721+j] / raw_year_data.loc[i][-720] < 1.099 or j == len(time_series) -1:
+                        if raw_year_data.loc[i][-720+j] / raw_year_data.loc[i][-721] < 1.099 or j == len(time_series) -1:
                             print j
-                            print raw_year_data.loc[i][-721+j] / raw_year_data.loc[i][-720]
+                            print raw_year_data.loc[i][-720+j] / raw_year_data.loc[i][-721]
                             if time_series[j] >= 0 :
                                 success_count += 1
                                 trade_return += time_series[j]

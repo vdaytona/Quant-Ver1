@@ -5,6 +5,23 @@ Created on 2016/03/07
  target : {high(D2) / low(D2) / close(D2)}
  
  using clustering algorithm to group the event, and fitting them separately
+
+2005-2016 :
+group 1
+MAX DS = 89.000000
+Hit rate = 0.780702
+NMSE = 0.565591
+DOC = 0.429404
+MAE = 0.030595
+C = 35.397289, gamma = 0.088914, epsilon = 0.019905
+
+group 0
+MAX DS = 50.000000
+Hit rate = 1.000000
+NMSE = 0.211545
+DOC = 0.784138
+MAE = 0.026847
+C = 35.397289, gamma = 35.397289, epsilon = 0.000050
  
 @author: Daytona
 '''
@@ -59,7 +76,7 @@ input_array = input.values
 target_array = target["High_2"].values
 
 #random_state = 170
-n_clusters = 2
+n_clusters = 3
 y_pred = KMeans(n_clusters=n_clusters).fit_predict(input_array)
 print y_pred
 
@@ -76,7 +93,7 @@ for i in range(0,n_clusters) :
     input_group.append(input_list)
     target_group.append(target_list)
 
-input_index = 1
+input_index = 2
 index_train = int (len(input_group[input_index]) * train_ratio)
 input_train = input_group[input_index][:index_train]
 target_train = target_group[input_index][:index_train]
