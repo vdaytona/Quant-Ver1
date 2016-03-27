@@ -3,8 +3,9 @@ Created on 2016/03/07
  1.2.1
  input : {open(D1), close (D1), high(D1), low(D1), volume D1, volume D2} 
  target : {high(D2) / low(D2) / close(D2)}
- using data v3
+ using data v4
 
+2015-
 volume1 change (D1 / D-1) :
 MAX DS = 136.000000
 Hit rate = 0.814371
