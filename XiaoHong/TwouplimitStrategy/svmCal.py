@@ -1,3 +1,5 @@
+#coding = utf-8
+#encoding: utf-8
 '''
 This module is for svm calculation
 
@@ -25,7 +27,7 @@ class svr():
         epsilon_set = [0.0001,0.001,0.01,0.1,10,100,1000]
         '''
         parameter_start = -4
-        parameter_stop = 2.5
+        parameter_stop = 4
         count = 10.0
         c_set = self.numberGenerate(parameter_start, parameter_stop, count)
         gamma_set = self.numberGenerate(parameter_start, parameter_stop, count)
@@ -51,9 +53,9 @@ class svr():
         percent_count = 0.05
         t0 = time.time()
         #=======================================================================
-        # c_set = [0.012559]
-        # gamma_set = [25.059362]
-        # epsilon_set = [0.012559]
+        # c_set = [0.088914]
+        # gamma_set = [7.924466]
+        # epsilon_set = [0.019905]
         #=======================================================================
         for C in c_set:
             for gamma in gamma_set:
@@ -66,6 +68,10 @@ class svr():
                         result = pd.DataFrame()
                         result["Y_real"] = y_real
                         result["y_pred"] = y_pred
+                        #=======================================================
+                        # plt.scatter(y_real, y_real - y_pred)
+                        # plt.show()
+                        #=======================================================
                         #x_axis = range(len(y_real))
                         #plt.plot(x_axis, y_real[:100], color = "r", )
                         #plt.plot(x_axis, y_pred[:100])
@@ -140,6 +146,10 @@ class svr():
         plt.xlabel('Times')
         plt.ylabel('NMSE')
         plt.subplot2grid((2,2),(1, 1))
+        plt.show()
+        plt.scatter(y_pred, y_real - y_pred)
+        plt.xlabel('Prediction lowest price in 2nd day')
+        plt.ylabel("(Real - Prediction) lowest price in 2nd day")
         plt.show()
         pass
         #return svr_result

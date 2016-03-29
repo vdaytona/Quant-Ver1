@@ -37,14 +37,14 @@ print max(high)
 print min(low)
  
 sl_list = []
-trace_st_list = []
+st_list = []
 for selllimit in range(0, int(max(high)*1000) + 20 , 10) :
     sl = selllimit / 1000.0
     sl_list.append(sl)
  
 for sellstop in range(0, int(abs(min(low))*1000) + 20 , 10) :
     st = (sellstop / 1000.0) * -1
-    trace_st_list.append(st)
+    st_list.append(st)
  
 print sl_list
  
@@ -69,17 +69,17 @@ print ("average return sell at close : %s" %(average_return_close / len(raw_year
  
 # calculate the win ratio and return for set sell stop and sell limit
 print "sl_list " + str(len(sl_list))
-print "trace_st_list " + str(len(trace_st_list))
+print "st_list " + str(len(st_list))
 for sl in sl_list :
     #l = sl_list[i]
     average_return_list = []
     win_ratio_list = []
-    for st in trace_st_list :
+    for st in st_list :
         print str(sl) +  "  " + str(st)
-        #t = trace_st_list[i]
-        success_count = 0.0
+        #t = st_list[i]
+        positive_success_count = 0.0
         loss_count = 0.0
-        trade_return = 0.0
+        positive_trade_return = 0.0
         failed_count = 0.0
         for i in range(len(raw_year_data)) :
             time_series = raw_year_data.loc[i].dropna()[-240:]
@@ -89,56 +89,56 @@ for sl in sl_list :
                 # 
                 if time_series.max() >= sl and time_series.min() > st :
                     # if max value > stop limit and min value > sell stop, close positio at sell limit
-                    success_count += 1
-                    trade_return += sl
+                    positive_success_count += 1
+                    positive_trade_return += sl
                     continue
                 elif time_series.max() < sl and time_series.min() <= st :
                     # if max value < stop limit and min value < sell stop, close position at sell stop
                     loss_count += 1
-                    trade_return += st
+                    positive_trade_return += st
                     continue
                 else :
                     # iterate each value to find if hit sl or st first
                     for j in range(len(time_series)) :
                         if time_series[j] >= sl and j != len(time_series) -1:
-                            success_count += 1
-                            trade_return += sl
+                            positive_success_count += 1
+                            positive_trade_return += sl
                             break
                         elif time_series[j] <= st and j != len(time_series) -1:
                             loss_count += 1
-                            trade_return += st
+                            positive_trade_return += st
                             break
                         elif time_series[-1] >= 0 and j == len(time_series) -1 :
-                            success_count += 1
-                            trade_return += time_series[-1]
+                            positive_success_count += 1
+                            positive_trade_return += time_series[-1]
                         elif time_series[-1] <= 0  and j == len(time_series) -1 :
                             loss_count += 1
-                            trade_return += time_series[-1]                            
+                            positive_trade_return += time_series[-1]                            
                     continue
             elif time_series[0] >= 0 :
                 # if 2nd open is already hit sl or st
-                success_count += 1
-                trade_return += time_series[0]
+                positive_success_count += 1
+                positive_trade_return += time_series[0]
             else :
                 loss_count += 1
-                trade_return += time_series[0]
+                positive_trade_return += time_series[0]
         trade_count = len(raw_year_data) - failed_count
-        win_ratio_list.append(success_count / trade_count)
-        average_return_list.append(trade_return / trade_count)
+        win_ratio_list.append(positive_success_count / trade_count)
+        average_return_list.append(positive_trade_return / trade_count)
     win_ratio_matrix.append(win_ratio_list)
     average_return_matrix.append(average_return_list)
  
  
-sl_list, trace_st_list = np.meshgrid(sl_list, trace_st_list)
+sl_list, st_list = np.meshgrid(sl_list, st_list)
 #print sl_list.shape
-#print trace_st_list.shape
+#print st_list.shape
 average_return_matrix = np.asarray(average_return_matrix)
 average_return_matrix = np.transpose(average_return_matrix)
 win_ratio_matrix = np.asarray(win_ratio_matrix)
 win_ratio_matrix = np.transpose(win_ratio_matrix)
 #print average_return_matrix.shape
 np.savetxt("./Data/sl.csv", sl_list, delimiter=",")
-np.savetxt("./Data/st.csv", trace_st_list, delimiter=",")
+np.savetxt("./Data/st.csv", st_list, delimiter=",")
 np.savetxt("./Data/return.csv", average_return_matrix, delimiter=",")
 np.savetxt("./Data/win_ratio.csv", win_ratio_matrix, delimiter=",")
 print "finished"
@@ -171,7 +171,7 @@ print "finished"
 # #X, Y = np.meshgrid(X, Y)
 # #R = np.sqrt(X**2 + Y**2)
 # #Z = np.sin(R)
-# surf = ax.plot_surface(sl_list, trace_st_list, average_return_matrix, rstride=1, cstride=1, cmap=cm.coolwarm,
+# surf = ax.plot_surface(sl_list, st_list, average_return_matrix, rstride=1, cstride=1, cmap=cm.coolwarm,
 #                        linewidth=0, antialiased=False)
 # 
 # ax.zaxis.set_major_locator(LinearLocator(10))
