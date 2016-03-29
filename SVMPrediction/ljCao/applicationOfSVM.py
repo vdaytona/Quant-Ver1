@@ -26,10 +26,11 @@ from pandas.core.frame import DataFrame
 # main program
 def main():
     # 1. collect data from DB
-    raw_data = collectData()
+    raw_year_data = collectData()
     t0 = time.time()
+    
     # 2. Feature engineering
-    (x_train, y_train, x_test ,y_real) = feature_engineering(raw_data)
+    (x_train, y_train, x_test ,y_real) = feature_engineering(raw_year_data)
     
 
     #3. SVM
@@ -61,8 +62,8 @@ def collectData():
         cnx.close()
     return df
 
-def feature_engineering(raw_data):
-    input_data = raw_data[['Date','AdjClose','AdjVolume']].dropna()
+def feature_engineering(raw_year_data):
+    input_data = raw_year_data[['Date','AdjClose','AdjVolume']].dropna()
     train_ratio = 0.8
     
     savedata= DataFrame(input_data)
@@ -95,11 +96,11 @@ def feature_engineering(raw_data):
     return (x_train,y_train,x_test,y_real)
 
     # split train and test data
-def divideTrainTest(raw_data,train_ratio):
-    raw_data_size = len(raw_data)
+def divideTrainTest(raw_year_data,train_ratio):
+    raw_data_size = len(raw_year_data)
     train_size = int(raw_data_size * train_ratio)
-    train_data = raw_data[0:train_size-1]
-    test_data = raw_data[train_size:raw_data_size]
+    train_data = raw_year_data[0:train_size-1]
+    test_data = raw_year_data[train_size:raw_data_size]
     return (train_data,test_data)
 
 def mergeColumnByDate(*args):

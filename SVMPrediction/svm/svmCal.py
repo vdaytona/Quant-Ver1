@@ -29,7 +29,7 @@ class svr():
         '''
         parameter_start = -5
         parameter_stop = 5
-        count = 15
+        count = 10
         c_set = svm.svmCal.svr.numberGenerate(self, parameter_start, parameter_stop, count)
         gamma_set = svm.svmCal.svr.numberGenerate(self, parameter_start, parameter_stop, count)
         epsilon_set = svm.svmCal.svr.numberGenerate(self, parameter_start, parameter_stop, count)

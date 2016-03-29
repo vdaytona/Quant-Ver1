@@ -1,0 +1,22 @@
+This file provides the frame to optimize the performance of twouplimit strategy
+@vdaytona
+1 optimize the sell limit
+
+1.1 matrix search for optimized fixed sell limit
+22% is the best value based
+ 
+1.2 Can we forecast the highest return that can be reached in the 2nd trading day?
+Use machine learning technique to forecast the high price of second day based on the variables,
+like first day volume, high, low close , open
+ 1.2.1
+ input : return of {open(D1), close (D1), high(D1), low(D1), volume(D1) , open(D2)} 
+ target : {high(D2)}
+ Model : svm, forest, nerualwork
+ 1.2.2
+ input : return of first day minute data -> 
+ 
+ 1.3 Can we predict whether the trade we will enter is going to win or loss
+ 1.3.1
+ input : return of previous 5 days, and volume, index of SH/SZ
+ target : win or loss
+ 

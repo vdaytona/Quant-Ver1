@@ -25,12 +25,12 @@ from SVC.randomforestCal import randomForestCal
 def main():
     
     # 1. collect data from DB
-    raw_data = collectData()
+    raw_year_data = collectData()
     t0 = time.time()
     threshold = 0.001
     
     # 2. Feature engineering
-    (x_train, y_train, x_test ,y_real) = featureEnginnering(raw_data,threshold)
+    (x_train, y_train, x_test ,y_real) = featureEnginnering(raw_year_data,threshold)
     
     # 3. Prediction
     # SVC
@@ -65,7 +65,7 @@ def collectData():
         cnx.close()
     return df
 
-def featureEnginnering(raw_data, threshold):
+def featureEnginnering(raw_year_data, threshold):
     '''
     input
     ['Date', 'AdjOpen', 'AdjClose']
@@ -82,7 +82,7 @@ def featureEnginnering(raw_data, threshold):
     else:
     0
     '''
-    n = len(raw_data.index)
+    n = len(raw_year_data.index)
     change_per = []
     change_per.append(None)
     adjclose_previous = []
@@ -96,32 +96,32 @@ def featureEnginnering(raw_data, threshold):
     wrong_day_set = []
     wrong_day_set.append(None)
     for i in range (1,n):
-        change = (raw_data['AdjOpen'][i] - raw_data['AdjClose'][i-1])/raw_data['AdjClose'][i-1]
+        change = (raw_year_data['AdjOpen'][i] - raw_year_data['AdjClose'][i-1])/raw_year_data['AdjClose'][i-1]
         change_per.append(change)
-        close_open = raw_data['AdjClose'][i] - raw_data['AdjOpen'][i] 
-        adjclose_previous.append(raw_data['AdjClose'][i-1])
+        close_open = raw_year_data['AdjClose'][i] - raw_year_data['AdjOpen'][i] 
+        adjclose_previous.append(raw_year_data['AdjClose'][i-1])
         if (change > threshold and (close_open < 0 )) :
             trade_day += 1
             wrong_day_set.append(0)
             if_trade.append(1)
-            profit.append(-close_open/raw_data['AdjOpen'][i])
+            profit.append(-close_open/raw_year_data['AdjOpen'][i])
         elif(change < -threshold and (close_open > 0 )): 
             if_trade.append(1)
             trade_day += 1
             wrong_day_set.append(0)
-            profit.append(close_open/raw_data['AdjOpen'][i])
+            profit.append(close_open/raw_year_data['AdjOpen'][i])
         elif (change > threshold and (close_open >= 0 )):
             wrong_day += 1
             trade_day += 1
             wrong_day_set.append(1)
             if_trade.append(0)
-            loss.append(-close_open/raw_data['AdjOpen'][i])
+            loss.append(-close_open/raw_year_data['AdjOpen'][i])
         elif (change < -threshold and (close_open <= 0 )):
             wrong_day += 1
             trade_day += 1
             wrong_day_set.append(1)
             if_trade.append(0)
-            loss.append(close_open/raw_data['AdjOpen'][i])
+            loss.append(close_open/raw_year_data['AdjOpen'][i])
         else:
             if_trade.append(0)
             wrong_day_set.append(0)
@@ -132,15 +132,15 @@ def featureEnginnering(raw_data, threshold):
     # print('At the same time, the average profit in other potential (win) days is %f%%.' %(np.mean(profit) * 100))
     #===========================================================================
    
-    raw_data['Change_Per'] = change_per
-    raw_data['AdjClose_Previous'] = adjclose_previous
-    raw_data['AdjOpen_Today'] = raw_data['AdjOpen']
-    raw_data['if_trade'] = if_trade
-    raw_data['Wrong_Day'] = wrong_day_set
-    raw_data = raw_data.dropna()
-    features = raw_data[['Change_Per','AdjClose_Previous', 'AdjOpen_Today']]
+    raw_year_data['Change_Per'] = change_per
+    raw_year_data['AdjClose_Previous'] = adjclose_previous
+    raw_year_data['AdjOpen_Today'] = raw_year_data['AdjOpen']
+    raw_year_data['if_trade'] = if_trade
+    raw_year_data['Wrong_Day'] = wrong_day_set
+    raw_year_data = raw_year_data.dropna()
+    features = raw_year_data[['Change_Per','AdjClose_Previous', 'AdjOpen_Today']]
     
-    objective = raw_data['if_trade']
+    objective = raw_year_data['if_trade']
     train_ratio = 0.8
     (x_train, x_test) = divideTrainTest(features, train_ratio)
     (y_train,y_real) = divideTrainTest(objective, train_ratio)
@@ -149,22 +149,22 @@ def featureEnginnering(raw_data, threshold):
     '''
     plt.figure(1)
     plt.subplot2grid((2,2),(0, 0))
-    plt.scatter(raw_data[raw_data['if_trade'] == 0][['Change_Per']], raw_data[raw_data['if_trade'] == 0][['AdjClose_Previous']], c='k', label='data')
-    plt.scatter(raw_data[raw_data['if_trade'] == 1][['Change_Per']], raw_data[raw_data['if_trade'] == 1][['AdjClose_Previous']], c='red', label='data')
+    plt.scatter(raw_year_data[raw_year_data['if_trade'] == 0][['Change_Per']], raw_year_data[raw_year_data['if_trade'] == 0][['AdjClose_Previous']], c='k', label='data')
+    plt.scatter(raw_year_data[raw_year_data['if_trade'] == 1][['Change_Per']], raw_year_data[raw_year_data['if_trade'] == 1][['AdjClose_Previous']], c='red', label='data')
     plt.xlabel('change_per')
     plt.ylabel('close_previous')
     plt.title('change_per vs. close_previous')
     
     plt.subplot2grid((2,2),(0, 1))
-    plt.scatter(raw_data[raw_data['if_trade'] == 0][['Change_Per']], raw_data[raw_data['if_trade'] == 0][['AdjOpen_Today']], c='k', label='data')
-    plt.scatter(raw_data[raw_data['if_trade'] == 1][['Change_Per']], raw_data[raw_data['if_trade'] == 1][['AdjOpen_Today']], c='red', label='data')
+    plt.scatter(raw_year_data[raw_year_data['if_trade'] == 0][['Change_Per']], raw_year_data[raw_year_data['if_trade'] == 0][['AdjOpen_Today']], c='k', label='data')
+    plt.scatter(raw_year_data[raw_year_data['if_trade'] == 1][['Change_Per']], raw_year_data[raw_year_data['if_trade'] == 1][['AdjOpen_Today']], c='red', label='data')
     plt.xlabel('change_per')
     plt.ylabel('open_today')
     plt.title('change_per vs. open_today')
     
     plt.subplot2grid((2,2),(1, 0))
-    plt.scatter(raw_data[raw_data['Wrong_Day'] == 1][['Change_Per']], raw_data[raw_data['Wrong_Day'] == 1][['AdjClose_Previous']], c='k', label='data')
-    plt.scatter(raw_data[raw_data['if_trade'] == 1][['Change_Per']], raw_data[raw_data['if_trade'] == 1][['AdjClose_Previous']], c='red', label='data')
+    plt.scatter(raw_year_data[raw_year_data['Wrong_Day'] == 1][['Change_Per']], raw_year_data[raw_year_data['Wrong_Day'] == 1][['AdjClose_Previous']], c='k', label='data')
+    plt.scatter(raw_year_data[raw_year_data['if_trade'] == 1][['Change_Per']], raw_year_data[raw_year_data['if_trade'] == 1][['AdjClose_Previous']], c='red', label='data')
     plt.xlabel('Change_Per')
     plt.ylabel('close_previous')
     plt.legend()
@@ -173,8 +173,8 @@ def featureEnginnering(raw_data, threshold):
     plt.subplot2grid((2,2),(1, 1))
     if_trade_density = []
     density_range = 20
-    for i in range(density_range-1,len(raw_data.index)):
-        if_trade_density.append(np.mean(raw_data[['if_trade']][i-9 : i]))        
+    for i in range(density_range-1,len(raw_year_data.index)):
+        if_trade_density.append(np.mean(raw_year_data[['if_trade']][i-9 : i]))        
     x= range(len(if_trade_density))
     plt.scatter(x,if_trade_density, c='k', label='data')
     plt.xlabel('day')
@@ -184,11 +184,11 @@ def featureEnginnering(raw_data, threshold):
     #plt.show()
     '''
 
-def divideTrainTest(raw_data,train_ratio):
-    raw_data_size = len(raw_data)
+def divideTrainTest(raw_year_data,train_ratio):
+    raw_data_size = len(raw_year_data)
     train_size = int(raw_data_size * train_ratio)
-    train_data = raw_data[0:train_size-1]
-    test_data = raw_data[train_size:raw_data_size]
+    train_data = raw_year_data[0:train_size-1]
+    test_data = raw_year_data[train_size:raw_data_size]
     return (train_data,test_data)
 
 if __name__ == '__main__': main()

@@ -78,8 +78,8 @@ def mergeTrendNasdaq(trend_data, nasdaq_data):
     trend_data['Nasdaq_Close'] = nasdaq_close
     return trend_data
 
-def excuteStrategy(raw_data,key_word, excute_random_strategy = False):
-    trade_data = insertIndicator(raw_data, key_word).dropna()
+def excuteStrategy(raw_year_data,key_word, excute_random_strategy = False):
+    trade_data = insertIndicator(raw_year_data, key_word).dropna()
     trade_data = trade_data.set_index([range(0,len(trade_data.index))])
     #print trade_data
     
@@ -142,50 +142,50 @@ def excuteStrategy(raw_data,key_word, excute_random_strategy = False):
     #print trade_data.describe()
     
     if excute_random_strategy == True :
-        random_data = excuteRandomStrategy(raw_data.dropna())
+        random_data = excuteRandomStrategy(raw_year_data.dropna())
         return trade_data, random_data
     else:
         return  trade_data
 
-def insertIndicator(raw_data, key_word,delta_t = 3):
+def insertIndicator(raw_year_data, key_word,delta_t = 3):
     # calcualte the N(t-1,delta_t) = (n(t-1) + n(t-2) + n(t-3) + ...+ n(t-delta_t)) / delta_t
     # if n > N , sell, Strategy_Buy_Or_Sell = -1, 
     N = []
     buy_sell = []
-    for i in range(0, len(raw_data.index)):
+    for i in range(0, len(raw_year_data.index)):
         if i < delta_t:
             N.append(None)
             buy_sell.append(None)
         else:
             n_sum = 0
             for j in range(1,delta_t+1):
-                n_sum += raw_data[key_word][i-j]
+                n_sum += raw_year_data[key_word][i-j]
             N.append(float(n_sum) / float(delta_t))
-            if raw_data[key_word][i] < float(n_sum) / float(delta_t):
+            if raw_year_data[key_word][i] < float(n_sum) / float(delta_t):
                 buy_sell.append(1)
-            elif raw_data[key_word][i] > float(n_sum) / float(delta_t):
+            elif raw_year_data[key_word][i] > float(n_sum) / float(delta_t):
                 buy_sell.append(-1)
             else:
                 buy_sell.append(0)
-    raw_data['N'] = N
-    raw_data['Strategy_Buy_Or_Sell'] = buy_sell
-    raw_data['Nasdaq_Change'] = (raw_data['Nasdaq_Close'] - raw_data['Nasdaq_Open']) / raw_data['Nasdaq_Open']
-    return raw_data
+    raw_year_data['N'] = N
+    raw_year_data['Strategy_Buy_Or_Sell'] = buy_sell
+    raw_year_data['Nasdaq_Change'] = (raw_year_data['Nasdaq_Close'] - raw_year_data['Nasdaq_Open']) / raw_year_data['Nasdaq_Open']
+    return raw_year_data
 
-def excuteRandomStrategy(raw_data):
-    raw_data = raw_data.set_index([range(0,len(raw_data.index))])
+def excuteRandomStrategy(raw_year_data):
+    raw_year_data = raw_year_data.set_index([range(0,len(raw_year_data.index))])
     loop = 1000
-    #random_strategy_return_R = zeroList(len(raw_data.index))
+    #random_strategy_return_R = zeroList(len(raw_year_data.index))
     random_strategy_cumulative_return_R = []
     for i in range(loop) :
         # create n but or sell decision random
-        buy_or_sell = randomList(len(raw_data.index))
+        buy_or_sell = randomList(len(raw_year_data.index))
         cumulative_return_R = 0
         for j in range(len(buy_or_sell)):
             if buy_or_sell[j] == 1:
-                cumulative_return_R += log10(raw_data['Nasdaq_Close'][j] / raw_data['Nasdaq_Open'][j])                
+                cumulative_return_R += log10(raw_year_data['Nasdaq_Close'][j] / raw_year_data['Nasdaq_Open'][j])                
             else:
-                cumulative_return_R += log10(raw_data['Nasdaq_Open'][j] / raw_data['Nasdaq_Close'][j])
+                cumulative_return_R += log10(raw_year_data['Nasdaq_Open'][j] / raw_year_data['Nasdaq_Close'][j])
         random_strategy_cumulative_return_R.append(cumulative_return_R)
     
     result = pd.DataFrame(data = {'Random_Strategy_Cumulative_Return_R' : random_strategy_cumulative_return_R})
