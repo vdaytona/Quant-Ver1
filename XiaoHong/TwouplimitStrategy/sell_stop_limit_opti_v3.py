@@ -1,3 +1,5 @@
+#coding = utf-8
+#encoding: utf-8
 '''
 Created on 2016/03/07
  1.2.1
@@ -5,7 +7,7 @@ Created on 2016/03/07
  target : {high(D2) / low(D2) / close(D2)}
  using data v4
 
-2015-
+2015-2016
 volume1 change (D1 / D-1) :
 MAX DS = 136.000000
 Hit rate = 0.814371
@@ -29,6 +31,23 @@ NMSE = 0.182068
 DOC = 0.815738
 MAE = 0.026944
 C = 35.397289, gamma = 7.924466, epsilon = 0.004456
+
+2005-2016 :
+Low
+MAX DS = 228.000000
+Hit rate = 0.912000
+NMSE = 0.133745
+DOC = 0.865718
+MAE = 0.019032
+C = 0.088914, gamma = 7.924466, epsilon = 0.019905
+
+close
+MAX DS = 577.000000
+Hit rate = 0.771390
+NMSE = 0.456214
+DOC = 0.543175
+MAE = 0.040270
+C = 3.154787, gamma = 3.154787, epsilon = 0.079245
  
 @author: Daytona
 '''
@@ -56,7 +75,9 @@ for i in range(len(raw_data)) :
     close_series.append(time_series[240])
     open_series.append(time_series[0])
     open2_series.append(time_series[240])
-    target_series.append(time_series[-240:].max())
+    #target_series.append(time_series[-240:].max()) # highest return
+    #target_series.append(time_series[-240:].min()) # lowest return
+    target_series.append(time_series[-1]) # close return
     volume1.append(time_series[3])
     volume2.append(time_series[4])
 input = pd.DataFrame()
@@ -79,13 +100,15 @@ target["High_2"] = target_series
 #print input
 #print target
 
-train_ratio = 0.9
+train_ratio = 0.7
 
 index_train = int (len(input) * train_ratio)
 input_train = input[:index_train].values
 target_train = target[:index_train]["High_2"].values
 input_test = input[index_train :].values
 target_test = target[index_train: ]["High_2"].values
+
+print target_train
 
 svr().svr_timeseries(input_train, target_train, input_test, target_test, 'rbf')
 

@@ -51,16 +51,16 @@ for i in range(0, len(date_list) - 1) :
     print min(low)
      
     sl_list = []
-    trace_st_list = []
+    st_list = []
     for selllimit in range(0, int(max(high)*1000) + 20 , 10) :
         sl = selllimit / 1000.0
         sl_list.append(sl)
      
     for sellstop in range(0, int(abs(min(low))*1000) + 20 , 10) :
         st = (sellstop / 1000.0) * -1
-        trace_st_list.append(st)
+        st_list.append(st)
     sl_list = [0.0]
-    trace_st_list = [0.0]
+    st_list = [0.0]
     
      
     win_ratio_matrix = []
@@ -83,17 +83,17 @@ for i in range(0, len(date_list) - 1) :
     
     # calculate the win ratio and return for set sell stop and sell limit
     print "sl_list " + str(len(sl_list))
-    print "trace_st_list " + str(len(trace_st_list))
+    print "st_list " + str(len(st_list))
     for sl in sl_list :
         #l = sl_list[i]
         average_return_list = []
         win_ratio_list = []
-        for st in trace_st_list :
+        for st in st_list :
             print str(sl) +  "  " + str(st)
-            #t = trace_st_list[i]
-            success_count = 0.0
+            #t = st_list[i]
+            positive_success_count = 0.0
             loss_count = 0.0
-            trade_return = 0.0
+            positive_trade_return = 0.0
             for i in range(len(raw_year_data)) :
                 open_price_ratio = raw_year_data.loc[i][-720] / raw_year_data.loc[i][-721]
                 # print open_price_ratio
@@ -101,12 +101,12 @@ for i in range(0, len(date_list) - 1) :
                 time_series = raw_year_data.loc[i].dropna()[-240:]
                 if open_price_ratio > 1.04 and open_price_ratio < 1.099 :
                     if time_series[0] >= 0 :
-                        success_count += 1
-                        trade_return += time_series[0]
+                        positive_success_count += 1
+                        positive_trade_return += time_series[0]
                         continue
                     else :
                         loss_count += 1
-                        trade_return += time_series[0]
+                        positive_trade_return += time_series[0]
                         continue
                 elif open_price_ratio >= 1.099 :
                     # sell the stock when the high limit is broken
@@ -116,33 +116,33 @@ for i in range(0, len(date_list) - 1) :
                             print j
                             print raw_year_data.loc[i][-720+j] / raw_year_data.loc[i][-721]
                             if time_series[j] >= 0 :
-                                success_count += 1
-                                trade_return += time_series[j]
+                                positive_success_count += 1
+                                positive_trade_return += time_series[j]
                                 break
                             else :
                                 loss_count += 1
-                                trade_return += time_series[j]
+                                positive_trade_return += time_series[j]
                                 break
                     continue
                 else :
                     if time_series[-1] >= 0 :
-                        success_count += 1
-                        trade_return += time_series[-1]
+                        positive_success_count += 1
+                        positive_trade_return += time_series[-1]
                         continue
                     else :
                         loss_count += 1
-                        trade_return += time_series[-1]
+                        positive_trade_return += time_series[-1]
                         continue
             trade_count = len(raw_year_data)
-            win_ratio_list.append(success_count / trade_count)
-            average_return_list.append(trade_return / trade_count)
+            win_ratio_list.append(positive_success_count / trade_count)
+            average_return_list.append(positive_trade_return / trade_count)
         win_ratio_matrix.append(win_ratio_list)
         average_return_matrix.append(average_return_list)
      
      
-    sl_list, trace_st_list = np.meshgrid(sl_list, trace_st_list)
+    sl_list, st_list = np.meshgrid(sl_list, st_list)
     #print sl_list.shape
-    #print trace_st_list.shape
+    #print st_list.shape
     average_return_matrix = np.asarray(average_return_matrix)
     average_return_matrix = np.transpose(average_return_matrix)
     win_ratio_matrix = np.asarray(win_ratio_matrix)
@@ -181,7 +181,7 @@ print "finished"
     # #X, Y = np.meshgrid(X, Y)
     # #R = np.sqrt(X**2 + Y**2)
     # #Z = np.sin(R)
-    # surf = ax.plot_surface(sl_list, trace_st_list, average_return_matrix, rstride=1, cstride=1, cmap=cm.coolwarm,
+    # surf = ax.plot_surface(sl_list, st_list, average_return_matrix, rstride=1, cstride=1, cmap=cm.coolwarm,
     #                        linewidth=0, antialiased=False)
     # 
     # ax.zaxis.set_major_locator(LinearLocator(10))
