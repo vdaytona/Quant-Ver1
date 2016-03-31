@@ -14,6 +14,7 @@ from sklearn.metrics import r2_score
 import matplotlib.pyplot as plt
 import evaluation
 import time
+import numpy as np
 
 class svr():
     def __init__(self):
@@ -26,6 +27,7 @@ class svr():
         gamma_set = [0.0001,0.001,0.01,0.1,10,100,1000]
         epsilon_set = [0.0001,0.001,0.01,0.1,10,100,1000]
         '''
+        print np.shape(x_train), np.shape(x_test)
         parameter_start = -4
         parameter_stop = 4
         count = 10.0
