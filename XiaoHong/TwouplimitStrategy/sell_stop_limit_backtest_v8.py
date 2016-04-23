@@ -35,7 +35,7 @@ print ("average return close : %s" %(average_return_close / len(raw_year_data)))
 close_time = range(0,240)
 win_ratio_matrix = []
 average_return_matrix = []
-for ct in (1,close_time) :
+for ct in range(close_time[0]+1,close_time[-1]) :
     print str(close_time.index(ct)) + " of "  + str(len(close_time))
     positive_count = 0.0
     negative_count = 0.0
