@@ -13,5 +13,7 @@
 <path>/${PROJECT_DIR_NAME}/GoogleTrend</path>
 <path>/${PROJECT_DIR_NAME}/XiaoHong</path>
 <path>/${PROJECT_DIR_NAME}/PyAlgoTradeTry</path>
+<path>/${PROJECT_DIR_NAME}/Wind</path>
+<path>/${PROJECT_DIR_NAME}/Paper</path>
 </pydev_pathproperty>
 </pydev_project>
