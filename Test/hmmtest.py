@@ -16,7 +16,7 @@ df =pd.read_csv('/home/peng/workspace/datafortrainCao.csv',header=None)
 
 dates = np.array(df[0])
 close_v = np.array(df[2])
-volume1 = np.array(df[3])[1:]
+volume = np.array(df[3])[1:]
 label= np.array(df[4])
 
 
@@ -27,8 +27,8 @@ diff = close_v[1:] - close_v[:-1]
 dates = dates[1:]
 close_v = close_v[1:]
 
-# pack diff and volume1 for training
-X = np.column_stack([volume1])
+# pack diff and volume for training
+X = np.column_stack([volume])
 
   ###############################################################################
 # Run Gaussian HMM
