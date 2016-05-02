@@ -6,8 +6,10 @@ Learning to Trade via Direct Reinforcement
 # return = prize(t) - prize(t-1)
 # input only return of commodity of each time
 
-flow:
+Main flow:
+1. Prepare time series data as input
 1. Initialize parameter
+position size , transcation cost, initial wealth
 2. Iteration:
     2.1 compute F(t) using F(t-1) and theta(t-1)
     2.2 compute U(t) using F(t)
@@ -153,7 +155,7 @@ def trainingDL(parameters, ret_series, training_interval):
     for i in range(len(ret_series)-training_interval) :
         # calculate new decision function
         new_f = parameters.calculate_decision_function(ret_series[i:i+training_interval])
-        parameters.
+        #parameters.
         if i == 0 :
             parameters.calculate_decision_function.append(new_f)
             parameters.update_value(new_f,"decision")
