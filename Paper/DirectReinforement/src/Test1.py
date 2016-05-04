@@ -155,6 +155,7 @@ class parameters_container():
             new_ret = self.__decision_function[-1] * ret - self.__transaction_cost * abs(self.__decision_function[-1]-self.__decision_function[-2])
         new_ret = new_ret * self.__position_size
         self.__return[-1] = new_ret
+        print new_ret
     
     def update_wealth(self):
         self.__wealth[-1] = sum(self.__return)
@@ -235,9 +236,9 @@ class parameters_container():
         d_Ut_d_v = self.list_add(self.list_multiple(self.list_multiple(d_Ft_d_theata[1], d_Rt_d_Ft),d_Ut_dRt), \
                                  self.list_multiple(d_Ftminus_d_thetaminus[1], d_Rt_d_Ftminus))
         d_Ut_d_w = d_Ut_dRt * d_Rt_d_Ft * d_Ft_d_theata[2] + d_Rt_d_Ftminus * d_Ftminus_d_thetaminus[2]
-        #print d_Ut_d_u
-        #print d_Ut_d_v
-        #print d_Ut_d_w
+        print d_Ut_d_u
+        print d_Ut_d_v
+        print d_Ut_d_w
         self.__u[-1] = self.__learning_rate * d_Ut_d_u + self.__u[-1]
         self.__v[-1] = self.list_add(self.list_multiple(d_Ut_d_v,self.__learning_rate), self.__v[-1])
         self.__w[-1] = self.__learning_rate * d_Ut_d_w + self.__w[-1]
@@ -298,6 +299,7 @@ def run():
     parameters = parameters_container(training_interval)
 
     # training
+    print len(training_series)
     trainingDL(parameters,training_series,training_interval)
 
     '''
