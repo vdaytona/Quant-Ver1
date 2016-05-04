@@ -77,13 +77,13 @@ class parameters_container():
 
     def get_u(self):
         return self.__u
-    
+
     def get_v(self):
         return self.__v
-    
+
     def get_w(self):
         return self.__w
-    
+
     def get_new_v(self):
         new_v = []
         for i in range(self.training_interval) :
@@ -116,7 +116,6 @@ class parameters_container():
     def calculate_new_return(self, ret):
         if len(self.__decision_function) == 1 :
             self.__return.append(0.0)
-            new_ret = self.__decision_function[-1]
         else :
             new_ret = self.__decision_function[-1] * ret - self.__transaction_cost * abs(self.__decision_function[-1]-self.__decision_function[-2])
             new_ret = new_ret * self.__position_size
@@ -134,7 +133,7 @@ class parameters_container():
         self.calculate_new_return(ret)
         self.calculate_new_wealth()
         self.calculate_new_utility()
-    
+
     def update_decision_function(self,ret_series):
         if len(self.__decision_function) == 1 :
             new_f = 0.0
@@ -147,7 +146,7 @@ class parameters_container():
                 new_f += self.__v[-1][i] * ret_series[i]
             new_f += self.__w[-1] + self.__decision_function[-1] * self.__u[-1]
         self.__decision_function[-1] = math.tanh(new_f)
-    
+
     def update_return(self,ret):
         if len(self.__decision_function) == 1 :
             new_ret = self.__decision_function[-1]
@@ -156,13 +155,13 @@ class parameters_container():
         new_ret = new_ret * self.__position_size
         self.__return[-1] = new_ret
         print new_ret
-    
+
     def update_wealth(self):
         self.__wealth[-1] = sum(self.__return)
-            
+
     def update_utility(self):
         self.__utility[-1] = self.__return[-1]
-        
+
     def update_para(self,ret_series, ret):
         self.update_decision_function(ret_series)
         self.update_return(ret)
@@ -236,24 +235,59 @@ class parameters_container():
         d_Ut_d_v = self.list_add(self.list_multiple(self.list_multiple(d_Ft_d_theata[1], d_Rt_d_Ft),d_Ut_dRt), \
                                  self.list_multiple(d_Ftminus_d_thetaminus[1], d_Rt_d_Ftminus))
         d_Ut_d_w = d_Ut_dRt * d_Rt_d_Ft * d_Ft_d_theata[2] + d_Rt_d_Ftminus * d_Ftminus_d_thetaminus[2]
-        print d_Ut_d_u
+        print "Calculated dUt_du : " + str(d_Ut_d_u)
+        estimated_dUt_du = self.derivitive_evaluation("u",ret_series, ret,0.000001)
+        print "Ref dUt_du : " + str(estimated_dUt_du)
         print d_Ut_d_v
         print d_Ut_d_w
         self.__u[-1] = self.__learning_rate * d_Ut_d_u + self.__u[-1]
         self.__v[-1] = self.list_add(self.list_multiple(d_Ut_d_v,self.__learning_rate), self.__v[-1])
         self.__w[-1] = self.__learning_rate * d_Ut_d_w + self.__w[-1]
-        
+
         self.update_para(ret_series, ret)
         #print "sum return : " + str(self.__wealth[-1])
         return d_Ut_d_u, d_Ut_d_v, d_Ut_d_w
 
     def list_multiple(self,list,multiplier) :
         return [x * multiplier for x in list]
-    
+
     def list_add(self,list1,list2):
         for i in range(len(list1)) :
             list1[i] = list1[i] + list2[i]
         return list1
+
+    def derivitive_evaluation(self, item, ret_series, ret, step) :
+        return_now = self.__return[-1]
+        if item == "u" :
+            # calculate initial F(t) when a new loop start
+            if len(self.__u) == 1 :
+                new_f = 0.0
+                for i in range(self.training_interval) :
+                    new_f += self.__v[-1][i] * ret_series[i]
+                    new_f += self.__w[-1]
+            else :
+                new_f = 0.0
+                for i in range(self.training_interval) :
+                    new_f += self.__v[-1][i] * ret_series[i]
+                    new_f += self.__w[-1] + self.__decision_function[-2] * self.__u[-1] * (1 + step)
+            new_ret = self.calculate_new_Rt_for_evaluation(math.tanh(new_f),ret)
+            print "new_ret : " + str(new_ret)
+            print "return_now : " + str(return_now)
+            return (new_ret - return_now) / return_now
+        elif item == "v":
+            return None
+        elif item == "w":
+            return None
+        else :
+            return None
+
+    def calculate_new_Rt_for_evaluation(self,new_ft,ret):
+        if len(self.__decision_function) == 1 :
+            return 0.0
+        else :
+            new_ret = new_ft  * ret - self.__transaction_cost * abs(new_ft - self.__decision_function[-2])
+            new_ret = new_ret * self.__position_size
+            return new_ret
 
 def trainingDL(parameters, ret_series, training_interval):
     threshold = 0.01
@@ -264,7 +298,7 @@ def trainingDL(parameters, ret_series, training_interval):
         if i > 0 :
             Flag = True
             loop = 0
-            while loop < 1000 :
+            while loop < 10 :
                 update_result = parameters.calculate_dUt_dtheata(ret_series[i:i + training_interval],ret_series[i + training_interval])
                 #print update_result[0]
                 #print update_result[1]
