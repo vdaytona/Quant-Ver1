@@ -236,6 +236,7 @@ class parameters_container():
                                  self.list_multiple(d_Ftminus_d_thetaminus[1], d_Rt_d_Ftminus))
         d_Ut_d_w = d_Ut_dRt * d_Rt_d_Ft * d_Ft_d_theata[2] + d_Rt_d_Ftminus * d_Ftminus_d_thetaminus[2]
         print "Calculated dUt_du : " + str(d_Ut_d_u)
+        # to calcualte the dUt_du using plus a minor change to the variable
         estimated_dUt_du = self.derivitive_evaluation("u",ret_series, ret,0.000001)
         print "Ref dUt_du : " + str(estimated_dUt_du)
         print d_Ut_d_v
