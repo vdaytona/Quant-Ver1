@@ -124,7 +124,7 @@ def parserUpDeviationSeven(input):
         oneRecord.__amount = float(amount) # 成交量
         oneRecord.__volume = float(volume) * 10000.0 # 成交金额
         oneRecord.__type = "UpDeviationSevenPercent" # 有价格涨跌幅限制的日收盘价格涨幅偏离值达到7%的前三只证券
-        volume1(code) > 2 :
+        if volume1(code) > 2 :
             security_container[code] = oneRecord
         #print security_container
     
