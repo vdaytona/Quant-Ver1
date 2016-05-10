@@ -175,7 +175,7 @@ class parameters_container():
             if self.__decision_function[-1] > self.__decision_function[-2] :
                 return -1.0 * self.__position_size * self.__transaction_cost
             else :
-                return self.__position_size * self.__transaction_cost
+                return -1.0 * self.__position_size * self.__transaction_cost * self.__decision_function[-1]
 
     def calculate_d_Rt_d_Ftminus(self, ret) :
         if len(self.__decision_function) == 1 :
@@ -191,7 +191,7 @@ class parameters_container():
         if len(self.__decision_function) == 1:
             u = 0.0
         else :
-            u = k * self.__decision_function[-2]
+            u = k * self.__u[-1] * self.__decision_function[-2]
         v = self.list_multiple(self.__v[-1],k)
         w = k
         return u, v, w
@@ -204,7 +204,7 @@ class parameters_container():
             if len(self.__decision_function) == 2 :
                 u = 1.0
             else :
-                u = k * self.__decision_function[-3]
+                u = k * self.__u[-2] * self.__decision_function[-3]
         else :
             u = 1.0
             v = self.get_new_v()
