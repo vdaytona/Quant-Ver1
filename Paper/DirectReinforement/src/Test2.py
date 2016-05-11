@@ -224,7 +224,9 @@ def run():
     # plt.plot(range(len(DL_model.get_decision_function())),DL_model.get_decision_function())
     # plt.show()
     #===========================================================================
-    
+    print str(DL_model.get_u()[-1])
+    print str(DL_model.get_w()[-1])
+    print str(DL_model.get_v()[-1])
     pass
         
 
