@@ -237,7 +237,7 @@ class parameters_container():
         d_Ut_d_w = d_Ut_dRt * d_Rt_d_Ft * d_Ft_d_theata[2] + d_Rt_d_Ftminus * d_Ftminus_d_thetaminus[2]
         print "Calculated dUt_du : " + str(d_Ut_d_u)
         # to calcualte the dUt_du using plus a minor change to the variable
-        estimated_dUt_du = self.derivitive_evaluation("u",ret_series, ret,0.000001)
+        estimated_dUt_du = self.derivitive_evaluation("u",ret_series, ret, 0.000000001)
         print "Ref dUt_du : " + str(estimated_dUt_du)
         print d_Ut_d_v
         print d_Ut_d_w
@@ -265,16 +265,16 @@ class parameters_container():
                 new_f = 0.0
                 for i in range(self.training_interval) :
                     new_f += self.__v[-1][i] * ret_series[i]
-                    new_f += self.__w[-1]
+                new_f += self.__w[-1]
             else :
                 new_f = 0.0
                 for i in range(self.training_interval) :
                     new_f += self.__v[-1][i] * ret_series[i]
-                    new_f += self.__w[-1] + self.__decision_function[-2] * self.__u[-1] * (1 + step)
+                new_f += self.__w[-1] + self.__decision_function[-2] * self.__u[-1] * (1 + step)
             new_ret = self.calculate_new_Rt_for_evaluation(math.tanh(new_f),ret)
             print "new_ret : " + str(new_ret)
             print "return_now : " + str(return_now)
-            return (new_ret - return_now) / return_now
+            return (new_ret - return_now) / step
         elif item == "v":
             return None
         elif item == "w":
@@ -299,7 +299,7 @@ def trainingDL(parameters, ret_series, training_interval):
         if i > 0 :
             Flag = True
             loop = 0
-            while loop < 10 :
+            while loop < 1 :
                 update_result = parameters.calculate_dUt_dtheata(ret_series[i:i + training_interval],ret_series[i + training_interval])
                 #print update_result[0]
                 #print update_result[1]
