@@ -182,7 +182,7 @@ class model() :
             delta_ret = self.calculate_delta_Rt(delta_f,ret_t)
             #print delta_ret
             pd_v = (delta_ret - self.__return[-1]) / step
-            v = self.__w[-1] * (1 + pd_v * self.__learning_rate)
+            v = self.__w[-1] * (1 + pd_v * self.__learning_rate * 100)
             new_v.append(v)
             print "pd_v " + str(pd_v)
         self.__v.append(new_v)
