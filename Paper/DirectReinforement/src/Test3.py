@@ -46,7 +46,7 @@ resource.setrlimit(rsrc, (2048, hard)) #limit to one kilobyte
 
 DELTA_DEV = 0.0001
 UPDATE_STEP = 1
-LEARNING_RATE = 100
+LEARNING_RATE = 1
 TRAINING_LOOP = 20000
 TRAINING_UNITS = 20
 
@@ -112,7 +112,6 @@ class model() :
         for i in range(self.__training_interval) :
             new_v.append(0 / 220.0)
         self.__v.append(new_v)
-        
     
     def calculate_decision_F(self):
         # calculate initial F(t) when a new TRAINING_LOOP start
@@ -181,9 +180,12 @@ class model() :
         # calculate the derivative
         
         if len(self.__u) > 1 :
-            self.update_u(DELTA_DEV, UPDATE_STEP)
-            self.update_w(DELTA_DEV, UPDATE_STEP)
-            self.update_v(DELTA_DEV, UPDATE_STEP)
+            new_u = self.update_u(DELTA_DEV, UPDATE_STEP)
+            new_w = self.update_w(DELTA_DEV, UPDATE_STEP)
+            new_v = self.update_v(DELTA_DEV, UPDATE_STEP)
+            self.__u.append(new_u)
+            self.__w.append(new_w)
+            self.__v.append(new_v)
         else :
             self.__u.append(0 / 220.0)
             self.__w.append(0  / 220.0)
@@ -211,7 +213,7 @@ class model() :
         print "pd_U " + str(pd_u)
         
         new_u = self.__u[-1] + pd_u * self.__learning_rate * UPDATE_STEP
-        self.__u.append(new_u)
+        return new_u
     
     def update_w(self, DELTA_DEV, UPDATE_STEP):
         # calculate the pdR_pdw
@@ -221,13 +223,14 @@ class model() :
         delta_f = 0.0
         for i in range(self.__training_interval) :
             delta_f += self.__v[-1][i] * self.__ret_series[j + i]
-        delta_f += delta_w + self.__decision_function[-2] * self.__u[-2]
+        delta_f += delta_w + self.__decision_function[-2] * self.__u[-1]
         delta_f = math.tanh(delta_f)
         delta_ret = self.calculate_delta_Rt(delta_f,ret_t)
         pd_w = (delta_ret - self.__return[-1]) / DELTA_DEV
         new_w = self.__w[-1] + pd_w * self.__learning_rate * UPDATE_STEP
-        self.__w.append(new_w)
+        
         print "pd_w " + str(pd_w)
+        return new_w
     
     def update_v(self, DELTA_DEV, UPDATE_STEP):
         new_v = []
@@ -243,7 +246,7 @@ class model() :
                     delta_f += delta_v * self.__ret_series[j + i]
                 else:
                     delta_f += self.__v[-1][i] * self.__ret_series[j + i]
-            delta_f += self.__w[-2] + self.__decision_function[-2] * self.__u[-2]
+            delta_f += self.__w[-1] + self.__decision_function[-2] * self.__u[-1]
             delta_f = math.tanh(delta_f)
             #print delta_f
             delta_ret = self.calculate_delta_Rt(delta_f,ret_t)
@@ -252,7 +255,7 @@ class model() :
             v = self.__v[-1][k] + pd_v * self.__learning_rate * UPDATE_STEP
             new_v.append(v)
             print "pd_v " + str(pd_v)
-        self.__v.append(new_v)
+        return new_v
         
     
     def calculate_delta_Rt(self,new_ft,ret):
@@ -295,14 +298,14 @@ def run():
     # 1. get time data series
     data = pd.read_csv("../Data/GBPUSD30.csv",header=None)
     close = data[5].values
-    ret = close[1:] - close[:-1]
+    ret = (close[1:] - close[:-1]) / close[:-1]
     calibrated_ret = return_preprocess(ret)
     
     training_series = calibrated_ret[:-200]
     real_return_series = ret[:-200]
     print len(training_series)
     
-    DL_model = model(TRAINING_UNITS = TRAINING_UNITS, real_ret_series = real_return_series ,ret_series = real_return_series)
+    DL_model = model(TRAINING_UNITS = TRAINING_UNITS, real_ret_series = real_return_series ,ret_series = training_series)
     
     #for i in range(len(training_series) - 20) :
     for i in range(TRAINING_LOOP) :

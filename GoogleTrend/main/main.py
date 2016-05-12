@@ -38,7 +38,7 @@ def processGoogleTrendData(input_data, key_word):
     # create list to store start date and end date of ecah google trend record
     start_date_list = []
     end_date_list = []
-    # loop to split and start and end date from column 'Week'
+    # TRAINING_LOOP to split and start and end date from column 'Week'
     for i in input_data['Week']:
         split_word = i.split('-')
         #print split_word
@@ -174,10 +174,10 @@ def insertIndicator(raw_year_data, key_word,delta_t = 3):
 
 def excuteRandomStrategy(raw_year_data):
     raw_year_data = raw_year_data.set_index([range(0,len(raw_year_data.index))])
-    loop = 1000
+    TRAINING_LOOP = 1000
     #random_strategy_return_R = zeroList(len(raw_year_data.index))
     random_strategy_cumulative_return_R = []
-    for i in range(loop) :
+    for i in range(TRAINING_LOOP) :
         # create n but or sell decision random
         buy_or_sell = randomList(len(raw_year_data.index))
         cumulative_return_R = 0
