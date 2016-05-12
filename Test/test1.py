@@ -14,7 +14,7 @@ nn = Classifier(
     layers=[
         Layer("Rectifier", units=100),
         Layer("Linear")],
-    learning_rate=0.02,
+    LEARNING_RATE=0.02,
     n_iter=10)
 nn.fit(X_train, y_train)
 

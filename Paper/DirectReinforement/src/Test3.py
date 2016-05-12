@@ -1,4 +1,5 @@
 '''
+Based on Test2, add data preprocessing
 Test of Direct Reinforcement Trading based on paper
 "Learning to Trade via Direct Reinforcement"
 
@@ -43,6 +44,12 @@ print 'Soft limit starts as  :', soft
 resource.setrlimit(rsrc, (2048, hard)) #limit to one kilobyte
 
 
+DELTA_DEV = 0.0001
+UPDATE_STEP = 1
+LEARNING_RATE = 100
+TRAINING_LOOP = 20000
+TRAINING_UNITS = 20
+
 class agent():
     # to store the wealth, and decision function to make trading dicision
     def __init__(self, initial_wealth):
@@ -53,10 +60,11 @@ class agent():
 
 class model() :
     # parameter, calculate and the derivative
-    def __init__(self, TRAINING_UNITS, ret_series):
+    def __init__(self, TRAINING_UNITS, real_ret_series, ret_series):
         # parameter need to be optimized
         self.__training_interval = TRAINING_UNITS
         self.__ret_series = ret_series
+        self.__real_ret_series = real_ret_series
         self.__u = []
         self.__w = []
         self.__v = []
@@ -66,13 +74,15 @@ class model() :
 
         # constant
         self.__position_size = 1.0
-        self.__transaction_cost = 0.005
+        self.__transaction_cost = 0.0002
         self.__initial_wealth = 10000.0
-        self.__learning_rate = 10
+        self.__learning_rate = LEARNING_RATE
 
         # sequential data
         self.__decision_function = []
         self.__return = []
+        self.__real_decision_function = []
+        self.__real_return = []
         
     def get_u(self):
         return self.__u
@@ -86,12 +96,21 @@ class model() :
     def get_decision_function(self):
         return self.__decision_function
     
+    def get_real_decision_function(self):
+        return self.__real_decision_function
+    
+    def get_return(self):
+        return self.__return
+    
+    def get_real_return(self):
+        return self.__real_return
+    
     def initial_para(self):
-        self.__u.append(1.0 / 220.0)
-        self.__w.append(1.0  / 220.0)
+        self.__u.append(0 / 220.0)
+        self.__w.append(0  / 220.0)
         new_v = []
         for i in range(self.__training_interval) :
-            new_v.append(1.0 / 220.0)
+            new_v.append(0 / 220.0)
         self.__v.append(new_v)
         
     
@@ -110,6 +129,29 @@ class model() :
                 new_f += self.__v[-1][i] * self.__ret_series[j + i]
             new_f += self.__w[-1] + self.__decision_function[-1] * self.__u[-1]
         self.__decision_function.append(math.tanh(new_f))
+        self.calculate_real_decision_F()
+    
+    def calculate_real_decision_F(self):
+        # calculate initial F(t) when a new TRAINING_LOOP start
+        if len(self.__decision_function) == 0 :
+            self.initial_para()
+            new_f = 0.0
+            for i in range(self.__training_interval) :
+                new_f += self.__v[0][i] * self.__ret_series[0 + i]
+            new_f += self.__w[0]
+        else :
+            j = len(self.__decision_function)
+            new_f = 0.0
+            for i in range(self.__training_interval):
+                new_f += self.__v[-1][i] * self.__ret_series[j + i]
+            new_f += self.__w[-1] + self.__decision_function[-1] * self.__u[-1]
+        new_f = math.tanh(new_f)
+        if new_f > 0.5 :
+            self.__real_decision_function.append(1)
+        elif new_f < -0.5 :
+            self.__real_decision_function.append(-1)
+        else :
+            self.__real_decision_function.append(0)
         
     def calculate_return(self):
         j = len(self.__decision_function) - 1
@@ -121,23 +163,36 @@ class model() :
             new_ret = new_ret * self.__position_size
         #print "return : " + str(ret_t)
         self.__return.append(new_ret)
+        self.calcualte_real_return()
+        
+    def calcualte_real_return(self):
+        j = len(self.__real_decision_function) - 1
+        ret_t = self.__real_ret_series[j + self.__training_interval-1]
+        if len(self.__real_decision_function) == 1 :
+            new_ret = self.__real_decision_function[-1] * ret_t * self.__position_size
+        else :
+            new_ret = self.__real_decision_function[-1] * ret_t - self.__transaction_cost * abs(self.__real_decision_function[-1]-self.__real_decision_function[-2])
+            new_ret = new_ret * self.__position_size
+        #print "return : " + str(ret_t)
+        self.__real_return.append(new_ret)
+        
     
     def update_para(self):
         # calculate the derivative
-        UPDATE_STEP = 0.001
+        
         if len(self.__u) > 1 :
-            self.update_u(UPDATE_STEP)
-            self.update_w(UPDATE_STEP)
-            self.update_v(UPDATE_STEP)
+            self.update_u(DELTA_DEV, UPDATE_STEP)
+            self.update_w(DELTA_DEV, UPDATE_STEP)
+            self.update_v(DELTA_DEV, UPDATE_STEP)
         else :
-            self.__u.append(1.0 / 220.0)
-            self.__w.append(1.0  / 220.0)
+            self.__u.append(0 / 220.0)
+            self.__w.append(0  / 220.0)
             self.__v.append(self.__v[-1])
         
     
-    def update_u(self, UPDATE_STEP):
+    def update_u(self, DELTA_DEV, UPDATE_STEP):
         # calculate the pdR_pdu
-        delta_u = self.__u[-1] + UPDATE_STEP
+        delta_u = self.__u[-1] + DELTA_DEV
         j = len(self.__decision_function) - 1
         ret_t = self.__ret_series[j + self.__training_interval-1]        
         delta_f = 0.0
@@ -146,21 +201,21 @@ class model() :
         delta_f += self.__w[-1] + self.__decision_function[-2] * delta_u
         delta_f = math.tanh(delta_f)
         delta_ret = self.calculate_delta_Rt(delta_f,ret_t)
-        pd_u = (delta_ret - self.__return[-1]) / UPDATE_STEP
+        pd_u = (delta_ret - self.__return[-1]) / DELTA_DEV
         
         print "f " + str(self.__decision_function[-1])
-        print "delta f "+ str(delta_f)
+        print "DELTA_DEV f "+ str(delta_f)
         print "ret " + str(self.__return[-1])
         print "delta_ret " + str(delta_ret)
         print "real ret : " + str(ret_t)
         print "pd_U " + str(pd_u)
         
-        new_u = self.__u[-1] + pd_u * self.__learning_rate
+        new_u = self.__u[-1] + pd_u * self.__learning_rate * UPDATE_STEP
         self.__u.append(new_u)
     
-    def update_w(self, UPDATE_STEP):
+    def update_w(self, DELTA_DEV, UPDATE_STEP):
         # calculate the pdR_pdw
-        delta_w = self.__w[-1] +UPDATE_STEP
+        delta_w = self.__w[-1] + DELTA_DEV
         j = len(self.__decision_function)-1
         ret_t = self.__ret_series[j + self.__training_interval-1]
         delta_f = 0.0
@@ -169,16 +224,16 @@ class model() :
         delta_f += delta_w + self.__decision_function[-2] * self.__u[-2]
         delta_f = math.tanh(delta_f)
         delta_ret = self.calculate_delta_Rt(delta_f,ret_t)
-        pd_w = (delta_ret - self.__return[-1]) / UPDATE_STEP
-        new_w = self.__w[-1] + pd_w * self.__learning_rate
+        pd_w = (delta_ret - self.__return[-1]) / DELTA_DEV
+        new_w = self.__w[-1] + pd_w * self.__learning_rate * UPDATE_STEP
         self.__w.append(new_w)
         print "pd_w " + str(pd_w)
     
-    def update_v(self, UPDATE_STEP):
+    def update_v(self, DELTA_DEV, UPDATE_STEP):
         new_v = []
         for k in range(self.__training_interval) :
             # calculate the pdR_pdv for each v
-            delta_v = self.__v[-1][k] +UPDATE_STEP
+            delta_v = self.__v[-1][k] + DELTA_DEV
             j = len(self.__decision_function) - 1
             ret_t = self.__ret_series[j + self.__training_interval-1]
             delta_f = 0.0
@@ -193,8 +248,8 @@ class model() :
             #print delta_f
             delta_ret = self.calculate_delta_Rt(delta_f,ret_t)
             #print delta_ret
-            pd_v = (delta_ret - self.__return[-1]) / UPDATE_STEP
-            v = self.__v[-1][k] + pd_v * self.__learning_rate * 1000000
+            pd_v = (delta_ret - self.__return[-1]) / DELTA_DEV
+            v = self.__v[-1][k] + pd_v * self.__learning_rate * UPDATE_STEP
             new_v.append(v)
             print "pd_v " + str(pd_v)
         self.__v.append(new_v)
@@ -209,16 +264,46 @@ class model() :
             new_ret = new_ret * self.__position_size
             return new_ret
 
+def return_preprocess(return_series):
+    #===========================================================================
+    # # standardized to [-1 : 1]
+    # max_ret = max(return_series)
+    # min_ret = min(return_series)
+    # print max_ret
+    # print min_ret
+    # positive_scale = 1 / max_ret
+    # negative_scale = 1 / abs(min_ret)
+    # new_ret = []
+    # for i in return_series :
+    #     if i > 0:
+    #         new_ret.append(i * positive_scale * 10)
+    #     elif i < 0 :
+    #         new_ret.append(i * negative_scale * 10)
+    #     else :
+    #         new_ret.append(0.0)
+    #===========================================================================
+            
+    # divide by std
+    return_series = np.array(return_series)
+    std = np.std(return_series)
+    return_series = return_series / std / (TRAINING_UNITS / 2)
+    new_ret = return_series.tolist()
+    #print new_ret
+    return new_ret
+
 def run():
     # 1. get time data series
     data = pd.read_csv("../Data/GBPUSD30.csv",header=None)
     close = data[5].values
     ret = close[1:] - close[:-1]
-    training_series = ret[:-200]
+    calibrated_ret = return_preprocess(ret)
+    
+    training_series = calibrated_ret[:-200]
+    real_return_series = ret[:-200]
     print len(training_series)
-    TRAINING_UNITS = 30
-    DL_model = model(TRAINING_UNITS = TRAINING_UNITS, ret_series = training_series)
-    TRAINING_LOOP = 20000
+    
+    DL_model = model(TRAINING_UNITS = TRAINING_UNITS, real_ret_series = real_return_series ,ret_series = real_return_series)
+    
     #for i in range(len(training_series) - 20) :
     for i in range(TRAINING_LOOP) :
         print i
@@ -231,21 +316,24 @@ def run():
     plt.show()
     plt.plot(range(len(DL_model.get_w())),DL_model.get_w())
     plt.show()
-    plt.plot(range(len(DL_model.get_v())),map(list, zip(*DL_model.get_v()))[-5])
+    plt.plot(range(len(DL_model.get_v())),map(list, zip(*DL_model.get_v()))[-1])
     plt.show()
     fig, ax1 = plt.subplots()
-    ax1.plot(range(len(DL_model.get_decision_function())),DL_model.get_decision_function())
+    ax1.plot(range(len(DL_model.get_real_decision_function())),DL_model.get_real_decision_function())
+    ax1.plot(range(len(DL_model.get_decision_function())),DL_model.get_decision_function(), "g")
     ax1.set_ylim([-1.2,1.2])
     ax2 = ax1.twinx()
-    ax2.plot(range(len(DL_model.get_decision_function())),close[1 + TRAINING_UNITS :  1 + TRAINING_UNITS + TRAINING_LOOP],'r')
+    ax2.plot(range(len(DL_model.get_real_decision_function())),close[1 + TRAINING_UNITS :  1 + TRAINING_UNITS + TRAINING_LOOP],'r')
     plt.show()
     
-    
+    accumulate_return = [1]
+    for ret in DL_model.get_real_return() :
+        accumulate_return.append(accumulate_return[-1] * (1 + ret))
+    plt.plot(range(len(accumulate_return)),accumulate_return)
+    plt.show()
     
     print str(DL_model.get_u()[-1])
     print str(DL_model.get_w()[-1])
     print str(DL_model.get_v()[-1])
-    pass
-        
 
 if __name__ == "__main__": run()

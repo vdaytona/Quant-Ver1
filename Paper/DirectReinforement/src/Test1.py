@@ -40,9 +40,9 @@ from __builtin__ import str
 
 class parameters_container():
 
-    def __init__(self, training_interval):
+    def __init__(self, TRAINING_UNITS):
         # parameter need to be optimized
-        self.training_interval = training_interval
+        self.training_interval = TRAINING_UNITS
         self.__u = []
         self.__w = []
         self.__v = []
@@ -94,7 +94,7 @@ class parameters_container():
         self.__ret_series.append(ret_series)
 
     def calculate_new_decision_function(self, ret_series):
-        # calculate initial F(t) when a new loop start
+        # calculate initial F(t) when a new TRAINING_LOOP start
         new_u = 1.0
         new_w = 1.0
         new_v = self.get_new_v()
@@ -257,10 +257,10 @@ class parameters_container():
             list1[i] = list1[i] + list2[i]
         return list1
 
-    def derivitive_evaluation(self, item, ret_series, ret, step) :
+    def derivitive_evaluation(self, item, ret_series, ret, UPDATE_STEP) :
         return_now = self.__return[-1]
         if item == "u" :
-            # calculate initial F(t) when a new loop start
+            # calculate initial F(t) when a new TRAINING_LOOP start
             if len(self.__u) == 1 :
                 new_f = 0.0
                 for i in range(self.training_interval) :
@@ -270,11 +270,11 @@ class parameters_container():
                 new_f = 0.0
                 for i in range(self.training_interval) :
                     new_f += self.__v[-1][i] * ret_series[i]
-                new_f += self.__w[-1] + self.__decision_function[-2] * self.__u[-1] * (1 + step)
+                new_f += self.__w[-1] + self.__decision_function[-2] * self.__u[-1] * (1 + UPDATE_STEP)
             new_ret = self.calculate_new_Rt_for_evaluation(math.tanh(new_f),ret)
             print "new_ret : " + str(new_ret)
             print "return_now : " + str(return_now)
-            return (new_ret - return_now) / step
+            return (new_ret - return_now) / UPDATE_STEP
         elif item == "v":
             return None
         elif item == "w":
@@ -290,24 +290,24 @@ class parameters_container():
             new_ret = new_ret * self.__position_size
             return new_ret
 
-def trainingDL(parameters, ret_series, training_interval):
+def trainingDL(parameters, ret_series, TRAINING_UNITS):
     threshold = 0.01
-    for i in range(len(ret_series)-training_interval-1) :
+    for i in range(len(ret_series)-TRAINING_UNITS-1) :
         print i
         # calculate new decision function
-        parameters.calculate_new_para(ret_series[i:i + training_interval],ret_series[i + training_interval])
+        parameters.calculate_new_para(ret_series[i:i + TRAINING_UNITS],ret_series[i + TRAINING_UNITS])
         if i > 0 :
             Flag = True
-            loop = 0
-            while loop < 1 :
-                update_result = parameters.calculate_dUt_dtheata(ret_series[i:i + training_interval],ret_series[i + training_interval])
+            TRAINING_LOOP = 0
+            while TRAINING_LOOP < 1 :
+                update_result = parameters.calculate_dUt_dtheata(ret_series[i:i + TRAINING_UNITS],ret_series[i + TRAINING_UNITS])
                 #print update_result[0]
                 #print update_result[1]
                 #print update_result[2]
                 if abs(update_result[0]) < threshold and abs(update_result[2]) < threshold and check_list_threshold(update_result[1],threshold):
                     Flag = False
-                loop += 1
-                #print loop
+                TRAINING_LOOP += 1
+                #print TRAINING_LOOP
         print "decision F: " + str(parameters.get_decision_function()[-1])
         print "U : " + str(parameters.get_u()[-1])
         print "V : " + str(parameters.get_v()[-1])
@@ -330,12 +330,12 @@ def run():
     print close
     ret = close[1:] - close[:-1]
     training_series = ret[:-200]
-    training_interval = 60
-    parameters = parameters_container(training_interval)
+    TRAINING_UNITS = 60
+    parameters = parameters_container(TRAINING_UNITS)
 
     # training
     print len(training_series)
-    trainingDL(parameters,training_series,training_interval)
+    trainingDL(parameters,training_series,TRAINING_UNITS)
 
     '''
     # 2. Iteration
