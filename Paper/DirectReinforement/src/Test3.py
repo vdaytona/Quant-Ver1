@@ -36,10 +36,10 @@ RETURN_SERIES_MULTIPLIER = 1.0
 DELTA_DEV = 0.0001
 UPDATE_STEP = 1.0
 LEARNING_RATE = 0.05
-TRAINING_LOOP = 60000
+TRAINING_LOOP = 5000
 TRAINING_UNITS = 20
-HIGH_Threshold = 0.3
-LOW_Threshold = -0.3
+HIGH_Threshold = 0.1
+LOW_Threshold = -0.1
 
 
 
@@ -350,5 +350,6 @@ def run():
         if DL_model.get_real_decision_function()[i] != DL_model.get_real_decision_function()[i-1] :
             trading_count += 1
     print trading_count
+    print accumulate_return[-1]
 
 if __name__ == "__main__": run()

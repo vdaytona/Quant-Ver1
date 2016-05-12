@@ -43,8 +43,6 @@ TRAINING_UNITS = 20
 HIGH_Threshold = 0.3
 LOW_Threshold = -0.3
 
-
-
 class agent():
     # to store the wealth, and decision function to make trading dicision
     def __init__(self, initial_wealth):
@@ -337,13 +335,17 @@ def run():
     return_list = []
     trade_count_list = []
     
+    print LEARNING_RATE_LIST
+    print HIGH_THRESHOLD_LIST
+    
     for learning_rate in LEARNING_RATE_LIST :
-        LEARNING_RATE = learning_rate
+        global LEARNING_RATE, HIGH_Threshold, LOW_Threshold 
+        LEARNING_RATE= learning_rate
         for threshold in range(len(HIGH_THRESHOLD_LIST)) :
-            print str(loop_count) + " of " + str(loop)  
+            print str(loop_count) + " of " + str(loop)
             HIGH_Threshold = HIGH_THRESHOLD_LIST[threshold]
             LOW_Threshold = LOW_THRESHOLD_LIST[threshold]
-            DL_model = DLmodel(TRAINING_UNITS = TRAINING_UNITS, real_ret_series = real_return_series , ret_series = training_series)
+            DL_model = DLmodel(TRAINING_UNITS = TRAINING_UNITS, real_ret_series = real_return_series , ret_series = training_series,)
             #for i in range(len(training_series) - 20) :
             for i in range(TRAINING_LOOP) :
                 #print i
@@ -351,56 +353,25 @@ def run():
                 DL_model.calculate_return()
                 DL_model.update_para()
                 
-                accumulate_return = [1]
-                for ret in DL_model.get_real_return() :
-                    accumulate_return.append(accumulate_return[-1] + ret)
-                trading_count = 0
-                for i in range(1 , len(DL_model.get_real_decision_function())-1) :
-                    if DL_model.get_real_decision_function()[i] != DL_model.get_real_decision_function()[i-1] :
-                        trading_count += 1
-                
+            accumulate_return = [1]
+            for ret in DL_model.get_real_return() :
+                accumulate_return.append(accumulate_return[-1] + ret)
+            trading_count = 0
+            for i in range(1 , len(DL_model.get_real_decision_function())-1) :
+                if DL_model.get_real_decision_function()[i] != DL_model.get_real_decision_function()[i-1] :
+                    trading_count += 1
             learning_list.append(LEARNING_RATE)
             threshold_list.append(HIGH_Threshold)
             return_list.append(accumulate_return[-1])
             trade_count_list.append(trading_count)          
             loop_count += 1
             del DL_model
+            print accumulate_return[-1]
     
     result["LEARNING_RATE"] = learning_list
     result["THRESHOLD"] = threshold_list
     result["RETURN"] = return_list
     result["TRADE_COUNT"] = trade_count_list
     result.to_csv("./result.csv")
-    
-    
-    #===========================================================================
-    # print trading_count
-    # print str(DL_model.get_u()[-1])
-    # print str(DL_model.get_w()[-1])
-    # print str(DL_model.get_v()[-1])
-    #===========================================================================
-    
-    
-    #print DL_model.get_u()
-    #===========================================================================
-    # plt.plot(range(len(DL_model.get_u())),DL_model.get_u())
-    # plt.show()
-    # plt.plot(range(len(DL_model.get_w())),DL_model.get_w())
-    # plt.show()
-    # plt.plot(range(len(DL_model.get_v())),map(list, zip(*DL_model.get_v()))[-1])
-    # plt.show()
-    # fig, ax1 = plt.subplots()
-    # ax1.plot(range(len(DL_model.get_real_decision_function())),DL_model.get_real_decision_function())
-    # ax1.plot(range(len(DL_model.get_decision_function())),DL_model.get_decision_function(), "g")
-    # ax1.set_ylim([-1.2,1.2])
-    # ax2 = ax1.twinx()
-    # ax2.plot(range(len(DL_model.get_real_decision_function())),close[1 + TRAINING_UNITS :  1 + TRAINING_UNITS + TRAINING_LOOP],'r')
-    # plt.show()
-    # fig, ax1 = plt.subplots()
-    # ax1.plot(range(len(accumulate_return)),accumulate_return)
-    # ax2 = ax1.twinx()
-    # ax2.plot(range(len(accumulate_return)),close[TRAINING_UNITS :  1 + TRAINING_UNITS + TRAINING_LOOP],'r')
-    # plt.show()
-    #===========================================================================
 
 if __name__ == "__main__": run()
