@@ -33,15 +33,6 @@ import pandas as pd
 import math
 import numpy as np
 import matplotlib.pyplot as plt
-from __builtin__ import str
-import resource
-
-rsrc = resource.RLIMIT_DATA
-soft, hard = resource.getrlimit(rsrc)
-print 'Soft limit starts as  :', soft
-
-resource.setrlimit(rsrc, (2048, hard)) #limit to one kilobyte
-
 
 class agent():
     # to store the wealth, and decision function to make trading dicision
@@ -218,7 +209,7 @@ def run():
     print len(training_series)
     TRAINING_UNITS = 30
     DL_model = model(TRAINING_UNITS = TRAINING_UNITS, ret_series = training_series)
-    TRAINING_LOOP = 20000
+    TRAINING_LOOP = 60000
     #for i in range(len(training_series) - 20) :
     for i in range(TRAINING_LOOP) :
         print i
@@ -245,7 +236,6 @@ def run():
     print str(DL_model.get_u()[-1])
     print str(DL_model.get_w()[-1])
     print str(DL_model.get_v()[-1])
-    pass
         
 
 if __name__ == "__main__": run()
