@@ -1,7 +1,9 @@
 '''
-Based on Test2, add data preprocessing
+Based on Test3, add data preprocessing
 Test of Direct Reinforcement Trading based on paper
 "Learning to Trade via Direct Reinforcement"
+
+Loop the parameter : learning rate , and high/low trading threshold to find best parameter combination
 
 Utility function use as wealth directly
 return = prize(t) - prize(t-1)
@@ -36,7 +38,7 @@ RETURN_SERIES_MULTIPLIER = 1.0
 DELTA_DEV = 0.0001
 UPDATE_STEP = 1.0
 LEARNING_RATE = 0.05
-TRAINING_LOOP = 60000
+TRAINING_LOOP = 10000
 TRAINING_UNITS = 20
 HIGH_Threshold = 0.3
 LOW_Threshold = -0.3
@@ -203,12 +205,14 @@ class DLmodel() :
         delta_ret = self.calculate_delta_Rt(delta_f,ret_t)
         pd_u = (delta_ret - self.__return[-1]) / DELTA_DEV
         
-        print "f " + str(self.__decision_function[-1])
-        print "delta_f "+ str(delta_f)
-        print "ret " + str(self.__return[-1])
-        print "delta_ret " + str(delta_ret)
-        print "real ret : " + str(ret_t)
-        print "pd_U " + str(pd_u)
+        #=======================================================================
+        # print "f " + str(self.__decision_function[-1])
+        # print "delta_f "+ str(delta_f)
+        # print "ret " + str(self.__return[-1])
+        # print "delta_ret " + str(delta_ret)
+        # print "real ret : " + str(ret_t)
+        # print "pd_U " + str(pd_u)
+        #=======================================================================
         
         new_u = self.__u[-1] + pd_u * LEARNING_RATE * UPDATE_STEP
         return new_u
@@ -230,7 +234,7 @@ class DLmodel() :
         pd_w = (delta_ret - self.__return[-1]) / DELTA_DEV
         new_w = self.__w[-1] + pd_w * LEARNING_RATE * UPDATE_STEP
         
-        print "pd_w " + str(pd_w)
+        #print "pd_w " + str(pd_w)
         return new_w
     
     def update_v(self, DELTA_DEV, UPDATE_STEP):
@@ -258,7 +262,7 @@ class DLmodel() :
             pd_v = (delta_ret - self.__return[-1]) / DELTA_DEV
             v = self.__v[-1][k] + pd_v * LEARNING_RATE * UPDATE_STEP
             new_v.append(v)
-            print "pd_v" + str(k) + " " + str(pd_v)
+            #print "pd_v" + str(k) + " " + str(pd_v)
         return new_v
         
     
@@ -306,49 +310,97 @@ def run():
     
     training_series = calibrated_ret[:-200]
     real_return_series = ret[:-200]
-    print len(training_series)
+    #print len(training_series)
     
-    DL_model = DLmodel(TRAINING_UNITS = TRAINING_UNITS, real_ret_series = real_return_series ,ret_series = training_series)
     
-    #for i in range(len(training_series) - 20) :
-    for i in range(TRAINING_LOOP) :
-        print i
-        DL_model.calculate_decision_F()
-        DL_model.calculate_return()
-        DL_model.update_para()
+    LEARNING_RATE_LIST = []
+    for i in range(50) :
+        LEARNING_RATE_LIST.append(0.01 + 0.02 * i)
+    LEARNING_RATE_LIST.append(1.0)
+    for i in range(2,32,2) :
+        LEARNING_RATE_LIST.append(float(i))
+    HIGH_THRESHOLD_LIST = []
+    LOW_THRESHOLD_LIST = []
+    for i in range(1, 10) :
+        HIGH_THRESHOLD_LIST.append( i / 10.0)
+        LOW_THRESHOLD_LIST.append( i / -10.0)
+    
+    #print LEARNING_RATE_LIST
+    #print HIGH_THRESHOLD_LIST
+    #print LOW_THRESHOLD_LIST
+    loop = len(LEARNING_RATE_LIST) * len(HIGH_THRESHOLD_LIST)
+    loop_count = 1
+    
+    result = pd.DataFrame()
+    learning_list = []
+    threshold_list = []
+    return_list = []
+    trade_count_list = []
+    
+    for learning_rate in LEARNING_RATE_LIST :
+        LEARNING_RATE = learning_rate
+        for threshold in range(len(HIGH_THRESHOLD_LIST)) :
+            print str(loop_count) + " of " + str(loop)  
+            HIGH_Threshold = HIGH_THRESHOLD_LIST[threshold]
+            LOW_Threshold = LOW_THRESHOLD_LIST[threshold]
+            DL_model = DLmodel(TRAINING_UNITS = TRAINING_UNITS, real_ret_series = real_return_series , ret_series = training_series)
+            #for i in range(len(training_series) - 20) :
+            for i in range(TRAINING_LOOP) :
+                #print i
+                DL_model.calculate_decision_F()
+                DL_model.calculate_return()
+                DL_model.update_para()
+                
+                accumulate_return = [1]
+                for ret in DL_model.get_real_return() :
+                    accumulate_return.append(accumulate_return[-1] + ret)
+                trading_count = 0
+                for i in range(1 , len(DL_model.get_real_decision_function())-1) :
+                    if DL_model.get_real_decision_function()[i] != DL_model.get_real_decision_function()[i-1] :
+                        trading_count += 1
+                
+            learning_list.append(LEARNING_RATE)
+            threshold_list.append(HIGH_Threshold)
+            return_list.append(accumulate_return[-1])
+            trade_count_list.append(trading_count)          
+            loop_count += 1
+            del DL_model
+    
+    result["LEARNING_RATE"] = learning_list
+    result["THRESHOLD"] = threshold_list
+    result["RETURN"] = return_list
+    result["TRADE_COUNT"] = trade_count_list
+    result.to_csv("./result.csv")
+    
+    
+    #===========================================================================
+    # print trading_count
+    # print str(DL_model.get_u()[-1])
+    # print str(DL_model.get_w()[-1])
+    # print str(DL_model.get_v()[-1])
+    #===========================================================================
+    
     
     #print DL_model.get_u()
-    plt.plot(range(len(DL_model.get_u())),DL_model.get_u())
-    plt.show()
-    plt.plot(range(len(DL_model.get_w())),DL_model.get_w())
-    plt.show()
-    plt.plot(range(len(DL_model.get_v())),map(list, zip(*DL_model.get_v()))[-1])
-    plt.show()
-    fig, ax1 = plt.subplots()
-    ax1.plot(range(len(DL_model.get_real_decision_function())),DL_model.get_real_decision_function())
-    ax1.plot(range(len(DL_model.get_decision_function())),DL_model.get_decision_function(), "g")
-    ax1.set_ylim([-1.2,1.2])
-    ax2 = ax1.twinx()
-    ax2.plot(range(len(DL_model.get_real_decision_function())),close[1 + TRAINING_UNITS :  1 + TRAINING_UNITS + TRAINING_LOOP],'r')
-    plt.show()
-    
-    
-    accumulate_return = [1]
-    for ret in DL_model.get_real_return() :
-        accumulate_return.append(accumulate_return[-1] + ret)
-    fig, ax1 = plt.subplots()
-    ax1.plot(range(len(accumulate_return)),accumulate_return)
-    ax2 = ax1.twinx()
-    ax2.plot(range(len(accumulate_return)),close[TRAINING_UNITS :  1 + TRAINING_UNITS + TRAINING_LOOP],'r')
-    plt.show()
-    
-    print str(DL_model.get_u()[-1])
-    print str(DL_model.get_w()[-1])
-    print str(DL_model.get_v()[-1])
-    trading_count = 0
-    for i in range(1 , len(DL_model.get_real_decision_function())-1) :
-        if DL_model.get_real_decision_function()[i] != DL_model.get_real_decision_function()[i-1] :
-            trading_count += 1
-    print trading_count
+    #===========================================================================
+    # plt.plot(range(len(DL_model.get_u())),DL_model.get_u())
+    # plt.show()
+    # plt.plot(range(len(DL_model.get_w())),DL_model.get_w())
+    # plt.show()
+    # plt.plot(range(len(DL_model.get_v())),map(list, zip(*DL_model.get_v()))[-1])
+    # plt.show()
+    # fig, ax1 = plt.subplots()
+    # ax1.plot(range(len(DL_model.get_real_decision_function())),DL_model.get_real_decision_function())
+    # ax1.plot(range(len(DL_model.get_decision_function())),DL_model.get_decision_function(), "g")
+    # ax1.set_ylim([-1.2,1.2])
+    # ax2 = ax1.twinx()
+    # ax2.plot(range(len(DL_model.get_real_decision_function())),close[1 + TRAINING_UNITS :  1 + TRAINING_UNITS + TRAINING_LOOP],'r')
+    # plt.show()
+    # fig, ax1 = plt.subplots()
+    # ax1.plot(range(len(accumulate_return)),accumulate_return)
+    # ax2 = ax1.twinx()
+    # ax2.plot(range(len(accumulate_return)),close[TRAINING_UNITS :  1 + TRAINING_UNITS + TRAINING_LOOP],'r')
+    # plt.show()
+    #===========================================================================
 
 if __name__ == "__main__": run()
