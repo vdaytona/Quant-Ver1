@@ -8,7 +8,7 @@ Created on 14 May 2016
 @author: Daytona
 '''
 
-
+import json
 import numpy as np
 import pandas as pd
 from keras.models import Sequential
@@ -29,7 +29,7 @@ class FX_Market():
         self.__previous_action = 1
         
     def get_state(self,t):
-        state = np.zeros((1,100))
+        state = np.zeros((1,self.__look_back_term))
         state[0] = self.__ret_train[t - self.__look_back_term + 1 : t+1]
         return state
     
@@ -72,7 +72,7 @@ class Trading_Memory():
             Q_sa = np.max(model.predict(state_new)[0])
             targets[i, action] = reward + self.discount * Q_sa
         return inputs, targets
-    
+
 def run():
     global ACTION_LIST
     # parameters
@@ -81,9 +81,9 @@ def run():
     transcation_cost = 0.0005
     epoch = 500
     max_memory = 5000
-    hidden_size = 300
-    batch_size = 50
-    look_back_term = 100
+    hidden_size = 100
+    batch_size = 100
+    look_back_term = 20
     
     
     # import return data
@@ -134,9 +134,17 @@ def run():
             
         print "accumulate return : " + str(accumulate_ret[-1])
         return_list.append(accumulate_ret[-1])
+    result = pd.DataFrame()
+    result["accumulate return"] = return_list
+    result.to_csv("./DRL_result_14052016.csv")
     
+    model.save_weights("./model.h5", overwrite=True)
+    with open("model.json", "w") as outfile:
+        json.dump(model.to_json(), outfile)
+        
     plt.plot(range(len(return_list)),return_list)
     plt.show()
+    #test(model, ret_test)
     
     
 if __name__ == '__main__': run()
