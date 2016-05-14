@@ -15,7 +15,6 @@ import pandas as pd
 from keras.models import Sequential
 from keras.layers.core import Dense
 from keras.optimizers import sgd
-from keras.utils.visualize_util import  plot
 import matplotlib.pyplot as plt
 
 ACTION_LIST = [1,0,-1]
