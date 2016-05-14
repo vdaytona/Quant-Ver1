@@ -83,7 +83,7 @@ def run():
     max_memory = 5000
     hidden_size = 100
     batch_size = 100
-    look_back_term = 20
+    look_back_term = 100
     
     
     # import return data
