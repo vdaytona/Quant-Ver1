@@ -17,8 +17,10 @@ from keras.models import Sequential
 from keras.layers.core import Dense
 from keras.optimizers import sgd
 import matplotlib.pyplot as plt
+import datetime
 import logging
 from time import gmtime, strftime
+import math
 
 ACTION_LIST = [1,0,-1]
 
@@ -58,17 +60,17 @@ class Trading_Memory():
         self.__memory.append([state, state_new, action, reward])
         if len(self.__memory) > self.__max_memory:
             del self.__memory[0]
+            
+    def memory_reset(self):
+        self.__memory = list()
 
-    def get_batch(self, model, batch_size=30):
+    def get_batch(self, model):
         len_memory = len(self.__memory)
-
         num_actions = model.output_shape[-1]
-
         env_dim = self.__memory[0][0].shape[1]
-
-        inputs = np.zeros((min(len_memory, batch_size), env_dim))
+        inputs = np.zeros((len_memory, env_dim))
         targets = np.zeros((inputs.shape[0], num_actions))
-
+        
         for i, idx in enumerate(np.random.randint(0, len_memory,size=inputs.shape[0])):
             state, state_new, action, reward = self.__memory[idx]
             inputs[i:i+1] = state
@@ -83,35 +85,38 @@ def run():
     epsilon = .1  # exploration
     num_actions = len(ACTION_LIST)  # [buy, hold, sell]
     transcation_cost = 0.0005
-    epoch = 500
-    max_memory = 5000
-    batch_size = 50
+    epoch = 1000
+    max_memory = 60000
+    #batch_size = 50
     look_back_term = 100
-    hidden_size = 300
+    hidden_size = 200
     act_function = "relu"
-    learning_rate = .2
+    learning_rate = .1
+    training_period = 10000
     
     # log
-    
-    time_start = strftime("%Y-%m-%d %H:%M:%S", gmtime())
+    time_start_epoch = datetime.datetime.now()
+    time_start = strftime("%Y-%m-%d-%H:%M:%S", gmtime())
     log_name = '../log/DRL_Trading_Learning_v1_' + time_start + '.log'
     logging.basicConfig(filename=log_name,level=logging.DEBUG)
+    logging.info("Time start : " + str(time_start))
     logging.info("Parameter setting :")
     logging.info("epsilon = " + str(epsilon))
     logging.info("transaction_cost = " + str(transcation_cost))
     logging.info("epoch ="  + str(epoch))
     logging.info("max_memory = " + str(max_memory))
-    logging.info("batch_size = " + str(batch_size))
+    #logging.info("batch_size = " + str(batch_size))
     logging.info("look back term = " + str(look_back_term))
     logging.info("hidden_size = " + str(hidden_size))
     logging.info("activation function = " + act_function)
     logging.info("learning rate = " + str(learning_rate))
+    logging.info("training period = " + str(training_period))
     print "log start"
     
     # import return data
     data = pd.read_csv("../Data/GBPUSD30.csv",header=None)
     close = data[5].values
-    ret = (close[1:] - close[:-1])[:800]
+    ret = (close[1:] - close[:-1])[:training_period]
     train_percent = 1
     ret_train = ret[:len(ret) * train_percent]
 
@@ -131,6 +136,7 @@ def run():
     for e in range(epoch):
         print "epoch : " + str(e)
         env.reset()
+        trading_his.memory_reset()
         accumulate_ret = [0.0]
         for t in range(look_back_term - 1 , len(ret_train) - 2) :
             state = env.get_state(t)
@@ -147,7 +153,7 @@ def run():
 
             trading_his.memory(state, new_state, action, reward)
 
-            inputs, targets = trading_his.get_batch(model, batch_size=batch_size)
+            inputs, targets = trading_his.get_batch(model)
 
             model.train_on_batch(inputs, targets)
 
@@ -159,15 +165,20 @@ def run():
     result["accumulate return"] = return_list
     result.to_csv("../Result_Data/DRL_result_" + time_start + ".csv")
 
-    #===========================================================================
-    # model.save_weights("./model2.h5", overwrite=True)
-    # with open("model2.json", "w") as outfile:
-    #     json.dump(model.to_json(), outfile)
-    #===========================================================================
+    model.save_weights("../Model/DRL_v1_model_" + time_start + ".h5", overwrite=True)
+    with open("../Model/DRL_v1_model_" + time_start + ".json", "w") as outfile:
+        json.dump(model.to_json(), outfile)
 
     #plt.plot(range(len(return_list)),return_list,"r.")
     #plt.show()
     #test(model, ret_test)
+    
+    time_used = datetime.datetime.now() - time_start_epoch
+    time_used = float(time_used.seconds) / 3600.0
+    logging.info("Processing time : " + str(time_used) + " hours")
+    
+    print "finished !"
 
 
-if __name__ == '__main__': run()
+if __name__ == '__main__':
+    run()
