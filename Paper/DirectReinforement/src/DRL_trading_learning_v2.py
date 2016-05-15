@@ -4,6 +4,8 @@ State: return_t, return_t-1. return_t-2....,return_t-m
 instant reward : Ft * return_t+1
 Q-value : instant reward + max(Q(a|s+1))
 
+Using two layers CNN
+
 training first 160 days, and test with 40 days
 Created on 14 May 2016
 
@@ -15,6 +17,8 @@ import numpy as np
 import pandas as pd
 from keras.models import Sequential
 from keras.layers.core import Dense
+from keras.layers.convolutional import Convolution1D 
+from keras.layers import Embedding
 from keras.optimizers import sgd
 import matplotlib.pyplot as plt
 import logging
@@ -81,9 +85,6 @@ class Trading_Memory():
 def run():
     global ACTION_LIST
     
-    logging.basicConfig(filename='DRL_Trading_Learning_v1.log',level=logging.INFO)
-    logging.info("Start time : " + strftime("%Y-%m-%d %H:%M:%S", gmtime()))
-    
     # parameters
     epsilon = .1  # exploration
     num_actions = len(ACTION_LIST)  # [buy, hold, sell]
@@ -96,6 +97,33 @@ def run():
     act_function = "relu"
     learning_rate = .2
     
+    # import return data
+    data = pd.read_csv("../Data/GBPUSD30.csv",header=None)
+    close = data[5].values
+    ret = (close[1:] - close[:-1])[:1000]
+    train_percent = 1
+    ret_train = ret[:len(ret) * train_percent]
+
+    
+    #model.add(Dense(hidden_size, input_shape=(look_back_term,), activation=act_function))
+    #model.add(Dense(hidden_size, activation=act_function))
+    #model.add(Dense(hidden_size, activation=act_function))
+    #model.add(Dense(num_actions))
+    #model.compile(sgd(lr=learning_rate), "mse")
+    
+    model = Sequential()
+    #model.add(Embedding(look_back_term, embedding_dims, input_length=maxlen, dropout=0.2))
+    model.add(Convolution1D(hidden_size, 2, input_shape=(look_back_term,),activation=act_function))
+    model.add(Dense(num_actions))
+    model.compile(sgd(lr=learning_rate), "mse")
+    
+
+    env = FX_Market(ret_train = ret_train, look_back_term = look_back_term, transaction_cost = transcation_cost)
+
+    trading_his = Trading_Memory(max_memory = max_memory)
+    
+    logging.basicConfig(filename='DRL_Trading_Learning_v2.log',level=logging.INFO)
+    logging.info("Start time : " + strftime("%Y-%m-%d %H:%M:%S", gmtime()))
     logging.info("Parameter setting :")
     logging.info("epsilon = " + str(epsilon))
     logging.info("transaction_cost = " + str(transcation_cost))
@@ -106,25 +134,6 @@ def run():
     logging.info("hidden_size = " + str(hidden_size))
     logging.info("activation function = " + act_function)
     logging.info("learning rate" + str(learning_rate))
-
-
-    # import return data
-    data = pd.read_csv("../Data/GBPUSD30.csv",header=None)
-    close = data[5].values
-    ret = (close[1:] - close[:-1])[:1000]
-    train_percent = 1
-    ret_train = ret[:len(ret) * train_percent]
-
-    model = Sequential()
-    model.add(Dense(hidden_size, input_shape=(look_back_term,), activation=act_function))
-    model.add(Dense(hidden_size, activation=act_function))
-    model.add(Dense(hidden_size, activation=act_function))
-    model.add(Dense(num_actions))
-    model.compile(sgd(lr=learning_rate), "mse")
-
-    env = FX_Market(ret_train = ret_train, look_back_term = look_back_term, transaction_cost = transcation_cost)
-
-    trading_his = Trading_Memory(max_memory = max_memory)
 
     # Train
     return_list = []
