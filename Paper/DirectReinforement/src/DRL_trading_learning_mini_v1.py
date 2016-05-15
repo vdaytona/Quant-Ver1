@@ -80,21 +80,20 @@ class Trading_Memory():
 
 def run():
     global ACTION_LIST
-    
-    logging.basicConfig(filename='DRL_Trading_Learning_v1.log',level=logging.INFO)
-    logging.info("Start time : " + strftime("%Y-%m-%d %H:%M:%S", gmtime()))
-    
+    time_start = strftime("%Y-%m-%d %H:%M:%S", gmtime())
+    logging.basicConfig(filename='DRL_Trading_Learning_v1_' + time_start + '.log',level=logging.INFO)
+    logging.info("Start time : " + time_start)
+
     # parameters
     epsilon = .1  # exploration
     num_actions = len(ACTION_LIST)  # [buy, hold, sell]
     transcation_cost = 0.0005
-    epoch = 200
-    max_memory = 1000
+    epoch = 500
+    max_memory = 800
     batch_size = max_memory
     look_back_term = 100
     hidden_size = look_back_term
     act_function = "relu"
-    
     logging.info("Parameter setting :")
     logging.info("epsilon = " + str(epsilon))
     logging.info("transaction_cost = " + str(transcation_cost))
@@ -153,12 +152,12 @@ def run():
         print "accumulate return : " + str(accumulate_ret[-1])
         logging.info("accumulate return : " + str(accumulate_ret[-1]))
         return_list.append(accumulate_ret[-1])
-        
+
 #===============================================================================
 #     result = pd.DataFrame()
 #     result["accumulate return"] = return_list
 #     result.to_csv("./DRL_result_1_14052016.csv")
-# 
+#
 #     model.save_weights("./model2.h5", overwrite=True)
 #     with open("model2.json", "w") as outfile:
 #         json.dump(model.to_json(), outfile)
