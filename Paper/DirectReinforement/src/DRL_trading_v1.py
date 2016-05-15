@@ -24,47 +24,47 @@ class FX_Market():
         self.__look_back_term = look_back_term
         self.__previous_action = 1
         self.__transaction_cost = transaction_cost
-        
+
     def reset(self):
         self.__previous_action = 1
-        
+
     def get_state(self,t):
         state = np.zeros((1,self.__look_back_term))
         state[0] = self.__ret_train[t - self.__look_back_term + 1 : t+1]
         return state
-    
+
     def get_instant_reward(self, t , action):
         return ACTION_LIST[action] * self.__ret_train[t+1] - \
             self.__transaction_cost * abs(ACTION_LIST[self.__previous_action] - ACTION_LIST[action])
-    
+
     def act(self, t, action):
         state_new = self.get_state(t + 1)
         reward = self.get_instant_reward(t, action)
         self.__previous_action = action
         return state_new, reward
-    
-    
+
+
 class Trading_Memory():
     def __init__(self,max_memory, discount = 0.9):
         self.__max_memory = max_memory
         self.__memory = list()
         self.discount = discount
-        
+
     def memory(self,state, state_new, action, reward):
         self.__memory.append([state, state_new, action, reward])
         if len(self.__memory) > self.__max_memory:
             del self.__memory[0]
-    
+
     def get_batch(self, model, batch_size=30):
         len_memory = len(self.__memory)
-        
+
         num_actions = model.output_shape[-1]
-        
+
         env_dim = self.__memory[0][0].shape[1]
-        
+
         inputs = np.zeros((min(len_memory, batch_size), env_dim))
         targets = np.zeros((inputs.shape[0], num_actions))
-        
+
         for i, idx in enumerate(np.random.randint(0, len_memory,size=inputs.shape[0])):
             state, state_new, action, reward = self.__memory[idx]
             inputs[i:i+1] = state
@@ -79,13 +79,13 @@ def run():
     epsilon = .1  # exploration
     num_actions = len(ACTION_LIST)  # [buy, hold, sell]
     transcation_cost = 0.0005
-    epoch = 500
+    epoch = 1000
     max_memory = 5000
-    hidden_size = 100
-    batch_size = 100
+    hidden_size = 300
+    batch_size = 1000
     look_back_term = 100
-    
-    
+
+
     # import return data
     data = pd.read_csv("../Data/GBPUSD30.csv",header=None)
     close = data[5].values
@@ -93,19 +93,19 @@ def run():
     train_percent = 0.8
     ret_train = ret[:len(ret) * train_percent]
     ret_test = ret[len(ret) :]
-    
+
     model = Sequential()
     model.add(Dense(hidden_size, input_shape=(look_back_term,), activation='relu'))
     model.add(Dense(hidden_size, activation='relu'))
     model.add(Dense(hidden_size, activation='relu'))
     model.add(Dense(num_actions))
-    
+
     model.compile(sgd(lr=.2), "mse")
-    
+
     env = FX_Market(ret_train = ret_train, look_back_term = look_back_term, transaction_cost = transcation_cost)
-    
+
     trading_his = Trading_Memory(max_memory = max_memory)
-    
+
     # Train
     return_list = []
     for e in range(epoch):
@@ -118,33 +118,33 @@ def run():
             if np.random.rand() < epsilon:
                 action = np.random.randint(0, num_actions, size=1)
             else:
-                
+
                 q = model.predict(state)
                 action = np.argmax(q[0])
-            
+
             new_state, reward = env.act(t, action)
-            
+
             accumulate_ret.append(accumulate_ret[-1] + reward)
-            
+
             trading_his.memory(state, new_state, action, reward)
-            
+
             inputs, targets = trading_his.get_batch(model, batch_size=batch_size)
-            
+
             model.train_on_batch(inputs, targets)
-            
+
         print "accumulate return : " + str(accumulate_ret[-1])
         return_list.append(accumulate_ret[-1])
     result = pd.DataFrame()
     result["accumulate return"] = return_list
-    result.to_csv("./DRL_result_14052016.csv")
-    
-    model.save_weights("./model.h5", overwrite=True)
-    with open("model.json", "w") as outfile:
+    result.to_csv("./DRL_result_1_14052016.csv")
+
+    model.save_weights("./model2.h5", overwrite=True)
+    with open("model2.json", "w") as outfile:
         json.dump(model.to_json(), outfile)
-        
-    plt.plot(range(len(return_list)),return_list)
-    plt.show()
+
+    #plt.plot(range(len(return_list)),return_list)
+    #plt.show()
     #test(model, ret_test)
-    
-    
+
+
 if __name__ == '__main__': run()
