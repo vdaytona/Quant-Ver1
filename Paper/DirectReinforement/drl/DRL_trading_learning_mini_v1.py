@@ -18,7 +18,6 @@ from keras.layers.core import Dense
 from keras.optimizers import sgd
 import matplotlib.pyplot as plt
 import logging
-import datetime
 from time import gmtime, strftime
 
 ACTION_LIST = [1,0,-1]
@@ -80,25 +79,23 @@ class Trading_Memory():
 
 def run():
     global ACTION_LIST
-    time_start = strftime("%Y-%m-%d %H:%M:%S", gmtime())
-    logging.basicConfig(filename='DRL_Trading_Learning_v1_' + time_start + '.log',level=logging.INFO)
-    logging.info("Start time : " + time_start)
-
     # parameters
     epsilon = .1  # exploration
     num_actions = len(ACTION_LIST)  # [buy, hold, sell]
     transcation_cost = 0.0005
     epoch = 500
-    max_memory = 800
-    batch_size = max_memory
+    max_memory = 5000
+    batch_size = 50
     look_back_term = 100
-    hidden_size = look_back_term
+    hidden_size = 300
     act_function = "relu"
-<<<<<<< HEAD
-=======
     learning_rate = .2
     
->>>>>>> 9be9cc2e96d54b237de5d7311dd44260ff3d5ebf
+    # log
+    
+    time_start = strftime("%Y-%m-%d %H:%M:%S", gmtime())
+    log_name = '../log/DRL_Trading_Learning_v1_' + time_start + '.log'
+    logging.basicConfig(filename=log_name,level=logging.DEBUG)
     logging.info("Parameter setting :")
     logging.info("epsilon = " + str(epsilon))
     logging.info("transaction_cost = " + str(transcation_cost))
@@ -108,13 +105,13 @@ def run():
     logging.info("look back term = " + str(look_back_term))
     logging.info("hidden_size = " + str(hidden_size))
     logging.info("activation function = " + act_function)
-    logging.info("learning rate" + str(learning_rate))
-
-
+    logging.info("learning rate = " + str(learning_rate))
+    print "log start"
+    
     # import return data
     data = pd.read_csv("../Data/GBPUSD30.csv",header=None)
     close = data[5].values
-    ret = (close[1:] - close[:-1])[:1000]
+    ret = (close[1:] - close[:-1])[:800]
     train_percent = 1
     ret_train = ret[:len(ret) * train_percent]
 
@@ -158,18 +155,18 @@ def run():
         logging.info("accumulate return : " + str(accumulate_ret[-1]))
         return_list.append(accumulate_ret[-1])
 
-#===============================================================================
-#     result = pd.DataFrame()
-#     result["accumulate return"] = return_list
-#     result.to_csv("./DRL_result_1_14052016.csv")
-#
-#     model.save_weights("./model2.h5", overwrite=True)
-#     with open("model2.json", "w") as outfile:
-#         json.dump(model.to_json(), outfile)
-#===============================================================================
+    result = pd.DataFrame()
+    result["accumulate return"] = return_list
+    result.to_csv("../Result_Data/DRL_result_" + time_start + ".csv")
 
-    plt.plot(range(len(return_list)),return_list,"r.")
-    plt.show()
+    #===========================================================================
+    # model.save_weights("./model2.h5", overwrite=True)
+    # with open("model2.json", "w") as outfile:
+    #     json.dump(model.to_json(), outfile)
+    #===========================================================================
+
+    #plt.plot(range(len(return_list)),return_list,"r.")
+    #plt.show()
     #test(model, ret_test)
 
 
