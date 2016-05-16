@@ -158,10 +158,10 @@ def run():
     
     result = pd.DataFrame()
     result["accumulate return"] = return_list
-    result.to_csv("../Result_Data/DRL_result_" + time_start + ".csv")
+    result.to_csv("../Result_Data/DRL_v4_result_" + time_start + ".csv")
 
-    model.save_weights("../Model/DRL_v1_model_" + time_start + ".h5", overwrite=True)
-    with open("../Model/DRL_v1_model_" + time_start + ".json", "w") as outfile:
+    model.save_weights("../Model/DRL_v4_model_" + time_start + ".h5", overwrite=True)
+    with open("../Model/DRL_v4_model_" + time_start + ".json", "w") as outfile:
         json.dump(model.to_json(), outfile)
 
     #plt.plot(range(len(return_list)),return_list,"r.")
