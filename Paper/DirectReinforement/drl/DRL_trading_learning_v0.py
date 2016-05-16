@@ -16,6 +16,9 @@ from keras.layers.core import Dense
 from keras.optimizers import sgd
 from keras.utils.visualize_util import  plot
 import matplotlib.pyplot as plt
+import datetime
+import logging
+from time import gmtime, strftime
 
 ACTION_LIST = [1,0,-1]
 
@@ -85,11 +88,31 @@ def run():
     hidden_size = 300
     batch_size = 50
     look_back_term = 100
+    training_period = 3000
+    
+    # log
+    time_start_epoch = datetime.datetime.now()
+    time_start = strftime("%Y-%m-%d-%H:%M:%S", gmtime())
+    log_name = '../log/DRL_Trading_Learning_v1_' + time_start + '.log'
+    logging.basicConfig(filename=log_name,level=logging.DEBUG)
+    logging.info("Time start : " + str(time_start))
+    logging.info("Parameter setting :")
+    logging.info("epsilon = " + str(epsilon))
+    logging.info("transaction_cost = " + str(transcation_cost))
+    logging.info("epoch ="  + str(epoch))
+    logging.info("max_memory = " + str(max_memory))
+    #logging.info("batch_size = " + str(batch_size))
+    logging.info("look back term = " + str(look_back_term))
+    logging.info("hidden_size = " + str(hidden_size))
+    logging.info("training period = " + str(training_period))
+    print "log start"
+    
+    
     # import return data
     data = pd.read_csv("../Data/GBPUSD30.csv",header=None)
     close = data[5].values
-    ret = (close[1:] - close[:-1])[:3000]
-    train_percent = 0.8
+    ret = (close[1:] - close[:-1])[:training_period]
+    train_percent = 1
     ret_train = ret[:len(ret) * train_percent]
     ret_test = ret[len(ret) :]
     model = Sequential()
@@ -125,8 +148,15 @@ def run():
             model.train_on_batch(inputs, targets)
         print "accumulate return : " + str(accumulate_ret[-1])
         return_list.append(accumulate_ret[-1])
-    plt.plot(range(len(return_list)),return_list)
-    plt.show()
+        logging.info("accumulate return : " + str(accumulate_ret[-1]))
+        loop_time = datetime.datetime.now() - time_start_epoch
+        time_left = float(loop_time.seconds) * float(epoch - e) / float(epoch) / 3600.0
+        print "left time : " + str(time_left) + " hours"
+    
+    #plt.plot(range(len(return_list)),return_list)
+    #plt.show()
+    
+    print "finished"
 
 
 if __name__ == '__main__': run()

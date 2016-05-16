@@ -134,7 +134,7 @@ def run():
     # Train
     return_list = []
     for e in range(epoch):
-        loop_start = datetime.datetime.now()
+        #loop_start = datetime.datetime.now()
         print "epoch : " + str(e)
         env.reset()
         trading_his.memory_reset()
