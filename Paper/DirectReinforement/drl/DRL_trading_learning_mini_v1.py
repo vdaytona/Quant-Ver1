@@ -162,7 +162,7 @@ def run():
         logging.info("accumulate return : " + str(accumulate_ret[-1]))
         return_list.append(accumulate_ret[-1])
         loop_time = datetime.datetime.now() - time_start_epoch
-        time_left = float(loop_time.seconds) * float(epoch - e) / float(epoch) / 3600.0
+        time_left = float(loop_time.seconds) / 3600.0 / float(e+1) * float(epoch - e + 1)
         print "left time : " + str(time_left) + " hours"
 
 
