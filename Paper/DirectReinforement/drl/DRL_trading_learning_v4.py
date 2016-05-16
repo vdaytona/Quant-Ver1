@@ -95,7 +95,7 @@ def run():
     # log
     time_start_epoch = datetime.datetime.now()
     time_start = strftime("%Y-%m-%d-%H:%M:%S", gmtime())
-    log_name = '../log/DRL_Trading_Learning_v1_' + time_start + '.log'
+    log_name = '../log/DRL_Trading_Learning_v4_' + time_start + '.log'
     logging.basicConfig(filename=log_name,level=logging.DEBUG)
     logging.info("Time start : " + str(time_start))
     logging.info("Parameter setting :")
