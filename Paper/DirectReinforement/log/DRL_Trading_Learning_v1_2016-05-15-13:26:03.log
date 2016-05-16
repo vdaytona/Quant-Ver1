@@ -1,0 +1,21 @@
+INFO:root:Time start : 2016-05-15-13:26:03
+INFO:root:Parameter setting :
+INFO:root:epsilon = 0.1
+INFO:root:transaction_cost = 0.0005
+INFO:root:epoch =1000
+INFO:root:max_memory = 60000
+INFO:root:look back term = 50
+INFO:root:hidden_size = 300
+INFO:root:activation function = relu
+INFO:root:learning rate = 0.1
+INFO:root:training period = 1000
+INFO:root:accumulate return : -0.08985
+INFO:root:accumulate return : -0.12048
+INFO:root:accumulate return : -0.10954
+INFO:root:accumulate return : -0.12269
+INFO:root:accumulate return : -0.08396
+INFO:root:accumulate return : -0.09248
+INFO:root:accumulate return : -0.07687
+INFO:root:accumulate return : -0.09527
+INFO:root:accumulate return : -0.07518
+INFO:root:accumulate return : -0.07974
