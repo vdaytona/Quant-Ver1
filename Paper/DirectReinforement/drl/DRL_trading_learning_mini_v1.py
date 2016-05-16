@@ -71,8 +71,8 @@ class Trading_Memory():
         inputs = np.zeros((len_memory, env_dim))
         targets = np.zeros((inputs.shape[0], num_actions))
         
-        for i, idx in enumerate(np.random.randint(0, len_memory,size=inputs.shape[0])):
-            state, state_new, action, reward = self.__memory[idx]
+        for i, idx in enumerate(range(0, len_memory)):
+            state, state_new, action, reward = self.__memory[len_memory-idx-1]
             inputs[i:i+1] = state
             targets[i] = model.predict(state)[0]
             Q_sa = np.max(model.predict(state_new)[0])
@@ -85,14 +85,14 @@ def run():
     epsilon = .1  # exploration
     num_actions = len(ACTION_LIST)  # [buy, hold, sell]
     transcation_cost = 0.0005
-    epoch = 1000
+    epoch = 500
     max_memory = 60000
     #batch_size = 50
-    look_back_term = 100
-    hidden_size = 200
-    act_function = "relu"
-    learning_rate = .1
-    training_period = 10000
+    look_back_term = 50
+    hidden_size = 300
+    act_function = "sigmoid"
+    learning_rate = 1.0
+    training_period = 100
     
     # log
     time_start_epoch = datetime.datetime.now()
@@ -134,6 +134,7 @@ def run():
     # Train
     return_list = []
     for e in range(epoch):
+        loop_start = datetime.datetime.now()
         print "epoch : " + str(e)
         env.reset()
         trading_his.memory_reset()
@@ -160,6 +161,10 @@ def run():
         print "accumulate return : " + str(accumulate_ret[-1])
         logging.info("accumulate return : " + str(accumulate_ret[-1]))
         return_list.append(accumulate_ret[-1])
+        loop_time = datetime.datetime.now() - time_start_epoch
+        time_left = float(loop_time.seconds) * float(epoch - e) / float(epoch) / 3600.0
+        print "left time : " + str(time_left) + " hours"
+        
 
     result = pd.DataFrame()
     result["accumulate return"] = return_list
@@ -178,7 +183,6 @@ def run():
     logging.info("Processing time : " + str(time_used) + " hours")
     
     print "finished !"
-
-
+    
 if __name__ == '__main__':
     run()
