@@ -1,0 +1,23 @@
+INFO:root:Time start : 2016-05-16-08:43:14
+INFO:root:Parameter setting :
+INFO:root:epsilon = 0.1
+INFO:root:transaction_cost = 0.0005
+INFO:root:epoch =1000
+INFO:root:max_memory = 100000
+INFO:root:batch_size = 50
+INFO:root:look back term = 100
+INFO:root:hidden_size = 300
+INFO:root:training period = 1000
+INFO:root:learning rate = 0.2
+INFO:root:accumulate return : -0.28758
+INFO:root:accumulate return : -0.20344
+INFO:root:accumulate return : -0.14981
+INFO:root:accumulate return : -0.18011
+INFO:root:accumulate return : -0.15865
+INFO:root:accumulate return : -0.10956
+INFO:root:accumulate return : -0.20576
+INFO:root:accumulate return : -0.15233
+INFO:root:accumulate return : -0.14049
+INFO:root:accumulate return : -0.15535
+INFO:root:accumulate return : -0.11688
+INFO:root:accumulate return : -0.11904

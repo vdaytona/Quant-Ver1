@@ -84,14 +84,14 @@ def run():
     epsilon = .1  # exploration
     num_actions = len(ACTION_LIST)  # [buy, hold, sell]
     transcation_cost = 0.0005
-    epoch = 2
+    epoch = 2000
     max_memory = 100000
     hidden_size = 300
     batch_size = 50
     look_back_term = 100
     training_period = 1000
     learning_rate = 0.2
-    
+
     # log
     time_start_epoch = datetime.datetime.now()
     time_start = strftime("%Y-%m-%d-%H:%M:%S", gmtime())
@@ -109,7 +109,7 @@ def run():
     logging.info("training period = " + str(training_period))
     logging.info("learning rate = " + str(learning_rate))
     print "log start"
-    
+
     # import return data
     data = pd.read_csv("../Data/GBPUSD30.csv",header=None)
     close = data[5].values
@@ -125,7 +125,7 @@ def run():
     model.compile(sgd(lr=learning_rate), "mse")
     env = FX_Market(ret_train = ret_train, look_back_term = look_back_term, transaction_cost = transcation_cost)
     trading_his = Trading_Memory(max_memory = max_memory)
-    
+
     # Train
     return_list = []
     for e in range(epoch):
@@ -155,7 +155,7 @@ def run():
         loop_time = datetime.datetime.now() - time_start_epoch
         time_left = float(loop_time.seconds) / 3600.0 / float(e+1) * float(epoch - e + 1)
         print "left time : " + str(time_left) + " hours"
-    
+
     result = pd.DataFrame()
     result["accumulate return"] = return_list
     result.to_csv("../Result_Data/DRL_v4_result_" + time_start + ".csv")
