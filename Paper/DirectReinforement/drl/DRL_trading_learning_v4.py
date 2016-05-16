@@ -85,7 +85,7 @@ def run():
     num_actions = len(ACTION_LIST)  # [buy, hold, sell]
     transcation_cost = 0.0005
     epoch = 2000
-    max_memory = 100000
+    max_memory = 10000
     hidden_size = 300
     batch_size = 50
     look_back_term = 100
@@ -106,14 +106,14 @@ def run():
     logging.info("batch_size = " + str(batch_size))
     logging.info("look back term = " + str(look_back_term))
     logging.info("hidden_size = " + str(hidden_size))
-    logging.info("training period = " + str(training_period))
+    logging.info("training period = 2000 ~ 2000 + " + str(training_period))
     logging.info("learning rate = " + str(learning_rate))
     print "log start"
 
     # import return data
     data = pd.read_csv("../Data/GBPUSD30.csv",header=None)
     close = data[5].values
-    ret = (close[1:] - close[:-1])[1000 : 1000 + training_period]
+    ret = (close[1:] - close[:-1])[2000 : 2000 + training_period]
     train_percent = 1
     ret_train = ret[:len(ret) * train_percent]
     ret_test = ret[len(ret) :]
