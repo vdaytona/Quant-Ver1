@@ -86,7 +86,7 @@ def run():
     num_actions = len(ACTION_LIST)  # [buy, hold, sell]
     transcation_cost = 0.0005
     epoch = 500
-    max_memory = 60000
+    max_memory = 6000
     #batch_size = 50
     look_back_term = 50
     hidden_size = 300
