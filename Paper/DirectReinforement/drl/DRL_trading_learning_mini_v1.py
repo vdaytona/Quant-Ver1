@@ -60,7 +60,7 @@ class Trading_Memory():
         self.__memory.append([state, state_new, action, reward])
         if len(self.__memory) > self.__max_memory:
             del self.__memory[0]
-            
+
     def memory_reset(self):
         self.__memory = list()
 
@@ -70,7 +70,7 @@ class Trading_Memory():
         env_dim = self.__memory[0][0].shape[1]
         inputs = np.zeros((len_memory, env_dim))
         targets = np.zeros((inputs.shape[0], num_actions))
-        
+
         for i, idx in enumerate(range(0, len_memory)):
             state, state_new, action, reward = self.__memory[len_memory-idx-1]
             inputs[i:i+1] = state
@@ -93,7 +93,7 @@ def run():
     act_function = "sigmoid"
     learning_rate = 1.0
     training_period = 100
-    
+
     # log
     time_start_epoch = datetime.datetime.now()
     time_start = strftime("%Y-%m-%d-%H:%M:%S", gmtime())
@@ -112,7 +112,7 @@ def run():
     logging.info("learning rate = " + str(learning_rate))
     logging.info("training period = " + str(training_period))
     print "log start"
-    
+
     # import return data
     data = pd.read_csv("../Data/GBPUSD30.csv",header=None)
     close = data[5].values
@@ -164,7 +164,7 @@ def run():
         loop_time = datetime.datetime.now() - time_start_epoch
         time_left = float(loop_time.seconds) * float(epoch - e) / float(epoch) / 3600.0
         print "left time : " + str(time_left) + " hours"
-        
+
 
     result = pd.DataFrame()
     result["accumulate return"] = return_list
@@ -177,12 +177,12 @@ def run():
     #plt.plot(range(len(return_list)),return_list,"r.")
     #plt.show()
     #test(model, ret_test)
-    
+
     time_used = datetime.datetime.now() - time_start_epoch
     time_used = float(time_used.seconds) / 3600.0
     logging.info("Processing time : " + str(time_used) + " hours")
-    
+
     print "finished !"
-    
+
 if __name__ == '__main__':
     run()
