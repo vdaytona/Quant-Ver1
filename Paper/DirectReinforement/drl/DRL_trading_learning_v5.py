@@ -4,6 +4,8 @@
  instant reward : Ft * return_t 1
  Q-value : instant reward   max(Q(a|s 1))
  Created on 14 May 2016
+ 
+ discount rate - > 0.000009 (four rate, compound annual interest rate is 2%)
 
  @author: Daytona
  '''
@@ -42,7 +44,7 @@ class FX_Market():
         return ACTION_LIST[action] * self.__ret_train[t+1] - \
             self.__transaction_cost * abs(ACTION_LIST[self.__previous_action] - ACTION_LIST[action])
         
-    def act(self, t, action, model, epilson):
+    def act(self, t, action):
         state_new = self.get_state(t + 1)
         reward = self.get_instant_reward(t, action)
         self.__previous_action = action
@@ -83,20 +85,22 @@ def run():
     # parameters
     epsilon = .1  # exploration
     num_actions = len(ACTION_LIST)  # [buy, hold, sell]
-    transcation_cost = 0.0005
-    epoch = 2000
-    max_memory = 100000
+    transcation_cost = 0.0002
+    epoch = 100
+    max_memory = 1000000
     hidden_size = 300
-    batch_size = 50
+    batch_size = 100
     look_back_term = 100
-    training_period = 2000
+    training_period_start = 0
+    training_period_stop = 5000
     learning_rate = 0.2
+    discount_rate = 0.000009
     input_data = "GBPUSD30.csv"
 
     # log
     time_start_epoch = datetime.datetime.now()
     time_start = strftime("%Y-%m-%d-%H-%M-%S", gmtime())
-    log_name = '../log/DRL_Learning_v4_' + time_start + '.log'
+    log_name = '../log/DRL_Learning_v5_' + time_start + '.log'
     logging.basicConfig(filename=log_name,level=logging.DEBUG)
     logging.info("Time start : " + str(time_start))
     logging.info("Input data :" + input_data)
@@ -108,14 +112,15 @@ def run():
     logging.info("batch_size = " + str(batch_size))
     logging.info("look back term = " + str(look_back_term))
     logging.info("hidden_size = " + str(hidden_size))
-    logging.info("training period = 2000 ~ 2000 + " + str(training_period))
+    logging.info("training period = " + str(training_period_start) + " ~ " + str(training_period_stop))
     logging.info("learning rate = " + str(learning_rate))
+    logging.info("discount rate = " + str(discount_rate))
     print "log start"
 
     # import return data
     data = pd.read_csv("../Data/" + input_data,header=None)
     close = data[5].values
-    ret = (close[1:] - close[:-1])[2000 : 2000 + training_period]
+    ret = (close[1:] - close[:-1])[training_period_start : training_period_stop]
     train_percent = 1
     ret_train = ret[:len(ret) * train_percent]
     ret_test = ret[len(ret) :]
@@ -126,7 +131,7 @@ def run():
     model.add(Dense(num_actions))
     model.compile(sgd(lr=learning_rate), "mse")
     env = FX_Market(ret_train = ret_train, look_back_term = look_back_term, transaction_cost = transcation_cost)
-    trading_his = Trading_Memory(max_memory = max_memory)
+    trading_his = Trading_Memory(max_memory = max_memory, discount=discount_rate)
 
     # Train
     return_list = []
@@ -161,9 +166,9 @@ def run():
 
     result = pd.DataFrame()
     result["accumulate return"] = return_list
-    result.to_csv("../Result_Data/DRL_v4_result_" + time_start + ".csv")
+    result.to_csv("../Result_Data/DRL_v5_result_" + time_start + ".csv")
 
-    model.save_weights("../Model/DRL_v4_model_" + time_start + ".h5", overwrite=True)
+    model.save_weights("../Model/DRL_v5_model_" + time_start + ".h5", overwrite=True)
     with open("../Model/DRL_v4_model_" + time_start + ".json", "w") as outfile:
         json.dump(model.to_json(), outfile)
 

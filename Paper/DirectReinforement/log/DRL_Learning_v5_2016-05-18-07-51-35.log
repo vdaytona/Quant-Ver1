@@ -1,0 +1,114 @@
+INFO:root:Time start : 2016-05-18-07-51-35
+INFO:root:Input data :GBPUSD240.csv
+INFO:root:Parameter setting :
+INFO:root:epsilon = 0.1
+INFO:root:transaction_cost = 0.0005
+INFO:root:epoch =100
+INFO:root:max_memory = 100000
+INFO:root:batch_size = 50
+INFO:root:look back term = 100
+INFO:root:hidden_size = 300
+INFO:root:training period = 0 ~ 2000
+INFO:root:learning rate = 0.2
+INFO:root:discount rate = 9e-06
+INFO:root:accumulate return : -0.7758
+INFO:root:accumulate return : -0.1894
+INFO:root:accumulate return : 0.0499
+INFO:root:accumulate return : 0.0048
+INFO:root:accumulate return : 0.0549
+INFO:root:accumulate return : 0.1937
+INFO:root:accumulate return : 0.2171
+INFO:root:accumulate return : 0.2849
+INFO:root:accumulate return : 0.3109
+INFO:root:accumulate return : 0.7336
+INFO:root:accumulate return : 0.6979
+INFO:root:accumulate return : 0.4955
+INFO:root:accumulate return : 1.1463
+INFO:root:accumulate return : 0.9709
+INFO:root:accumulate return : 0.9055
+INFO:root:accumulate return : 0.7202
+INFO:root:accumulate return : 1.1383
+INFO:root:accumulate return : 0.7409
+INFO:root:accumulate return : 1.2809
+INFO:root:accumulate return : 1.2171
+INFO:root:accumulate return : 1.0951
+INFO:root:accumulate return : 1.126
+INFO:root:accumulate return : 1.1375
+INFO:root:accumulate return : 1.2924
+INFO:root:accumulate return : 1.2329
+INFO:root:accumulate return : 1.539
+INFO:root:accumulate return : 1.4837
+INFO:root:accumulate return : 1.1579
+INFO:root:accumulate return : 1.2949
+INFO:root:accumulate return : 1.4717
+INFO:root:accumulate return : 1.3617
+INFO:root:accumulate return : 1.3371
+INFO:root:accumulate return : 1.8086
+INFO:root:accumulate return : 1.4853
+INFO:root:accumulate return : 1.4014
+INFO:root:accumulate return : 1.7494
+INFO:root:accumulate return : 1.7027
+INFO:root:accumulate return : 1.6406
+INFO:root:accumulate return : 1.5591
+INFO:root:accumulate return : 1.7444
+INFO:root:accumulate return : 1.6037
+INFO:root:accumulate return : 1.6512
+INFO:root:accumulate return : 1.7339
+INFO:root:accumulate return : 1.908
+INFO:root:accumulate return : 2.0287
+INFO:root:accumulate return : 1.6216
+INFO:root:accumulate return : 1.9388
+INFO:root:accumulate return : 1.6854
+INFO:root:accumulate return : 1.7698
+INFO:root:accumulate return : 1.7504
+INFO:root:accumulate return : 1.7887
+INFO:root:accumulate return : 2.0351
+INFO:root:accumulate return : 2.0786
+INFO:root:accumulate return : 1.8062
+INFO:root:accumulate return : 1.7506
+INFO:root:accumulate return : 1.8147
+INFO:root:accumulate return : 1.8784
+INFO:root:accumulate return : 1.8501
+INFO:root:accumulate return : 1.8387
+INFO:root:accumulate return : 2.0198
+INFO:root:accumulate return : 2.0103
+INFO:root:accumulate return : 1.9767
+INFO:root:accumulate return : 2.1174
+INFO:root:accumulate return : 1.9269
+INFO:root:accumulate return : 1.9435
+INFO:root:accumulate return : 1.8841
+INFO:root:accumulate return : 2.1255
+INFO:root:accumulate return : 2.1378
+INFO:root:accumulate return : 2.069
+INFO:root:accumulate return : 1.8428
+INFO:root:accumulate return : 2.1538
+INFO:root:accumulate return : 1.9393
+INFO:root:accumulate return : 2.0018
+INFO:root:accumulate return : 2.3208
+INFO:root:accumulate return : 2.0937
+INFO:root:accumulate return : 1.9246
+INFO:root:accumulate return : 2.0009
+INFO:root:accumulate return : 2.0022
+INFO:root:accumulate return : 2.1715
+INFO:root:accumulate return : 2.3309
+INFO:root:accumulate return : 2.0438
+INFO:root:accumulate return : 2.1425
+INFO:root:accumulate return : 2.1365
+INFO:root:accumulate return : 2.2389
+INFO:root:accumulate return : 2.227
+INFO:root:accumulate return : 2.2872
+INFO:root:accumulate return : 2.4179
+INFO:root:accumulate return : 2.4507
+INFO:root:accumulate return : 2.311
+INFO:root:accumulate return : 2.4703
+INFO:root:accumulate return : 2.3538
+INFO:root:accumulate return : 2.1967
+INFO:root:accumulate return : 2.4239
+INFO:root:accumulate return : 2.3067
+INFO:root:accumulate return : 2.2497
+INFO:root:accumulate return : 2.3834
+INFO:root:accumulate return : 2.3904
+INFO:root:accumulate return : 2.3432
+INFO:root:accumulate return : 2.2525
+INFO:root:accumulate return : 2.3835
+INFO:root:Processing time : 2.32638888889 hours

@@ -5,7 +5,6 @@ Test for the trained model
  @author: Daytona
  '''
 
-
 import numpy as np
 import pandas as pd
 from keras.models import Sequential
@@ -38,7 +37,7 @@ class FX_Market():
         return state
 
     def get_instant_reward(self, t , action):
-        return ACTION_LIST[action] * self.__ret_train[t+1] - \
+        return ACTION_LIST[action] * self.__ret_train[t+1] + \
             self.__transaction_cost * abs(ACTION_LIST[self.__previous_action] - ACTION_LIST[action])
 
     def act(self, t, action):
@@ -49,17 +48,17 @@ class FX_Market():
 
 def run():
     
-    with open("../Archive_Result/DRL_v4_model_1.json", "r") as jfile:
+    with open("../Archive_Result/DRL_v5_model_1.json", "r") as jfile:
         model = model_from_json(json.load(jfile))
-    model.load_weights("../Archive_Result/DRL_v4_model_1.h5")
+    model.load_weights("../Archive_Result/DRL_v5_model_1.h5")
     model.compile("sgd", "mse")
     look_back_term = 100
-    transaction_cost = 0.0005
+    transaction_cost = 0.00005
     
     # import return data
-    data = pd.read_csv("../Data/GBPUSD30.csv",header=None)
+    data = pd.read_csv("../Data/GBPUSD240.csv",header=None)
     close = data[5].values
-    ret_test = (close[1:] - close[:-1])[1000 : 2000]
+    ret_test = (close[1:] - close[:-1])[4900:]
     env = FX_Market(ret_train = ret_test, look_back_term = look_back_term, transaction_cost = transaction_cost)
 
     accumulate_ret = [0.0]
@@ -87,9 +86,13 @@ def run():
     print loss
     print win / (win + loss)
     
+    
     plt.plot(range(len(accumulate_ret)),accumulate_ret,"r.")
     plt2 = plt.twinx()
     #plt2.plot(range(len(action_list)),action_list,"b")
+    print len(accumulate_ret)
+    print len(close[5000:-1])
+    plt2.plot(range(len(accumulate_ret)), close[5000:-1], "b")
     plt.show()
     
     
