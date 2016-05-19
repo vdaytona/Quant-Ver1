@@ -1,0 +1,98 @@
+INFO:root:Time start : 2016-05-18-22-18-40
+INFO:root:Input data :GBPUSD30.csv
+INFO:root:Parameter setting :
+INFO:root:epsilon = 0.1
+INFO:root:transaction_cost = 0.0002
+INFO:root:epoch =100
+INFO:root:max_memory = 1000000
+INFO:root:batch_size = 100
+INFO:root:look back term = 100
+INFO:root:hidden_size = 300
+INFO:root:training period = 0 ~ 5000
+INFO:root:learning rate = 0.2
+INFO:root:discount rate = 9e-06
+INFO:root:accumulate return : -0.53961
+INFO:root:accumulate return : -0.3268
+INFO:root:accumulate return : -0.27161
+INFO:root:accumulate return : -0.22546
+INFO:root:accumulate return : -0.28017
+INFO:root:accumulate return : -0.12871
+INFO:root:accumulate return : -0.15362
+INFO:root:accumulate return : -0.22411
+INFO:root:accumulate return : -0.1852
+INFO:root:accumulate return : -0.15711
+INFO:root:accumulate return : -0.12734
+INFO:root:accumulate return : -0.10254
+INFO:root:accumulate return : -0.10911
+INFO:root:accumulate return : -0.07675
+INFO:root:accumulate return : -0.07054
+INFO:root:accumulate return : -0.061
+INFO:root:accumulate return : -0.04176
+INFO:root:accumulate return : 0.02914
+INFO:root:accumulate return : -0.03435
+INFO:root:accumulate return : 0.05077
+INFO:root:accumulate return : -0.05671
+INFO:root:accumulate return : 0.0328
+INFO:root:accumulate return : 0.06823
+INFO:root:accumulate return : 0.07452
+INFO:root:accumulate return : 0.04919
+INFO:root:accumulate return : -0.04559
+INFO:root:accumulate return : 0.12479
+INFO:root:accumulate return : 0.10023
+INFO:root:accumulate return : 0.06362
+INFO:root:accumulate return : 0.04228
+INFO:root:accumulate return : 0.05391
+INFO:root:accumulate return : 0.15194
+INFO:root:accumulate return : 0.09165
+INFO:root:accumulate return : 0.13886
+INFO:root:accumulate return : 0.15076
+INFO:root:accumulate return : 0.02761
+INFO:root:accumulate return : 0.16148
+INFO:root:accumulate return : 0.06568
+INFO:root:accumulate return : 0.18472
+INFO:root:accumulate return : 0.1786
+INFO:root:accumulate return : 0.12386
+INFO:root:accumulate return : 0.12536
+INFO:root:accumulate return : 0.14312
+INFO:root:accumulate return : 0.21999
+INFO:root:accumulate return : 0.04531
+INFO:root:accumulate return : 0.11016
+INFO:root:accumulate return : 0.16124
+INFO:root:accumulate return : 0.14328
+INFO:root:accumulate return : 0.15925
+INFO:root:accumulate return : 0.1886
+INFO:root:accumulate return : 0.14808
+INFO:root:accumulate return : 0.17684
+INFO:root:accumulate return : 0.1795
+INFO:root:accumulate return : 0.19455
+INFO:root:accumulate return : 0.24331
+INFO:root:accumulate return : 0.22177
+INFO:root:accumulate return : 0.24027
+INFO:root:accumulate return : 0.09647
+INFO:root:accumulate return : 0.20521
+INFO:root:accumulate return : 0.23092
+INFO:root:accumulate return : 0.23383
+INFO:root:accumulate return : 0.22276
+INFO:root:accumulate return : 0.16573
+INFO:root:accumulate return : 0.23824
+INFO:root:accumulate return : 0.24484
+INFO:root:accumulate return : 0.27616
+INFO:root:accumulate return : 0.13214
+INFO:root:accumulate return : 0.33283
+INFO:root:accumulate return : 0.22639
+INFO:root:accumulate return : 0.21197
+INFO:root:accumulate return : 0.23674
+INFO:root:accumulate return : 0.12441
+INFO:root:accumulate return : 0.28633
+INFO:root:accumulate return : 0.2464
+INFO:root:accumulate return : 0.19074
+INFO:root:accumulate return : 0.27153
+INFO:root:accumulate return : 0.286
+INFO:root:accumulate return : 0.19483
+INFO:root:accumulate return : 0.2309
+INFO:root:accumulate return : 0.19272
+INFO:root:accumulate return : 0.2278
+INFO:root:accumulate return : 0.24055
+INFO:root:accumulate return : 0.3185
+INFO:root:accumulate return : 0.14505
+INFO:root:accumulate return : 0.26504
