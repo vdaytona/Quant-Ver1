@@ -1,14 +1,18 @@
 '''
- Deep learning reinfocement based trading
- State: return_t, return_t-1. return_t-2....,return_t-m
- instant reward : Ft * return_t 1
- Q-value : instant reward   max(Q(a|s 1))
- Created on 14 May 2016
- 
- discount rate - > 0.000009 (four rate, compound annual interest rate is 2%)
+Deep learning reinfocement based trading
+State: return_t, return_t-1. return_t-2....,return_t-m
+instant reward : Ft * return_t 1
+Q-value : instant reward   max(Q(a|s 1))
+Created on 14 May 2016
+Using two layers CNN
 
- @author: Daytona
- '''
+v4 : use random memory to train to avoid correlation of the data
+v5 : discount rate - > 0.000009 (four rate, compound annual interest rate is 2%)
+* discount rate need to be discussed
+
+
+@author: Daytona
+'''
 
 
 import numpy as np
@@ -169,7 +173,7 @@ def run():
     result.to_csv("../Result_Data/DRL_v5_result_" + time_start + ".csv")
 
     model.save_weights("../Model/DRL_v5_model_" + time_start + ".h5", overwrite=True)
-    with open("../Model/DRL_v4_model_" + time_start + ".json", "w") as outfile:
+    with open("../Model/DRL_v5_model_" + time_start + ".json", "w") as outfile:
         json.dump(model.to_json(), outfile)
 
     #plt.plot(range(len(return_list)),return_list,"r.")

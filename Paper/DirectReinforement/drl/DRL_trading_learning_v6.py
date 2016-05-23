@@ -1,13 +1,20 @@
 '''
- Deep learning reinfocement based trading
- State: return_t, return_t-1. return_t-2....,return_t-m
- instant reward : Ft * return_t 1
- Q-value : instant reward   max(Q(a|s 1))
- Created on 14 May 2016
+Deep learning reinfocement based trading
+State: return_t, return_t-1. return_t-2....,return_t-m
+instant reward : Ft * return_t 1
+Q-value : instant reward   max(Q(a|s 1))
+Created on 14 May 2016
+Using two layers CNN
 
- @author: Daytona
- '''
+v4 : use random memory to train to avoid correlation of the data
+v5 : discount rate - > 0.000009 (four rate, compound annual interest rate is 2%)
+* discount rate need to be discussed
+v6 : two model : online network and target network, online use to calculate action, 
+and target network used to calculate the value of greedy policy, detailed in double DQN
+change memory.get_batch
 
+@author: Daytona
+'''
 
 import numpy as np
 import pandas as pd
@@ -20,6 +27,7 @@ import datetime
 import logging
 from time import gmtime, strftime
 import json
+import copy
 
 ACTION_LIST = [1,0,-1]
 
@@ -34,7 +42,7 @@ class FX_Market():
         self.__previous_action = 1
 
     def get_state(self,t):
-        state = np.zeros((1,100))
+        state = np.zeros((1,self.__look_back_term))
         state[0] = self.__ret_train[t - self.__look_back_term +  1 : t + 1]
         return state
 
@@ -60,10 +68,12 @@ class Trading_Memory():
         if len(self.__memory) > self.__max_memory:
             del self.__memory[0]
 
-    def get_batch(self, model, batch_size=30):
+    def get_batch(self, target_model,online_model, batch_size=30):
+        # use target_model to decide greedy policy (action), 
+        # and target_model to calculate the value 
         len_memory = len(self.__memory)
 
-        num_actions = model.output_shape[-1]
+        num_actions = target_model.output_shape[-1]
 
         env_dim = self.__memory[0][0].shape[1]
 
@@ -73,30 +83,36 @@ class Trading_Memory():
         for i, idx in enumerate(np.random.randint(0, len_memory,size=inputs.shape[0])):
             state, state_new, action, reward = self.__memory[idx]
             inputs[i:i+1] = state
-            targets[i] = model.predict(state)[0]
-            Q_sa = np.max(model.predict(state_new)[0])
+            
+            targets[i] = target_model.predict(state)[0]
+            action_next = np.argmax(online_model.predict(state_new)[0])
+            Q_sa = target_model.predict(state_new)[0][action_next]
+            
             targets[i, action] = reward + self.discount * Q_sa
         return inputs, targets
 
 def run():
     global ACTION_LIST
     # parameters
-    epsilon = .1  # exploration
+    epsilon = 0.1  # exploration
     num_actions = len(ACTION_LIST)  # [buy, hold, sell]
     transcation_cost = 0.0005
-    epoch = 200
-    max_memory = 100000
+    epoch = 150
+    max_memory = 1000000
     hidden_size = 300
     batch_size = 50
-    look_back_term = 100
-    training_period = 2000
-    learning_rate = 0.2
-    input_data = "GBPUSD30.csv"
+    look_back_term = 200
+    training_period_start = 0
+    training_period_stop = 10000
+    learning_rate = 0.1
+    discount_rate = 0.95
+    step_size = 10 # iterate step to update target_model
+    input_data = "GBPUSD240.csv"
 
     # log
     time_start_epoch = datetime.datetime.now()
     time_start = strftime("%Y-%m-%d-%H-%M-%S", gmtime())
-    log_name = '../log/DRL_Learning_v4_' + time_start + '.log'
+    log_name = '../log/DRL_Learning_v6_' + time_start + '.log'
     logging.basicConfig(filename=log_name,level=logging.DEBUG)
     logging.info("Time start : " + str(time_start))
     logging.info("Input data :" + input_data)
@@ -108,14 +124,16 @@ def run():
     logging.info("batch_size = " + str(batch_size))
     logging.info("look back term = " + str(look_back_term))
     logging.info("hidden_size = " + str(hidden_size))
-    logging.info("training period = 2000 ~ 2000 + " + str(training_period))
+    logging.info("training period = " + str(training_period_start) + " ~ " + str(training_period_stop))
     logging.info("learning rate = " + str(learning_rate))
+    logging.info("discount rate = " + str(discount_rate))
+    logging.info("step_size = " + str(step_size))
     print "log start"
 
     # import return data
     data = pd.read_csv("../Data/" + input_data,header=None)
     close = data[5].values
-    ret = (close[1:] - close[:-1])[2000 : 2000 + training_period]
+    ret = (close[1:] - close[:-1])[training_period_start : training_period_stop]
     train_percent = 1
     ret_train = ret[:len(ret) * train_percent]
     ret_test = ret[len(ret) :]
@@ -125,22 +143,28 @@ def run():
     model.add(Dense(hidden_size, activation='relu'))
     model.add(Dense(num_actions))
     model.compile(sgd(lr=learning_rate), "mse")
+    
+    target_model = copy.deepcopy(model)
+    
     env = FX_Market(ret_train = ret_train, look_back_term = look_back_term, transaction_cost = transcation_cost)
-    trading_his = Trading_Memory(max_memory = max_memory)
-
+    trading_his = Trading_Memory(max_memory = max_memory, discount=discount_rate)
+    
+    
     # Train
     return_list = []
     for e in range(epoch):
         print "epoch : " + str(e)
         env.reset()
         accumulate_ret = [0.0]
+        if e % step_size == 0:
+            target_model = copy.deepcopy(model)
         for t in range(look_back_term - 1 , len(ret_train) - 2) :
             state = env.get_state(t)
             # decide action
             if np.random.rand() < epsilon:
                 action = np.random.randint(0, num_actions, size=1)
             else:
-                q = model.predict(state)
+                q = target_model.predict(state)
                 action = np.argmax(q[0])
 
             new_state, reward = env.act(t, action)
@@ -149,7 +173,7 @@ def run():
 
             trading_his.memory(state, new_state, action, reward)
             
-            inputs, targets = trading_his.get_batch(model, batch_size=batch_size)
+            inputs, targets = trading_his.get_batch(target_model, model,batch_size=batch_size)
             
             model.train_on_batch(inputs, targets)
         print "accumulate return : " + str(accumulate_ret[-1])
@@ -158,13 +182,13 @@ def run():
         loop_time = datetime.datetime.now() - time_start_epoch
         time_left = float(loop_time.seconds) / 3600.0 / float(e+1) * float(epoch - e + 1)
         print "left time : " + str(time_left) + " hours"
-
+        
     result = pd.DataFrame()
     result["accumulate return"] = return_list
-    result.to_csv("../Result_Data/DRL_v4_result_" + time_start + ".csv")
+    result.to_csv("../Result_Data/DRL_v6_result_" + time_start + ".csv")
 
-    model.save_weights("../Model/DRL_v4_model_" + time_start + ".h5", overwrite=True)
-    with open("../Model/DRL_v4_model_" + time_start + ".json", "w") as outfile:
+    model.save_weights("../Model/DRL_model_v6_" + time_start + ".h5", overwrite=True)
+    with open("../Model/DRL_model_v6_" + time_start + ".json", "w") as outfile:
         json.dump(model.to_json(), outfile)
 
     #plt.plot(range(len(return_list)),return_list,"r.")
