@@ -29,6 +29,9 @@ from time import gmtime, strftime
 from keras.models import model_from_json
 import json
 import copy
+import theano
+import time
+from os import listdir
 
 ACTION_LIST = [1,0,-1]
 
@@ -92,29 +95,19 @@ class Trading_Memory():
             targets[i, action] = reward + self.discount * Q_sa
         return inputs, targets
 
-def update_target_model(online_model, version, time_start):
+def write_model(online_model, version, time_start):
     #output model
-    
-    
-    
     online_model.save_weights("../Model/DRL_model_v" + version + "_" + time_start + ".h5", overwrite=True)
     with open("../Model/DRL_model_v" + version + "_" + time_start + ".json", "w") as outfile:
         json.dump(online_model.to_json(), outfile)
-        
-    online_model.save_weights("../Model/DRL_model_v" + version + "_" + time_start + ".h5", overwrite=True)
-    with open("../Model/DRL_model_v" + version + "_" + time_start + ".json", "w") as outfile:
-        json.dump(online_model.to_json(), outfile)
-    
-    print "../Model/DRL_model_v" + version + "_" + time_start + ".h5"
-    print "../Model/DRL_model_v" + version + "_" + time_start + ".json"
-    print "../Model/DRL_model_v" + version + "_" + time_start + ".h5"
-    print "../Model/DRL_model_v" + version + "_" + time_start + ".json"
-    
-    with open("../Model/DRL_model_v" + version + "_" + time_start + ".h5", "r") as jfile:
+    outfile.close()
+
+def read_model(version, time_start):
+    with open("../Model/DRL_model_v" + version + "_" + time_start + ".json", "r") as jfile:
         target_model = model_from_json(json.load(jfile))
-    target_model.load_weights("../Model/DRL_model_v" + version + "_" + time_start + ".json")
+    target_model.load_weights("../Model/DRL_model_v" + version + "_" + time_start + ".h5")
     target_model.compile("sgd", "mse")
-    
+    jfile.close()
     return target_model
     
 
@@ -172,7 +165,8 @@ def run():
     model.add(Dense(num_actions))
     model.compile(sgd(lr=learning_rate), "mse")
     
-    target_model = update_target_model(model, version, time_start)
+    write_model(model, version, time_start)
+    target_model = read_model(version, time_start)
     
     # create market
     env = FX_Market(ret_train = ret_train, look_back_term = look_back_term, transaction_cost = transcation_cost)
@@ -186,7 +180,8 @@ def run():
         env.reset()
         accumulate_ret = [0.0] # pips earn from fx market
         if e % step_size == 0:
-            target_model = update_target_model(model, target_model, version, time_start)
+            write_model(model, version, time_start)
+            target_model = read_model(version, time_start)
         for t in range(look_back_term - 1 , len(ret_train) - 2) :
             state = env.get_state(t)
             # decide action
@@ -204,7 +199,10 @@ def run():
             
             inputs, targets = trading_his.get_batch(target_model, model,batch_size=batch_size)
             
-            model.train_on_batch(inputs, targets)
+            shared_inputs = theano.shared(inputs)
+            shared_targets = theano.shared(targets)
+            
+            model.train_on_batch(shared_inputs, shared_targets)
         
         print "accumulate return : " + str(accumulate_ret[-1])
         
@@ -224,9 +222,7 @@ def run():
     result.to_csv("../Result_Data/DRL_v" + version + "_result_" + time_start + ".csv")
     
     #output model
-    model.save_weights("../Model/DRL_model_v" + version + "_" + time_start + ".h5", overwrite=True)
-    with open("../Model/DRL_model_v" + version + "_" + time_start + ".json", "w") as outfile:
-        json.dump(model.to_json(), outfile)
+    write_model(model, version, time_start)
 
     #plt.plot(range(len(return_list)),return_list,"r.")
     #plt.show()
