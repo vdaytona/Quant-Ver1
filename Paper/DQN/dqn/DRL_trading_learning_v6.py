@@ -26,6 +26,7 @@ import matplotlib.pyplot as plt
 import datetime
 import logging
 from time import gmtime, strftime
+from keras.models import model_from_json
 import json
 import copy
 
@@ -91,10 +92,36 @@ class Trading_Memory():
             targets[i, action] = reward + self.discount * Q_sa
         return inputs, targets
 
+def update_target_model(online_model, version, time_start):
+    #output model
+    
+    
+    
+    online_model.save_weights("../Model/DRL_model_v" + version + "_" + time_start + ".h5", overwrite=True)
+    with open("../Model/DRL_model_v" + version + "_" + time_start + ".json", "w") as outfile:
+        json.dump(online_model.to_json(), outfile)
+        
+    online_model.save_weights("../Model/DRL_model_v" + version + "_" + time_start + ".h5", overwrite=True)
+    with open("../Model/DRL_model_v" + version + "_" + time_start + ".json", "w") as outfile:
+        json.dump(online_model.to_json(), outfile)
+    
+    print "../Model/DRL_model_v" + version + "_" + time_start + ".h5"
+    print "../Model/DRL_model_v" + version + "_" + time_start + ".json"
+    print "../Model/DRL_model_v" + version + "_" + time_start + ".h5"
+    print "../Model/DRL_model_v" + version + "_" + time_start + ".json"
+    
+    with open("../Model/DRL_model_v" + version + "_" + time_start + ".h5", "r") as jfile:
+        target_model = model_from_json(json.load(jfile))
+    target_model.load_weights("../Model/DRL_model_v" + version + "_" + time_start + ".json")
+    target_model.compile("sgd", "mse")
+    
+    return target_model
+    
+
 def run():
     global ACTION_LIST
     # parameters
-    version = str(1)
+    version = str(6)
     epsilon = 0.1  # exploration
     num_actions = len(ACTION_LIST)  # [buy, hold, sell]
     transcation_cost = 0.0005
@@ -115,6 +142,7 @@ def run():
     time_start = strftime("%Y-%m-%d-%H-%M-%S", gmtime())
     log_name = '../log/DRL_Learning_v' + version + '_' + time_start + '.log'
     logging.basicConfig(filename=log_name,level=logging.DEBUG)
+    logging.info("Version : " + version)
     logging.info("Time start : " + str(time_start))
     logging.info("Input data :" + input_data)
     logging.info("Parameter setting :")
@@ -144,13 +172,12 @@ def run():
     model.add(Dense(num_actions))
     model.compile(sgd(lr=learning_rate), "mse")
     
-    target_model = copy.deepcopy(model)
+    target_model = update_target_model(model, version, time_start)
     
     # create market
     env = FX_Market(ret_train = ret_train, look_back_term = look_back_term, transaction_cost = transcation_cost)
     # create memory
     trading_his = Trading_Memory(max_memory = max_memory, discount=discount_rate)
-    
     
     # Train
     return_list = []
@@ -159,7 +186,7 @@ def run():
         env.reset()
         accumulate_ret = [0.0] # pips earn from fx market
         if e % step_size == 0:
-            target_model = copy.deepcopy(model)
+            target_model = update_target_model(model, target_model, version, time_start)
         for t in range(look_back_term - 1 , len(ret_train) - 2) :
             state = env.get_state(t)
             # decide action

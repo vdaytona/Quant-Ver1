@@ -59,13 +59,14 @@ class FX_Market():
         return state_new, self.__wealth
 
 def run():
+    time_start = "2016-05-26-10-02-15"
+    version = str(6)
 
-
-    with open("../Archive_Result/DRL_model_v5_1.json", "r") as jfile:
+    with open("../Model/DRL_model_v" + version + "_" + time_start + ".json", "r") as jfile:
         model = model_from_json(json.load(jfile))
-    model.load_weights("../Archive_Result/DRL_model_v5_1.h5")
+    model.load_weights("../Model/DRL_model_v" + version + "_" + time_start + ".h5")
     model.compile("sgd", "mse")
-    look_back_term =   100
+    look_back_term =   200
     transaction_cost = 0.0005
 
     # import return data
