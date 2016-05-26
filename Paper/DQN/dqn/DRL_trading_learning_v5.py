@@ -167,7 +167,10 @@ def run():
         loop_time = datetime.datetime.now() - time_start_epoch
         time_left = float(loop_time.seconds) / 3600.0 / float(e+1) * float(epoch - e + 1)
         print "left time : " + str(time_left) + " hours"
-
+    
+    time_used = datetime.datetime.now() - time_start_epoch
+    time_used = float(time_used.seconds) / 3600.0
+    logging.info("Processing time : " + str(time_used) + " hours")
     result = pd.DataFrame()
     result["accumulate return"] = return_list
     result.to_csv("../Result_Data/DRL_v5_result_" + time_start + ".csv")
@@ -180,9 +183,7 @@ def run():
     #plt.show()
     #test(model, ret_test)
 
-    time_used = datetime.datetime.now() - time_start_epoch
-    time_used = float(time_used.seconds) / 3600.0
-    logging.info("Processing time : " + str(time_used) + " hours")
+    
     print "finished"
 
 if __name__ == '__main__': run()

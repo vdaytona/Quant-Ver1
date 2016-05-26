@@ -10,7 +10,7 @@ v4 : use random memory to train to avoid correlation of the data
 v5 : discount rate - > 0.000009 (four rate, compound annual interest rate is 2%)
 * discount rate need to be discussed
 v6 : two model : online network and target network, online use to calculate action, 
-and target network used to calculate the value of greedy policy, detailed in double DQN
+and target network used to calculate the value of greedy policy, detailed in "Double DQN"
 change memory.get_batch
 
 @author: Daytona
@@ -94,25 +94,26 @@ class Trading_Memory():
 def run():
     global ACTION_LIST
     # parameters
+    version = str(1)
     epsilon = 0.1  # exploration
     num_actions = len(ACTION_LIST)  # [buy, hold, sell]
     transcation_cost = 0.0005
     epoch = 150
     max_memory = 1000000
-    hidden_size = 300
+    hidden_size = 600
     batch_size = 50
     look_back_term = 200
     training_period_start = 0
     training_period_stop = 10000
     learning_rate = 0.1
-    discount_rate = 0.95
+    discount_rate = 0.000009
     step_size = 10 # iterate step to update target_model
     input_data = "GBPUSD240.csv"
 
     # log
     time_start_epoch = datetime.datetime.now()
     time_start = strftime("%Y-%m-%d-%H-%M-%S", gmtime())
-    log_name = '../log/DRL_Learning_v6_' + time_start + '.log'
+    log_name = '../log/DRL_Learning_v' + version + '_' + time_start + '.log'
     logging.basicConfig(filename=log_name,level=logging.DEBUG)
     logging.info("Time start : " + str(time_start))
     logging.info("Input data :" + input_data)
@@ -133,10 +134,9 @@ def run():
     # import return data
     data = pd.read_csv("../Data/" + input_data,header=None)
     close = data[5].values
-    ret = (close[1:] - close[:-1])[training_period_start : training_period_stop]
-    train_percent = 1
-    ret_train = ret[:len(ret) * train_percent]
-    ret_test = ret[len(ret) :]
+    ret_train = (close[1:] - close[:-1])[training_period_start : training_period_stop]
+    
+    #build model : online mode and target model
     model = Sequential()
     model.add(Dense(hidden_size, input_shape=(look_back_term,), activation='relu'))
     model.add(Dense(hidden_size, activation='relu'))
@@ -146,7 +146,9 @@ def run():
     
     target_model = copy.deepcopy(model)
     
+    # create market
     env = FX_Market(ret_train = ret_train, look_back_term = look_back_term, transaction_cost = transcation_cost)
+    # create memory
     trading_his = Trading_Memory(max_memory = max_memory, discount=discount_rate)
     
     
@@ -155,7 +157,7 @@ def run():
     for e in range(epoch):
         print "epoch : " + str(e)
         env.reset()
-        accumulate_ret = [0.0]
+        accumulate_ret = [0.0] # pips earn from fx market
         if e % step_size == 0:
             target_model = copy.deepcopy(model)
         for t in range(look_back_term - 1 , len(ret_train) - 2) :
@@ -176,28 +178,34 @@ def run():
             inputs, targets = trading_his.get_batch(target_model, model,batch_size=batch_size)
             
             model.train_on_batch(inputs, targets)
+        
         print "accumulate return : " + str(accumulate_ret[-1])
+        
         return_list.append(accumulate_ret[-1])
         logging.info("accumulate return : " + str(accumulate_ret[-1]))
         loop_time = datetime.datetime.now() - time_start_epoch
         time_left = float(loop_time.seconds) / 3600.0 / float(e+1) * float(epoch - e + 1)
         print "left time : " + str(time_left) + " hours"
-        
+    
+    time_used = datetime.datetime.now() - time_start_epoch
+    time_used = float(time_used.seconds) / 3600.0
+    logging.info("Processing time : " + str(time_used) + " hours")   
+    
+    #output accumulate data
     result = pd.DataFrame()
     result["accumulate return"] = return_list
-    result.to_csv("../Result_Data/DRL_v6_result_" + time_start + ".csv")
-
-    model.save_weights("../Model/DRL_model_v6_" + time_start + ".h5", overwrite=True)
-    with open("../Model/DRL_model_v6_" + time_start + ".json", "w") as outfile:
+    result.to_csv("../Result_Data/DRL_v" + version + "_result_" + time_start + ".csv")
+    
+    #output model
+    model.save_weights("../Model/DRL_model_v" + version + "_" + time_start + ".h5", overwrite=True)
+    with open("../Model/DRL_model_v" + version + "_" + time_start + ".json", "w") as outfile:
         json.dump(model.to_json(), outfile)
 
     #plt.plot(range(len(return_list)),return_list,"r.")
     #plt.show()
     #test(model, ret_test)
 
-    time_used = datetime.datetime.now() - time_start_epoch
-    time_used = float(time_used.seconds) / 3600.0
-    logging.info("Processing time : " + str(time_used) + " hours")
+    
     print "finished"
 
 if __name__ == '__main__': run()
