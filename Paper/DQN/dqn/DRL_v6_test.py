@@ -12,6 +12,7 @@ v5 : discount rate - > 0.000009 (four rate, compound annual interest rate is 2%)
 v6 : two model : online network and target network, online use to calculate action, 
 and target network used to calculate the value of greedy policy, detailed in double DQN
 change memory.get_batch
+v6 test : for running on desktop UNSW
 
 @author: Daytona
 '''
