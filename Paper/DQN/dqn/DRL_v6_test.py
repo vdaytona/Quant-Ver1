@@ -16,8 +16,8 @@ v6 test : for running on desktop UNSW
 
 @author: Daytona
 '''
-#import os
-#os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
+import os
+os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
 import numpy as np
 import pandas as pd
 from keras.models import Sequential
@@ -99,7 +99,7 @@ def run():
     epsilon = 0.1  # exploration
     num_actions = len(ACTION_LIST)  # [buy, hold, sell]
     transcation_cost = 0.0005
-    epoch = 150
+    epoch = 2
     max_memory = 1000000
     hidden_size = 600
     batch_size = 50

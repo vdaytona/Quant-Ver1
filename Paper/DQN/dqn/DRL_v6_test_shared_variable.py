@@ -39,17 +39,17 @@ ACTION_LIST = [1,0,-1]
 
 class FX_Market():
     def __init__(self,ret_train, look_back_term, transaction_cost):
-        self.__ret_train = ret_train
-        self.__look_back_term = look_back_term
-        self.__previous_action = 1
-        self.__transaction_cost = transaction_cost
+        self.__ret_train = shared(np.asarray(ret_train), name="ret_train")
+        self.__look_back_term = shared(look_back_term,name="look_back_term")
+        self.__previous_action = shared(1,name="previous_action")
+        self.__transaction_cost = shared(transaction_cost,name="transaction_cost")
 
     def reset(self):
-        self.__previous_action = 1
+        self.__previous_action.set_value(1)
 
     def get_state(self,t):
         state = np.zeros((1,self.__look_back_term))
-        state[0] = self.__ret_train.get_value()[t - self.__look_back_term +  1 : t + 1]
+        state[0] = self.__ret_train.get_value()[t - self.__look_back_term.get_value() +  1 : t + 1]
         return state
 
     def get_instant_reward(self, t , action):
@@ -141,8 +141,8 @@ def run():
     close = data[5].values
     ret_train = (close[1:] - close[:-1])[training_period_start : training_period_stop]
     
-    ret_train_shared = shared(np.asarray(ret_train), name="ret_train")
-    print ret_train_shared.get_value()
+    #ret_train_shared = shared(np.asarray(ret_train), name="ret_train")
+    #print ret_train_shared.get_value()
     
     model = Sequential()
     model.add(Dense(hidden_size, input_shape=(look_back_term,), activation='relu'))
@@ -153,7 +153,7 @@ def run():
     
     target_model = copy.deepcopy(model)
     
-    env = FX_Market(ret_train = ret_train_shared, look_back_term = look_back_term, transaction_cost = transcation_cost)
+    env = FX_Market(ret_train = ret_train, look_back_term = look_back_term, transaction_cost = transcation_cost)
     trading_his = Trading_Memory(max_memory = max_memory, discount=discount_rate)
     
     
