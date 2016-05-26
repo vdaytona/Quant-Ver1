@@ -1,4 +1,4 @@
-'''
+    '''
 Deep learning reinfocement based trading
 State: return_t, return_t-1. return_t-2....,return_t-m
 instant reward : Ft * return_t 1
