@@ -30,10 +30,11 @@ from keras.models import model_from_json
 import json
 import copy
 import theano
-import time
-from os import listdir
+from numba.types import float32
+from theano import config
 
 ACTION_LIST = [1,0,-1]
+floatX = float32
 
 class FX_Market():
     def __init__(self,ret_train, look_back_term, transaction_cost):
@@ -113,6 +114,7 @@ def read_model(version, time_start):
 
 def run():
     global ACTION_LIST
+    global floatX
     # parameters
     version = str(6)
     epsilon = 0.1  # exploration
@@ -198,11 +200,8 @@ def run():
             trading_his.memory(state, new_state, action, reward)
             
             inputs, targets = trading_his.get_batch(target_model, model,batch_size=batch_size)
-            
-            shared_inputs = theano.shared(inputs)
-            shared_targets = theano.shared(targets)
-            
-            model.train_on_batch(shared_inputs, shared_targets)
+
+            model.train_on_batch(inputs, targets)
         
         print "accumulate return : " + str(accumulate_ret[-1])
         
