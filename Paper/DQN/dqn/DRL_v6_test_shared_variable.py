@@ -156,7 +156,7 @@ def run():
     env = FX_Market(ret_train = ret_train, look_back_term = look_back_term, transaction_cost = transcation_cost)
     trading_his = Trading_Memory(max_memory = max_memory, discount=discount_rate)
     
-    
+
     # Train
     return_list = []
     for e in range(epoch):
