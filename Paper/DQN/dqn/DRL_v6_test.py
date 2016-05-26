@@ -16,8 +16,8 @@ v6 test : for running on desktop UNSW
 
 @author: Daytona
 '''
-import os
-os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
+#import os
+#os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
 import numpy as np
 import pandas as pd
 from keras.models import Sequential
