@@ -1,0 +1,18 @@
+INFO:root:Time start : 2016-05-24-06-20-17
+INFO:root:Input data :GBPUSD240.csv
+INFO:root:Parameter setting :
+INFO:root:epsilon = 0.1
+INFO:root:transaction_cost = 0.0005
+INFO:root:epoch =150
+INFO:root:max_memory = 1000000
+INFO:root:batch_size = 50
+INFO:root:look back term = 200
+INFO:root:hidden_size = 300
+INFO:root:training period = 0 ~ 10000
+INFO:root:learning rate = 0.1
+INFO:root:discount rate = 0.95
+INFO:root:step_size = 10
+INFO:root:accumulate return : -3.2611
+INFO:root:accumulate return : -3.4333
+INFO:root:accumulate return : -3.21
+INFO:root:accumulate return : -3.3858
