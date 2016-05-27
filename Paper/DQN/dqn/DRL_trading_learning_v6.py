@@ -12,7 +12,7 @@ v5 : discount rate - > 0.000009 (four rate, compound annual interest rate is 2%)
 v6 : 1. two model : online network and target network, online use to calculate action, 
 and target network used to calculate the value of greedy policy, detailed in "Double DQN"
 change memory.get_batch
-     2. set skip frame, to increase training speed
+     2. set skip frame, to increase training speed - > only used in DRL_model_v6_3 
 
 @author: Daytona
 '''
@@ -121,7 +121,7 @@ def run():
     epsilon = 0.1  # exploration
     num_actions = len(ACTION_LIST)  # [buy, hold, sell]
     transcation_cost = 0.0005
-    epoch = 300
+    epoch = 200
     max_memory = 1000000
     hidden_size = 600
     batch_size = 200
@@ -131,7 +131,8 @@ def run():
     learning_rate = 0.1
     discount_rate = 0.000009
     step_size = 10 # iterate step to update target_model
-    frame_skip = 4 # train the model with some frames intervals
+    act_function = "relu"
+    #frame_skip = 4 # train the model with some frames intervals
     input_data = "GBPUSD240.csv"
 
     # log
@@ -154,7 +155,8 @@ def run():
     logging.info("learning rate = " + str(learning_rate))
     logging.info("discount rate = " + str(discount_rate))
     logging.info("step_size = " + str(step_size))
-    logging.info("frame_skip" + str(frame_skip))
+    logging.info("activation function = " + act_function)
+    #logging.info("frame_skip" + str(frame_skip))
     print "log start"
 
     # import return data
@@ -164,9 +166,9 @@ def run():
     
     #build model : online mode and target model
     model = Sequential()
-    model.add(Dense(hidden_size, input_shape=(look_back_term,), activation='relu'))
-    model.add(Dense(hidden_size, activation='relu'))
-    model.add(Dense(hidden_size, activation='relu'))
+    model.add(Dense(hidden_size, input_shape=(look_back_term,), activation=act_function))
+    model.add(Dense(hidden_size, activation=act_function))
+    model.add(Dense(hidden_size, activation=act_function))
     model.add(Dense(num_actions))
     model.compile(sgd(lr=learning_rate), "mse")
     
@@ -188,24 +190,24 @@ def run():
             write_model(model, version, time_start)
             target_model = read_model(version, time_start)
         for t in range(look_back_term - 1 , len(ret_train) - 2) :
-            if np.random.random_integers(1,frame_skip) == 4 :
-                state = env.get_state(t)
-                # decide action
-                if np.random.rand() < epsilon:
-                    action = np.random.randint(0, num_actions, size=1)
-                else:
-                    q = target_model.predict(state)
-                    action = np.argmax(q[0])
-    
-                new_state, reward = env.act(t, action)
-    
-                accumulate_ret.append(accumulate_ret[-1]  + reward)
-    
-                trading_his.memory(state, new_state, action, reward)
-                
-                inputs, targets = trading_his.get_batch(target_model, model,batch_size=batch_size)
-    
-                model.train_on_batch(inputs, targets)
+            #if np.random.random_integers(1,frame_skip) == 4 :
+            state = env.get_state(t)
+            # decide action
+            if np.random.rand() < epsilon:
+                action = np.random.randint(0, num_actions, size=1)
+            else:
+                q = target_model.predict(state)
+                action = np.argmax(q[0])
+
+            new_state, reward = env.act(t, action)
+
+            accumulate_ret.append(accumulate_ret[-1]  + reward)
+
+            trading_his.memory(state, new_state, action, reward)
+            
+            inputs, targets = trading_his.get_batch(target_model, model,batch_size=batch_size)
+
+            model.train_on_batch(inputs, targets)
         
         print "accumulate return : " + str(accumulate_ret[-1])
         
