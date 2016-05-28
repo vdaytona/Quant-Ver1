@@ -43,7 +43,7 @@ def main():
     test(test_x, test_y, forest)
     
     # result analysis
-    # anlyze the relative importance of all the words
+    # analyze the relative importance of all the words
     
     
     print "finished"

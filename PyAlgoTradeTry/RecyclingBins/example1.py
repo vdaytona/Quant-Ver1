@@ -21,7 +21,7 @@ from connectMysqlDBTest import workingSpace
 class MyStrategy(strategy.BacktestingStrategy):
     def __init__(self, feed, instrument, smaPeriod):
         strategy.BacktestingStrategy.__init__(self, feed, 2000)
-        self.__position = None
+        self.__share = None
         self.__instrument = instrument
         # We'll use adjusted close values instead of regular close values.
         self.setUseAdjustedValues(True)
@@ -32,16 +32,16 @@ class MyStrategy(strategy.BacktestingStrategy):
         self.info("BUY at $%.2f" % (execInfo.getPrice()))
 
     def onEnterCanceled(self, position):
-        self.__position = None
+        self.__share = None
 
     def onExitOk(self, position):
         execInfo = position.getExitOrder().getExecutionInfo()
         self.info("SELL at $%.2f" % (execInfo.getPrice()))
-        self.__position = None
+        self.__share = None
 
     def onExitCanceled(self, position):
         # If the exit was canceled, re-submit it.
-        self.__position.exitMarket()
+        self.__share.exitMarket()
 
     def onBars(self, bars):
         # Wait for enough bars to be available to calculate a SMA.
@@ -50,13 +50,13 @@ class MyStrategy(strategy.BacktestingStrategy):
 
         bar = bars[self.__instrument]
         # If a position was not opened, check if we should enter a long position.
-        if self.__position is None:
+        if self.__share is None:
             if bar.getPrice() > self.__sma[-1]:
                 # Enter a buy market order for 10 shares. The order is good till canceled.
-                self.__position = self.enterLong(self.__instrument, 10, True)
+                self.__share = self.enterLong(self.__instrument, 10, True)
         # Check if we have to exit the position.
-        elif bar.getPrice() < self.__sma[-1] and not self.__position.exitActive():
-            self.__position.exitMarket()
+        elif bar.getPrice() < self.__sma[-1] and not self.__share.exitActive():
+            self.__share.exitMarket()
 
 
 def run_strategy(smaPeriod):

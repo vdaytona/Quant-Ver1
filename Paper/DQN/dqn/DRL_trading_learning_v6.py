@@ -126,8 +126,8 @@ def run():
     hidden_size = 600
     batch_size = 200
     look_back_term = 200
-    training_period_start = 0
-    training_period_stop = 10000
+    training_period_start = 100
+    training_period_stop = 10100
     learning_rate = 0.1
     discount_rate = 0.000009
     step_size = 10 # iterate step to update target_model
