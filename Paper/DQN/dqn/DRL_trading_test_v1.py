@@ -47,19 +47,22 @@ class FX_Market():
         self.__investment = self.__wealth * self.__investment_rate
         return self.__investment * ( 1.0 + self.__leverage * (self.__close_test[t+1] - self.__close_test[t]) / self.__close_test[t] * ACTION_LIST[action]) - \
             self.__investment * (self.__transaction_cost) / self.__close_test[t] * abs(ACTION_LIST[self.__previous_action] - ACTION_LIST[action])
-        # return ACTION_LIST[action] * self.__ret_train[t+1] + \
-        #    self.__transaction_cost * abs(ACTION_LIST[self.__previous_action] - ACTION_LIST[action])
+    
+    def get_instant_pips(self, t, action):
+        return (self.__close_test[t+1] - self.__close_test[t]) * ACTION_LIST[action] - \
+            (self.__transaction_cost) * abs(ACTION_LIST[self.__previous_action] - ACTION_LIST[action])
 
     def act(self, t, action):
         state_new = self.get_state(t + 1)
-        self.__wealth = self.__wealth - self.__investment
+        self.__wealth = self.__wealth - self.__wealth * self.__investment_rate
         reward = self.get_instant_reward(t,action)
+        #reward = self.get_instant_pips(t,action)
         self.__wealth += reward
         self.__previous_action = action
         return state_new, self.__wealth
 
 def run():
-    time_start = "2016-05-26-10-02-15"
+    time_start = "2016-05-26-14-16-52"
     version = str(6)
 
     with open("../Model/DRL_model_v" + version + "_" + time_start + ".json", "r") as jfile:
@@ -74,7 +77,7 @@ def run():
     close = data[5].values
 
     train_start_period = 0
-    train_stop_period = 30000
+    train_stop_period = 10000
     ret_test = (close[1:] - close[:-1])[train_start_period:train_stop_period]
     close_test = close[train_start_period+1:train_stop_period]
 
