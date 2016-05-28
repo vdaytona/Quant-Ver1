@@ -30,9 +30,11 @@ class FX_Market():
         self.__previous_action = 1
         self.__transaction_cost = transaction_cost
         self.__wealth = 10000.0
-        self.__investment = 1000.0
         self.__investment_rate = 0.1
-        self.__leverage = 25
+        self.__leverage = 1
+        self.__position = 0.0
+        self.__cash = 10000.0
+        self.__enter_price = 0.0
 
     def reset(self):
         self.__previous_action = 1
@@ -43,26 +45,37 @@ class FX_Market():
         return state
 
     def get_instant_reward(self, t , action):
-        print (self.__close_test[t+1] - self.__close_test[t]) / self.__close_test[t]
-        self.__investment = self.__wealth * self.__investment_rate
-        return self.__investment * ( 1.0 + self.__leverage * (self.__close_test[t+1] - self.__close_test[t]) / self.__close_test[t] * ACTION_LIST[action]) - \
-            self.__investment * (self.__transaction_cost) / self.__close_test[t] * abs(ACTION_LIST[self.__previous_action] - ACTION_LIST[action])
+        # print (self.__close_test[t+1] - self.__close_test[t]) / self.__close_test[t]
+        if self.__previous_action == action :
+            pass
+        elif self.__previous_action == 1 : # open position
+            investment = self.__cash * self.__investment_rate * self.__leverage
+            self.__enter_price = self.__close_test[t]
+            self.__cash = self.__cash - self.__cash * self.__investment_rate
+            self.__position = investment / self.__close_test[t]
+        elif action == 1: # close position
+            self.__cash = self.__position * (1 + (self.__enter_price - self.__close_test[t]) / self.__enter_price * ACTION_LIST[self.__previous_action])
+            self.__position = 0.0
+        else : # change position
+            self.__cash = self.__position * (1 + (self.__enter_price - self.__close_test[t]) / self.__enter_price * ACTION_LIST[self.__previous_action])
+            investment = self.__cash * self.__investment_rate * self.__leverage
+            self.__enter_price = self.__close_test[t]
+            self.__cash = self.__cash - self.__cash * self.__investment_rate
+            self.__position = investment / self.__close_test[t]
+        self.__wealth = self.__cash + abs(self.__position * self.__close_test[t])
     
     def get_instant_pips(self, t, action):
         return (self.__close_test[t+1] - self.__close_test[t]) * ACTION_LIST[action] - \
             (self.__transaction_cost) * abs(ACTION_LIST[self.__previous_action] - ACTION_LIST[action])
 
     def act(self, t, action):
-        state_new = self.get_state(t + 1)
-        self.__wealth = self.__wealth - self.__wealth * self.__investment_rate
-        reward = self.get_instant_reward(t,action)
+        self.get_instant_reward(t, action)
         #reward = self.get_instant_pips(t,action)
-        self.__wealth += reward
         self.__previous_action = action
-        return state_new, self.__wealth
+        return self.__wealth
 
 def run():
-    time_start = "2016-05-26-14-16-52"
+    time_start = "2016-05-27-08-08-18"
     version = str(6)
 
     with open("../Model/DRL_model_v" + version + "_" + time_start + ".json", "r") as jfile:
@@ -103,8 +116,8 @@ def run():
         elif ret_test[t+1] * np.argmax(q[0]) < 0 :
             loss += 1
 
-        new_state, reward = env.act(t, action)
-        accumulate_ret.append(reward)
+        wealth = env.act(t, action)
+        accumulate_ret.append(wealth)
         print "accumulate return : " + str(accumulate_ret[-1])
     q_value_list = np.transpose(np.asarray(q_value_list))
     print win
