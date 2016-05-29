@@ -95,8 +95,8 @@ def run():
     data = pd.read_csv("../Data/GBPUSD240.csv",header=None)
     close = data[5].values
 
-    train_start_period = 9800
-    train_stop_period = 10200
+    train_start_period = 0
+    train_stop_period = 10000
     ret_test = (close[1:] - close[:-1])[train_start_period:train_stop_period]
     close_test = close[train_start_period+1:train_stop_period]
 
@@ -132,6 +132,7 @@ def run():
     print win
     print loss
     print win / (win + loss)
+    print accumulate_pips[-1]
     
     # plot result
     fig = plt.figure(1)
