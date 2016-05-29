@@ -70,7 +70,7 @@ class FX_Market():
         self.__accumulate_return = (self.__wealth - self.__initial_wealth) / self.__initial_wealth * 100
     
     def get_instant_pips(self, t, action):
-        self.__accumulate_pips +=  ACTION_LIST[self.__previous_action] * (self.__close_test[t] - self.__close_test[t-1] ) - \
+        self.__accumulate_pips +=  ACTION_LIST[action] * (self.__ret_train[t+1]) - \
         self.__transaction_cost * abs(ACTION_LIST[self.__previous_action] - ACTION_LIST[action])
 
     def act(self, t, action):
@@ -81,22 +81,36 @@ class FX_Market():
         return self.__accumulate_return, self.__accumulate_pips
 
 def run():
+    
+    version = "5"
+    serial_No = "3"
+    look_back_term = 200
+    train_start_period = 4800
+    train_stop_period = 5100
+    transaction_cost = 0.00025 # for side trade
+    
+    '''
     time_start = "2016-05-27-08-08-18"
-    version = str(6)
-
     with open("../Model/DRL_model_v" + version + "_" + time_start + ".json", "r") as jfile:
         model = model_from_json(json.load(jfile))
     model.load_weights("../Model/DRL_model_v" + version + "_" + time_start + ".h5")
+    '''
+    
+    
+    with open("../Archive_Result/DRL_model_v" + version + "_" + serial_No + ".json", "r") as jfile:
+        model = model_from_json(json.load(jfile))
+    model.load_weights("../Archive_Result/DRL_model_v" + version + "_" + serial_No + ".h5")
+    
+    
     model.compile("sgd", "mse")
-    look_back_term =   200
-    transaction_cost = 0.0005 # for side trade 
+    
+     
 
     # import return data
     data = pd.read_csv("../Data/GBPUSD240.csv",header=None)
     close = data[5].values
 
-    train_start_period = 0
-    train_stop_period = 10000
+    
     ret_test = (close[1:] - close[:-1])[train_start_period:train_stop_period]
     close_test = close[train_start_period+1:train_stop_period]
 
@@ -137,7 +151,7 @@ def run():
     # plot result
     fig = plt.figure(1)
     ax1 = fig.add_subplot(411)
-    ax1.plot(range(len(accumulate_ret)),accumulate_ret,"r.",label = "Return")
+    ax1.plot(range(len(accumulate_ret)),accumulate_ret,"r-",label = "Return")
     plt.ylabel("Return (%)")
     ax1.legend()
     plt2 = ax1.twinx()
@@ -151,7 +165,7 @@ def run():
     #plt2.legend()
     
     ax2 = fig.add_subplot(412)
-    ax2.plot(range(len(accumulate_ret)),accumulate_pips,"r.",label = "Pips")
+    ax2.plot(range(len(accumulate_ret)),accumulate_pips,"r-",label = "Pips")
     plt.ylabel("Pips")
     ax2.legend()
     plt2 = ax2.twinx()
@@ -163,8 +177,8 @@ def run():
     #plt2.legend()
     
     ax3 = fig.add_subplot(413)
-    ax3.plot(range(len(action_list)),action_list,"r",label = "Action")
-    plt.ylabel("Action 0 = buy, 1 = hold, -1 = sell")
+    ax3.plot(range(len(action_list)),action_list,"r.",label = "Action")
+    plt.ylabel("Action 0 = hold, 1 = buy, -1 = sell")
     ax3.legend()
     plt2 = ax3.twinx()
     if train_stop_period < 0 :

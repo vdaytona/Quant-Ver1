@@ -33,6 +33,7 @@ import copy
 import theano
 from numba.types import float32
 from theano import config
+import pickle
 
 ACTION_LIST = [1,0,-1]
 floatX = float32
@@ -68,11 +69,15 @@ class Trading_Memory():
         self.__max_memory = max_memory
         self.__memory = list()
         self.discount = discount
-
+        
+    def get_memory(self):
+        return self.__memory
+    
     def memory(self,state, state_new, action, reward):
         self.__memory.append([state, state_new, action, reward])
         if len(self.__memory) > self.__max_memory:
             del self.__memory[0]
+            
 
     def get_batch(self, target_model,online_model, batch_size=30):
         # use target_model to decide greedy policy (action), 
@@ -93,24 +98,33 @@ class Trading_Memory():
             targets[i] = target_model.predict(state)[0]
             action_next = np.argmax(online_model.predict(state_new)[0])
             Q_sa = target_model.predict(state_new)[0][action_next]
-            
             targets[i, action] = reward + self.discount * Q_sa
+            
         return inputs, targets
 
 def write_model(online_model, version, time_start):
     #output model
-    online_model.save_weights("../Model/DRL_model_v" + version + "_" + time_start + ".h5", overwrite=True)
-    with open("../Model/DRL_model_v" + version + "_" + time_start + ".json", "w") as outfile:
+    online_model.save_weights("../Temp/DRL_model_v" + version + "_" + time_start + ".h5", overwrite=True)
+    with open("../Temp/DRL_model_v" + version + "_" + time_start + ".json", "w") as outfile:
         json.dump(online_model.to_json(), outfile)
     outfile.close()
 
 def read_model(version, time_start):
-    with open("../Model/DRL_model_v" + version + "_" + time_start + ".json", "r") as jfile:
+    with open("../Temp/DRL_model_v" + version + "_" + time_start + ".json", "r") as jfile:
         target_model = model_from_json(json.load(jfile))
-    target_model.load_weights("../Model/DRL_model_v" + version + "_" + time_start + ".h5")
+    target_model.load_weights("../Temp/DRL_model_v" + version + "_" + time_start + ".h5")
     target_model.compile("sgd", "mse")
     jfile.close()
     return target_model
+
+def save_variable(fileName, variable):
+    f = file("../Temp/" + fileName, 'wb')
+    pickle.dump(variable, f)
+    f.close
+
+def load_variable(fileName, variable):
+    f = file("../Temp/" + fileName, 'rb')
+    return pickle.load(f)
     
 
 def run():
@@ -121,13 +135,13 @@ def run():
     epsilon = 0.1  # exploration
     num_actions = len(ACTION_LIST)  # [buy, hold, sell]
     transcation_cost = 0.0005
-    epoch = 200
+    epoch = 500
     max_memory = 1000000
     hidden_size = 600
-    batch_size = 200
+    batch_size = 50
     look_back_term = 200
-    training_period_start = 100
-    training_period_stop = 10100
+    training_period_start = 0
+    training_period_stop = 1000
     learning_rate = 0.1
     discount_rate = 0.000009
     step_size = 10 # iterate step to update target_model
@@ -205,6 +219,8 @@ def run():
 
             trading_his.memory(state, new_state, action, reward)
             
+            save_variable("memory_" + time_start, trading_his.get_memory())
+            
             inputs, targets = trading_his.get_batch(target_model, model,batch_size=batch_size)
 
             model.train_on_batch(inputs, targets)
@@ -227,7 +243,10 @@ def run():
     result.to_csv("../Result_Data/DRL_v" + version + "_result_" + time_start + ".csv")
     
     #output model
-    write_model(model, version, time_start)
+    model.save_weights("../Model/DRL_model_v" + version + "_" + time_start + ".h5", overwrite=True)
+    with open("../Model/DRL_model_v" + version + "_" + time_start + ".json", "w") as outfile:
+        json.dump(model.to_json(), outfile)
+    outfile.close()
 
     #plt.plot(range(len(return_list)),return_list,"r.")
     #plt.show()
