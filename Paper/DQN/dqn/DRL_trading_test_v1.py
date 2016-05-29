@@ -89,7 +89,7 @@ def run():
     model.load_weights("../Model/DRL_model_v" + version + "_" + time_start + ".h5")
     model.compile("sgd", "mse")
     look_back_term =   200
-    transaction_cost = 0.00025 # for side trade 
+    transaction_cost = 0.0005 # for side trade 
 
     # import return data
     data = pd.read_csv("../Data/GBPUSD240.csv",header=None)
