@@ -38,7 +38,7 @@ import time
 
 ACTION_LIST = [1,0,-1]
 floatX = float32
-time_get_batch = list(np.zeros(6))
+time_get_batch = list(np.zeros(7))
 
 class FX_Market():
     def __init__(self,ret_train, look_back_term, transaction_cost):
@@ -85,38 +85,51 @@ class Trading_Memory():
         # use target_model to decide greedy policy (action), 
         # and target_model to calculate the value
         
-        time_40 = time.clock()        
+        time_40 = time.clock()
+        
         len_memory = len(self.__memory)
-        time_41 = time.clock()
-        time_get_batch[0] += (time_41 - time_40)
+        
+        
 
         num_actions = target_model.output_shape[-1]
         
-        time_42 = time.clock()
-        time_get_batch[0] += (time_42 - time_42)
+        
 
         env_dim = self.__memory[0][0].shape[1]
         
-        time_43 = time.clock()
-        time_get_batch[0] += (time_43 - time_42)
+        
 
         inputs = np.zeros((min(len_memory, batch_size), env_dim))
         targets = np.zeros((inputs.shape[0], num_actions))
         
-        time_44 = time.clock()
-        time_get_batch[0] += (time_44 - time_43)
+        
 
         for i, idx in enumerate(np.random.randint(0, len_memory,size=inputs.shape[0])):
+            time_40 = time.clock()
             state, state_new, action, reward = self.__memory[idx]
+            time_41 = time.clock()
+            time_get_batch[0] += (time_41 - time_40)
+            time_42 = time.clock()
+            time_get_batch[1] += (time_42 - time_42)
+            
             inputs[i:i+1] = state
+            time_43 = time.clock()
+            time_get_batch[2] += (time_43 - time_42)
             
             targets[i] = target_model.predict(state)[0]
-            action_next = np.argmax(online_model.predict(state_new)[0])
-            Q_sa = target_model.predict(state_new)[0][action_next]
-            targets[i, action] = reward + self.discount * Q_sa
+            time_44 = time.clock()
+            time_get_batch[3] += (time_44 - time_43)
             
-        time_45 = time.clock()
-        time_get_batch[0] += (time_45 - time_44)
+            action_next = np.argmax(online_model.predict(state_new)[0])
+            time_45 = time.clock()
+            time_get_batch[4] += (time_45 - time_44)
+            Q_sa = target_model.predict(state_new)[0][action_next]
+            time_46 = time.clock()
+            time_get_batch[5] += (time_46 - time_45)
+            targets[i, action] = reward + self.discount * Q_sa
+            time_47 = time.clock()
+            time_get_batch[6] += (time_47 - time_46)
+            
         return inputs, targets
 
 def write_model(online_model, version, time_start):
@@ -154,7 +167,7 @@ def run():
     num_actions = len(ACTION_LIST)  # [buy, hold, sell]
     transcation_cost = 0.0005
     epoch = 500
-    max_memory = 1000000
+    max_memory = 10000
     hidden_size = 600
     batch_size = 50
     look_back_term = 200
@@ -224,7 +237,7 @@ def run():
             target_model = read_model(version, time_start)
             
         time_cal = list(np.zeros(6))
-        time_get_batch = list(np.zeros(6))
+        time_get_batch = list(np.zeros(7))
         
         for t in range(look_back_term - 1 , len(ret_train) - 2) :
             #if np.random.random_integers(1,frame_skip) == 4 :
