@@ -152,11 +152,11 @@ def run():
     transcation_cost = 0.0005
     epoch = 2000
     max_memory = 1000000
-    hidden_size = 900
-    batch_size = 50
+    hidden_size = 600
+    batch_size = 200
     look_back_term = 300
     training_period_start = 0
-    training_period_stop = 1000
+    training_period_stop = 10000
     learning_rate = 0.1
     discount_rate = 0.000009
     step_size = 10 # iterate step to update target_model
