@@ -88,47 +88,48 @@ class Trading_Memory():
         time_40 = time.clock()
         
         len_memory = len(self.__memory)
-        
-        
-
         num_actions = target_model.output_shape[-1]
-        
-        
-
         env_dim = self.__memory[0][0].shape[1]
-        
-        
-
         inputs = np.zeros((min(len_memory, batch_size), env_dim))
         targets = np.zeros((inputs.shape[0], num_actions))
         
+        new_state_batch = np.zeros((min(len_memory, batch_size), env_dim))
         
-
+        
         for i, idx in enumerate(np.random.randint(0, len_memory,size=inputs.shape[0])):
             time_40 = time.clock()
             state, state_new, action, reward = self.__memory[idx]
             time_41 = time.clock()
             time_get_batch[0] += (time_41 - time_40)
-            time_42 = time.clock()
-            time_get_batch[1] += (time_42 - time_42)
             
             inputs[i:i+1] = state
+            new_state_batch[i:i+1] = state_new
+            time_42 = time.clock()
+            time_get_batch[1] += (time_42 - time_41)
+            
+            targets[i] = target_model.predict(state)[0]
+            
             time_43 = time.clock()
             time_get_batch[2] += (time_43 - time_42)
             
-            targets[i] = target_model.predict(state)[0]
+            action_next = np.argmax(online_model.predict(state_new)[0])
             time_44 = time.clock()
             time_get_batch[3] += (time_44 - time_43)
-            
-            action_next = np.argmax(online_model.predict(state_new)[0])
+            Q_sa = target_model.predict(state_new)[0][action_next]
             time_45 = time.clock()
             time_get_batch[4] += (time_45 - time_44)
-            Q_sa = target_model.predict(state_new)[0][action_next]
+            targets[i, action] = reward + self.discount * Q_sa
             time_46 = time.clock()
             time_get_batch[5] += (time_46 - time_45)
-            targets[i, action] = reward + self.discount * Q_sa
-            time_47 = time.clock()
-            time_get_batch[6] += (time_47 - time_46)
+        
+        targets_predict_batch = target_model.predict(inputs,batch_size = len(inputs))
+        Q_predict = online_model.predict(new_state_batch,batch_size = len(new_state_batch))
+        action_next_bath = Q_predict.argmax(axis = 1)
+        Q_max = target_model.predict(new_state_batch,batch_size = len(new_state_batch))       
+        
+        
+        time_47 = time.clock()
+        time_get_batch[6] += (time_47 - time_46)
             
         return inputs, targets
 
