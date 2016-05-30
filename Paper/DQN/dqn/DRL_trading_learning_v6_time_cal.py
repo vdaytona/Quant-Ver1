@@ -152,7 +152,7 @@ def run():
     transcation_cost = 0.0005
     epoch = 2000
     max_memory = 1000000
-    hidden_size = 600
+    hidden_size = 900
     batch_size = 50
     look_back_term = 300
     training_period_start = 0
@@ -160,7 +160,7 @@ def run():
     learning_rate = 0.1
     discount_rate = 0.000009
     step_size = 10 # iterate step to update target_model
-    act_function = "sigmoid"
+    act_function = "relu"
     #frame_skip = 4 # train the model with some frames intervals
     input_data = "GBPUSD240.csv"
 
