@@ -154,7 +154,7 @@ def run():
     max_memory = 1000000
     hidden_size = 600
     batch_size = 50
-    look_back_term = 100
+    look_back_term = 300
     training_period_start = 0
     training_period_stop = 1000
     learning_rate = 0.1
