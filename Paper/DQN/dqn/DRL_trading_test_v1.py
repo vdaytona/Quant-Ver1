@@ -82,30 +82,28 @@ class FX_Market():
 
 def run():
     
-    version = "5"
-    serial_No = "3"
-    look_back_term = 200
-    train_start_period = 4800
-    train_stop_period = 5100
+    version = "6"
+    serial_No = "5"
+    look_back_term = 300
+    train_start_period = 700
+    train_stop_period = 1100
     transaction_cost = 0.00025 # for side trade
     
-    '''
-    time_start = "2016-05-27-08-08-18"
-    with open("../Model/DRL_model_v" + version + "_" + time_start + ".json", "r") as jfile:
-        model = model_from_json(json.load(jfile))
-    model.load_weights("../Model/DRL_model_v" + version + "_" + time_start + ".h5")
-    '''
     
-    
-    with open("../Archive_Result/DRL_model_v" + version + "_" + serial_No + ".json", "r") as jfile:
+    time_start = "2016-05-30-08-34-44"
+    with open("../Temp/DRL_model_v" + version + "_" + time_start + ".json", "r") as jfile:
         model = model_from_json(json.load(jfile))
-    model.load_weights("../Archive_Result/DRL_model_v" + version + "_" + serial_No + ".h5")
+    model.load_weights("../Temp/DRL_model_v" + version + "_" + time_start + ".h5")
+    
+    #===========================================================================
+    # with open("../Archive_Result/v" + version + "/DRL_model_v" + version + "_" + serial_No + ".json", "r") as jfile:
+    #     model = model_from_json(json.load(jfile))
+    # model.load_weights("../Archive_Result/v" + version + "/DRL_model_v" + version + "_" + serial_No + ".h5")
+    #===========================================================================
     
     
     model.compile("sgd", "mse")
     
-     
-
     # import return data
     data = pd.read_csv("../Data/GBPUSD240.csv",header=None)
     close = data[5].values
@@ -178,7 +176,8 @@ def run():
     
     ax3 = fig.add_subplot(413)
     ax3.plot(range(len(action_list)),action_list,"r.",label = "Action")
-    plt.ylabel("Action 0 = hold, 1 = buy, -1 = sell")
+    plt.ylabel("Action 0 = no entry, 1 = buy, -1 = sell")
+    plt.ylim(-1.2,1.2)
     ax3.legend()
     plt2 = ax3.twinx()
     if train_stop_period < 0 :

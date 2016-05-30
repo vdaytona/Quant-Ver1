@@ -34,6 +34,7 @@ import theano
 from numba.types import float32
 from theano import config
 import pickle
+import time
 
 ACTION_LIST = [1,0,-1]
 floatX = float32
@@ -196,6 +197,7 @@ def run():
     
     # Train
     return_list = []
+    
     for e in range(epoch):
         print "epoch : " + str(e)
         env.reset()
@@ -203,6 +205,7 @@ def run():
         if e % step_size == 0:
             write_model(model, version, time_start)
             target_model = read_model(version, time_start)
+        time_cal = list(np.zeros(6))
         for t in range(look_back_term - 1 , len(ret_train) - 2) :
             #if np.random.random_integers(1,frame_skip) == 4 :
             state = env.get_state(t)
@@ -212,14 +215,14 @@ def run():
             else:
                 q = target_model.predict(state)
                 action = np.argmax(q[0])
-
+            
             new_state, reward = env.act(t, action)
 
             accumulate_ret.append(accumulate_ret[-1]  + reward)
 
             trading_his.memory(state, new_state, action, reward)
             
-            save_variable("memory_" + time_start, trading_his.get_memory())
+            #save_variable("memory_" + time_start, trading_his.get_memory())
             
             inputs, targets = trading_his.get_batch(target_model, model,batch_size=batch_size)
 
