@@ -87,28 +87,31 @@ class Trading_Memory():
         
         len_memory = len(self.__memory)
         env_dim = self.__memory[0][0].shape[1]
-        inputs = np.zeros((min(len_memory, batch_size), env_dim))
+        state_batch = np.zeros((min(len_memory, batch_size), env_dim))
         
         new_state_batch = np.zeros((min(len_memory, batch_size), env_dim))
-        reward_batch = np.zeros(inputs.shape[0])
-        action_batch = np.zeros(inputs.shape[0])        
+        reward_batch = np.zeros(state_batch.shape[0])
+        action_batch = np.zeros(state_batch.shape[0])        
         
-        for i, idx in enumerate(np.random.randint(0, len_memory,size=inputs.shape[0])):
+        for i, idx in enumerate(np.random.randint(0, len_memory,size=state_batch.shape[0])):
             state, state_new, action, reward = self.__memory[idx]
-            inputs[i:i+1] = state
+            state_batch[i:i+1] = state
             new_state_batch[i:i+1] = state_new
             reward_batch[i:i+1] = reward
             action_batch[i:i+1] = action
         
-        targets_predict_batch = target_model.predict(inputs,batch_size = len(inputs))
+        joined_batch = np.concatenate((state_batch, new_state_batch))        
+        joined_predict_batch = target_model.predict(joined_batch,batch_size = len(state_batch) * 2)
+        targets_predict_batch = joined_predict_batch[: len(joined_predict_batch) / 2]
+               
         Q_predict = online_model.predict(new_state_batch,batch_size = len(new_state_batch))
         action_next_bath = Q_predict.argmax(axis = 1)
-        Q_max = target_model.predict(new_state_batch,batch_size = len(new_state_batch))[np.array(range(len(new_state_batch))), action_next_bath]
+        Q_max = joined_predict_batch[len(joined_predict_batch) / 2 : ][np.array(range(len(new_state_batch))), action_next_bath]
         
         for i in range(len(targets_predict_batch)) :
             targets_predict_batch[i, action_batch[i]] = reward_batch[i] + self.discount * Q_max[i]
             
-        return inputs, targets_predict_batch
+        return state_batch, targets_predict_batch
 
 def write_model(online_model, version, time_start):
     #output model
@@ -150,7 +153,7 @@ def run():
     batch_size = 200
     look_back_term = 200
     training_period_start = 0
-    training_period_stop = 10000
+    training_period_stop = 1000
     learning_rate = 0.1
     discount_rate = 0.000009
     step_size = 10 # iterate step to update target_model
@@ -261,9 +264,6 @@ def run():
         
         for i in range(len(time_cal)) :
             print "process " + str(i) + " : " + str(time_cal[i]/60) + " minutes"
-            if i == 4:
-                for i in range(len(time_get_batch)) :
-                    print "process 4" + str(i) + " : " + str(time_get_batch[i]/60) + " minutes"
         
         print "accumulate return : " + str(accumulate_ret[-1])
         
