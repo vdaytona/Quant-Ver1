@@ -16,12 +16,12 @@ def run():
     
     result = pd.merge(result, EURGBP, how="inner", on = [0,1]).dropna().rename(columns = {5 : 'EURGBP'})
     result = pd.merge(result, GBPCHF, how="inner", on = [0,1]).dropna().rename(columns = {5 : 'GBPCHF'})
-    #for pair in ["USDJPY","JPYEUR","EURGBP","GBPCHF"] :
-    #    result[pair] = (result[pair] - result[pair].min()) / (result[pair].max() - result[pair].min())
+    for pair in ["USDJPY","JPYEUR","EURGBP","GBPCHF"] :
+        result[pair] = (result[pair] - result[pair].min()) / (result[pair].max() - result[pair].min()) * 256
     #print USDJPY
     #print JPYEUR
     print result
-    result.to_csv("../Data/combination.csv")
+    result.to_csv("../Data/combination_RGB.csv")
 
 if __name__ == '__main__':
     run()
