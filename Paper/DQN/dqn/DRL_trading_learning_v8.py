@@ -16,7 +16,7 @@ change memory.get_batch
 v7: 1. Modify the Traning_memory.get_batch(), extremely reducing the processing time
     2. Output the return for next 100 time as out of sample test ? (not done)
     
-v8: 1. calculate the transaction cost of the next action , and set the discount rate to 0.95
+v8: 1. considering the transaction cost of the next action, so set the discount rate to 0.95
 @author: Daytona
 import os
 os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
@@ -72,11 +72,10 @@ class FX_Market():
 
 
 class Trading_Memory():
-    def __init__(self,max_memory, transactoin_cost, discount = 0.9):
+    def __init__(self,max_memory, discount = 0.9):
         self.__max_memory = max_memory
         self.__memory = list()
         self.discount = discount
-        self.__transaction_cost = transactoin_cost
         
         
     def get_memory(self):
@@ -116,11 +115,7 @@ class Trading_Memory():
         Q_max = joined_predict_batch[len(joined_predict_batch) / 2 : ][np.array(range(len(new_state_batch))), action_next_bath]
         
         for i in range(len(targets_predict_batch)) :
-            if i < len(targets_predict_batch)-1 : 
-                targets_predict_batch[i, action_batch[i]] = reward_batch[i] + self.discount * \
-                (Q_max[i] + self.__transaction_cost * abs(ACTION_LIST[int(action_batch[i])] - ACTION_LIST[int(action_next_bath[i+1])]))
-            else :
-                targets_predict_batch[i, action_batch[i]] = reward_batch[i] + self.discount * Q_max[i]
+            targets_predict_batch[i, action_batch[i]] = reward_batch[i] + self.discount * Q_max[i]
         return state_batch, targets_predict_batch
 
 def write_model(online_model, version, time_start):
@@ -214,7 +209,7 @@ def run():
     # create market
     env = FX_Market(ret_train = ret_train, look_back_term = look_back_term, transaction_cost = transcation_cost)
     # create memory
-    trading_his = Trading_Memory(max_memory = max_memory, transactoin_cost=transcation_cost, discount=discount_rate)
+    trading_his = Trading_Memory(max_memory = max_memory, discount=discount_rate)
     
     # Train
     return_list = []
