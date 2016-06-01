@@ -12,16 +12,17 @@ v5 : discount rate - > 0.000009 (four rate, compound annual interest rate is 2%)
 v6 : 1. two model : online network and target network, online use to calculate action, 
 and target network used to calculate the value of greedy policy, detailed in "Double DQN"
 change memory.get_batch
-     2. set skip frame, to increase training speed - > only used in DRL_model_v6_3
-v7: 1. Modify the Traning_memory.get_batch(), extremely reducing the processing time
-    2. Output the return for next 100 time as out of sample test ?
-v8: 1. in order to consider the next action transaction cost, set discount cost to 0.9
-
+     2. set skip frame, to increase training speed - > only used in DRL_model_v6_3 
+v7: 1. Modify the Traning_memory.get_batch(), extremely reduced processing time
+    2. Data has fixed. (4 hour data only begin from 1999)
 @author: Daytona
-'''
-
 import os
 os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
+'''
+
+
+#import os
+#os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
 
 import numpy as np
 import pandas as pd
@@ -149,19 +150,19 @@ def run():
     global floatX
     global time_get_batch
     # parameters
-    version = str(6)
+    version = str(7)
     epsilon = 0.1  # exploration
     num_actions = len(ACTION_LIST)  # [buy, hold, sell]
     transcation_cost = 0.0005
     epoch = 2000
     max_memory = 1000000
     hidden_size = 600
-    batch_size = 50
+    batch_size = 200
     look_back_term = 300
     training_period_start = 0
-    training_period_stop = 1000
+    training_period_stop = 10000
     learning_rate = 0.1
-    discount_rate = 0.9
+    discount_rate = 0.000009
     step_size = 10 # iterate step to update target_model
     act_function = "relu"
     #frame_skip = 4 # train the model with some frames intervals
@@ -302,3 +303,4 @@ def run():
     print "finished"
 
 if __name__ == '__main__': run()
+
