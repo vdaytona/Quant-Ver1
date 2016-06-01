@@ -12,14 +12,12 @@ v5 : discount rate - > 0.000009 (four rate, compound annual interest rate is 2%)
 v6 : 1. two model : online network and target network, online use to calculate action, 
 and target network used to calculate the value of greedy policy, detailed in "Double DQN"
 change memory.get_batch
-     2. set skip frame, to increase training speed - > only used in DRL_model_v6_3 
+     2. set skip frame, to increase training speed - > only used in DRL_model_v6_3
 v7: 1. Modify the Traning_memory.get_batch(), extremely reducing the processing time
-    2. Output the return for next 100 time as out of sample test ? (not done)
-    
-v8: 1. considering the transaction cost of the next action, so set the discount rate to 0.95
+    2. Output the return for next 100 time as out of sample test ?
+v8: 1. in order to consider the next action transaction cost, set discount cost to 0.9
+
 @author: Daytona
-import os
-os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
 '''
 
 import os
@@ -31,13 +29,16 @@ from keras.models import Sequential
 from keras.layers.core import Dense
 from keras.optimizers import sgd
 #from keras.utils.visualize_util import  plot
+import matplotlib.pyplot as plt
 import datetime
 import logging
 from time import gmtime, strftime
 from keras.models import model_from_json
 import json
 import copy
+import theano
 from numba.types import float32
+from theano import config
 import pickle
 import time
 
@@ -77,7 +78,6 @@ class Trading_Memory():
         self.__memory = list()
         self.discount = discount
         
-        
     def get_memory(self):
         return self.__memory
     
@@ -116,6 +116,7 @@ class Trading_Memory():
         
         for i in range(len(targets_predict_batch)) :
             targets_predict_batch[i, action_batch[i]] = reward_batch[i] + self.discount * Q_max[i]
+            
         return state_batch, targets_predict_batch
 
 def write_model(online_model, version, time_start):
@@ -148,7 +149,7 @@ def run():
     global floatX
     global time_get_batch
     # parameters
-    version = str(8)
+    version = str(6)
     epsilon = 0.1  # exploration
     num_actions = len(ACTION_LIST)  # [buy, hold, sell]
     transcation_cost = 0.0005
@@ -160,7 +161,7 @@ def run():
     training_period_start = 0
     training_period_stop = 1000
     learning_rate = 0.1
-    discount_rate = 0.000009
+    discount_rate = 0.9
     step_size = 10 # iterate step to update target_model
     act_function = "relu"
     #frame_skip = 4 # train the model with some frames intervals
@@ -225,9 +226,6 @@ def run():
         time_cal = list(np.zeros(6))
         time_get_batch = list(np.zeros(7))
         
-        inputs_batch = None
-        targets_batch = None
-        
         for t in range(look_back_term - 1 , len(ret_train) - 2) :
             #if np.random.random_integers(1,frame_skip) == 4 :
             state = env.get_state(t)
@@ -262,19 +260,13 @@ def run():
             
             inputs, targets = trading_his.get_batch(target_model, model,batch_size=batch_size)
             
-            if t == look_back_term - 1 :
-                inputs_batch = copy.deepcopy(inputs)
-                targets_batch = copy.deepcopy(targets)
-            else :
-                inputs_batch = np.concatenate((inputs_batch,inputs))
-                targets_batch = np.concatenate((targets_batch,targets))
-            
             time_6 = time.clock()
             time_cal[4] += (time_6 - time_5)
-        
-        model.train_on_batch(inputs, targets)            
-        time_7 = time.clock()
-        time_cal[5] += (time_7 - time_6)
+
+            model.train_on_batch(inputs, targets)
+            
+            time_7 = time.clock()
+            time_cal[5] += (time_7 - time_6)
         
         for i in range(len(time_cal)) :
             print "process " + str(i) + " : " + str(time_cal[i]/60) + " minutes"
