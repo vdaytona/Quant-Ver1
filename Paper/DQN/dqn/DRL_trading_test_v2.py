@@ -75,15 +75,15 @@ class FX_Market():
 
 def run():
     
-    version = "6"
+    version = "7"
     serial_No = "6"
     look_back_term = 300
     train_start_period = 0
     train_stop_period = -1
-    transaction_cost = 0.0005 # for side trade
+    transaction_cost = 0.00025 # for side trade
     
     
-    time_start = "2016-05-30-15-15-12"
+    time_start = "2016-06-01-06-50-23"
     with open("../Temp/DRL_model_v" + version + "_" + time_start + ".json", "r") as jfile:
         model = model_from_json(json.load(jfile))
     model.load_weights("../Temp/DRL_model_v" + version + "_" + time_start + ".h5")
@@ -101,7 +101,6 @@ def run():
     data = pd.read_csv("../Data/GBPUSD240.csv",header=None)
     close = data[5].values
 
-    
     ret_test = (close[1:] - close[:-1])[train_start_period:train_stop_period]
     close_test = close[train_start_period+1:train_stop_period]
 
@@ -110,9 +109,13 @@ def run():
     accumulate_ret = [0.0]
     accumulate_pips = [0.0]
     action_list = []
+    keep = 0
+    no_entry = 0
     win = 0.0
     loss = 0.0
-    state_batch = np.zeros((len(ret_test) - 2 -look_back_term +1 , look_back_term))
+    win_result_list = []
+    win_ratio_list = []
+    state_batch = np.zeros((len(ret_test) -2 -look_back_term +1 , look_back_term))
     
     for t in range(look_back_term - 1 , len(ret_test) - 2) :
         state_batch[t-(look_back_term-1) : t-look_back_term+2] = env.get_state(t)
@@ -123,8 +126,17 @@ def run():
         i = t-(look_back_term-1)
         if ret_test[t+1] * ACTION_LIST[action_batch[i]] > 0 :
             win += 1
-        elif ret_test[t+1] *ACTION_LIST[action_batch[i]] < 0 :
+            win_result_list.append(1)
+        elif ret_test[t+1] * ACTION_LIST[action_batch[i]] < 0 :
             loss += 1
+            win_result_list.append(-1)
+        else :
+            no_entry += 1
+            win_result_list.append(0)
+        #no_entry = no_entry + 1 if action_batch[i] == 1 else no_entry
+        if i != 0 :
+            if action_batch[i] == action_batch[i-1] :
+                keep += 1
         wealth, pips = env.act(t, action_batch[i])
         accumulate_ret.append(wealth)
         accumulate_pips.append(pips)
@@ -135,12 +147,14 @@ def run():
     print "win trade count :" + str(int(win))
     print "loss trade count :" + str(int(loss))
     print "win ratio :" + str(win / (win + loss))
+    print "keep position count : " + str(keep)
+    print "No entry count :" + str(no_entry)
     print "accumulate pips :" + str(accumulate_pips[-1])
     print "accumulate return :" + str(accumulate_ret[-1])
     
     # plot result
     fig = plt.figure(1)
-    ax1 = fig.add_subplot(411)
+    ax1 = fig.add_subplot(511)
     ax1.plot(range(len(accumulate_ret)),accumulate_ret,"r-",label = "Return")
     plt.ylabel("Return (%)")
     ax1.legend()
@@ -154,7 +168,7 @@ def run():
     plt.ylabel("GBPUSD exchange rate")
     #plt2.legend()
     
-    ax2 = fig.add_subplot(412)
+    ax2 = fig.add_subplot(512)
     ax2.plot(range(len(accumulate_ret)),accumulate_pips,"r-",label = "Pips")
     plt.ylabel("Pips")
     ax2.legend()
@@ -166,7 +180,7 @@ def run():
     plt.ylabel("GBPUSD exchange rate")
     #plt2.legend()
     
-    ax3 = fig.add_subplot(413)
+    ax3 = fig.add_subplot(513)
     ax3.plot(range(len(action_list)),action_list,"r.",label = "Action")
     plt.ylabel("Action 0 = no entry, 1 = buy, -1 = sell")
     plt.ylim(-1.2,1.2)
@@ -177,12 +191,23 @@ def run():
     else :
         plt2.plot(range(len(accumulate_ret)), close[train_start_period+look_back_term+1:train_stop_period+1],"b-", label = "GBPUSD exchange rate")
     
-    ax3 = fig.add_subplot(414)
+    ax3 = fig.add_subplot(514)
     ax3.plot(range(len(q_value_list[0])), q_value_list[0],"r",label = "Q value of buy")
     ax3.plot(range(len(q_value_list[0])), q_value_list[1],"g",label = "Q value of hold")
     ax3.plot(range(len(q_value_list[0])), q_value_list[2],"b",label = "Q value of sell")
     ax3.legend()
+    
+    # plot winning ratio
+    for i in range(len(win_result_list)) :
+        if win_result_list[:i+1].count(1) + win_result_list[:i+1].count(-1) > 0 :
+            win_ratio_list.append(float(win_result_list[:i+1].count(1)) / float((win_result_list[:i+1].count(1) + win_result_list[:i+1].count(-1))))
+    #print win_ratio_list
+    ax4 = fig.add_subplot(515)
+    ax4.plot(range(len(win_ratio_list)), win_ratio_list, label = "average_win_ratio")
+    plt.ylim(0,1)
+    ax4.legend()
     plt.show()
+        
 
 
 if __name__ == '__main__': run()
