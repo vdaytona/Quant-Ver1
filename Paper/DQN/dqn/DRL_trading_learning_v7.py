@@ -154,13 +154,13 @@ def run():
     epsilon = 0.1  # exploration
     num_actions = len(ACTION_LIST)  # [buy, hold, sell]
     transcation_cost = 0.0005
-    epoch = 2000
+    epoch = 500
     max_memory = 1000000
     hidden_size = 600
     batch_size = 200
     look_back_term = 300
-    training_period_start = 9700
-    training_period_stop = 10100
+    training_period_start = 0
+    training_period_stop = 10000
     learning_rate = 0.1
     discount_rate = 0.000009
     step_size = 10 # iterate step to update target_model
