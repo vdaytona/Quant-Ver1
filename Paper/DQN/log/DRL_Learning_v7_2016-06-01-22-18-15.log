@@ -1,0 +1,16 @@
+INFO:root:Version : 7
+INFO:root:Time start : 2016-06-01-22-18-15
+INFO:root:Input data :GBPUSD240.csv
+INFO:root:Parameter setting :
+INFO:root:epsilon = 0.1
+INFO:root:transaction_cost = 0.0005
+INFO:root:epoch =500
+INFO:root:max_memory = 1000000
+INFO:root:batch_size = 200
+INFO:root:look back term = 300
+INFO:root:hidden_size = 600
+INFO:root:training period = 0 ~ 10000
+INFO:root:learning rate = 0.1
+INFO:root:discount rate = 9e-06
+INFO:root:step_size = 10
+INFO:root:activation function = relu

@@ -162,7 +162,7 @@ def run():
     training_period_start = 0
     training_period_stop = 10000
     learning_rate = 0.1
-    discount_rate = 0.000009
+    discount_rate = 0.9
     step_size = 10 # iterate step to update target_model
     act_function = "relu"
     #frame_skip = 4 # train the model with some frames intervals
@@ -282,7 +282,9 @@ def run():
     
     time_used = datetime.datetime.now() - time_start_epoch
     time_used = float(time_used.seconds) / 3600.0
-    logging.info("Processing time : " + str(time_used) + " hours")   
+    logging.info("Processing time : " + str(time_used) + " hours")
+    
+    save_variable("../Temp/memory_" + time_start, trading_his.get_memory())
     
     #output accumulate data
     result = pd.DataFrame()
