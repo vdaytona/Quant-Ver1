@@ -236,38 +236,18 @@ def run():
             else:
                 q = target_model.predict(state)
                 action = np.argmax(q[0])
-                
-            time_1 = time.clock()
             
             new_state, reward = env.act(t, action)
-            
-            time_2 = time.clock()
-            time_cal[0] += (time_2 - time_1)
 
             accumulate_ret.append(accumulate_ret[-1]  + reward)
-            
-            time_3 = time.clock()
-            time_cal[1] += (time_3 - time_2)
 
             trading_his.memory(state, new_state, action, reward)
             
-            time_4 = time.clock()
-            time_cal[2] += (time_4 - time_3)
-            
             #save_variable("memory_" + time_start, trading_his.get_memory())
             
-            time_5 = time.clock()
-            time_cal[3] += (time_5 - time_4)
-            
             inputs, targets = trading_his.get_batch(target_model, model,batch_size=batch_size)
-            
-            time_6 = time.clock()
-            time_cal[4] += (time_6 - time_5)
 
             model.train_on_batch(inputs, targets)
-            
-            time_7 = time.clock()
-            time_cal[5] += (time_7 - time_6)
         
         for i in range(len(time_cal)) :
             print "process " + str(i) + " : " + str(time_cal[i]/60) + " minutes"
