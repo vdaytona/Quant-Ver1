@@ -224,7 +224,7 @@ def run():
             write_model(model, version, time_start)
             target_model = read_model(version, time_start)
             
-        time_cal = list(np.zeros(6))
+        #time_cal = list(np.zeros(6))
         time_get_batch = list(np.zeros(7))
         
         for t in range(look_back_term - 1 , len(ret_train) - 2) :

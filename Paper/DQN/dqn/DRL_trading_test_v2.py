@@ -76,23 +76,23 @@ class FX_Market():
 def run():
     
     version = "7"
-    serial_No = "6"
+    serial_No = "3"
     look_back_term = 300
-    train_start_period = 0
-    train_stop_period = -1
+    train_start_period = 10000-look_back_term
+    train_stop_period = 10000+1+20
     transaction_cost = 0.00025 # for side trade
     
     
-    time_start = "2016-06-01-06-50-23"
-    with open("../Temp/DRL_model_v" + version + "_" + time_start + ".json", "r") as jfile:
-        model = model_from_json(json.load(jfile))
-    model.load_weights("../Temp/DRL_model_v" + version + "_" + time_start + ".h5")
-    
     #===========================================================================
-    # with open("../Archive_Result/v" + version + "/DRL_model_v" + version + "_" + serial_No + ".json", "r") as jfile:
+    # time_start = "2016-06-01-06-50-23"
+    # with open("../Temp/DRL_model_v" + version + "_" + time_start + ".json", "r") as jfile:
     #     model = model_from_json(json.load(jfile))
-    # model.load_weights("../Archive_Result/v" + version + "/DRL_model_v" + version + "_" + serial_No + ".h5")
+    # model.load_weights("../Temp/DRL_model_v" + version + "_" + time_start + ".h5")
     #===========================================================================
+    
+    with open("../Archive_Result/v" + version + "/DRL_model_v" + version + "_" + serial_No + ".json", "r") as jfile:
+        model = model_from_json(json.load(jfile))
+    model.load_weights("../Archive_Result/v" + version + "/DRL_model_v" + version + "_" + serial_No + ".h5")
     
     
     model.compile("sgd", "mse")
@@ -201,6 +201,8 @@ def run():
     for i in range(len(win_result_list)) :
         if win_result_list[:i+1].count(1) + win_result_list[:i+1].count(-1) > 0 :
             win_ratio_list.append(float(win_result_list[:i+1].count(1)) / float((win_result_list[:i+1].count(1) + win_result_list[:i+1].count(-1))))
+        elif len(win_result_list) == 0 :
+            win_ratio_list.append(0.0)
     #print win_ratio_list
     ax4 = fig.add_subplot(515)
     ax4.plot(range(len(win_ratio_list)), win_ratio_list, label = "average_win_ratio")
