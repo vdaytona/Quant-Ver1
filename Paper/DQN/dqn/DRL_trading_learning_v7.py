@@ -153,7 +153,7 @@ def run():
     version = str(7)
     epsilon = 0.1  # exploration
     num_actions = len(ACTION_LIST)  # [buy, hold, sell]
-    transcation_cost = 0.0005
+    transcation_cost = 0.001
     epoch = 1000
     max_memory = 1000000
     hidden_size = 600
