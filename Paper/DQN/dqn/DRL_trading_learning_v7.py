@@ -159,7 +159,7 @@ def run():
     hidden_size = 600
     batch_size = 200
     look_back_term = 300
-    training_period_start = 50
+    training_period_start = 9050
     training_period_stop = 10050
     learning_rate = 0.1
     discount_rate = 0.9
