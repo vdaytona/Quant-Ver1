@@ -153,20 +153,21 @@ def run():
     version = str(7)
     epsilon = 0.1  # exploration
     num_actions = len(ACTION_LIST)  # [buy, hold, sell]
-    transcation_cost = 0.001
-    epoch = 1000
+    transcation_cost = 0.0005
+    epoch = 2000
     max_memory = 1000000
     hidden_size = 600
-    batch_size = 200
+    batch_size = 500
     look_back_term = 300
-    training_period_start = 9050
-    training_period_stop = 10050
+    training_period_start = -10000
+    training_period_stop = -1
     learning_rate = 0.1
     discount_rate = 0.000009
     step_size = 10 # iterate step to update target_model
     act_function = "relu"
     #frame_skip = 4 # train the model with some frames intervals
-    input_data = "GBPUSD240.csv"
+    #input_data = "GBPUSD240.csv"
+    input_data = "GBP_USD240_oanda.csv"
 
     # log
     time_start_epoch = datetime.datetime.now()
@@ -195,7 +196,15 @@ def run():
     # import return data
     data = pd.read_csv("../Data/" + input_data,header=None)
     close = data[5].values
-    ret_train = (close[1:] - close[:-1])[training_period_start : training_period_stop]
+    
+    # import return data from oanda data
+    data = pd.read_csv("../Data/" + input_data,header=0)
+    #print data
+    close = data["closeAsk"].values
+    #print close
+    
+    ret_train = (close[1:] - close[:-1])[training_period_start : ]
+    
     
     #build model : online mode and target model
     model = Sequential()
