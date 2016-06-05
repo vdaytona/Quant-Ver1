@@ -162,7 +162,7 @@ def run():
     training_period_start = 9050
     training_period_stop = 10050
     learning_rate = 0.1
-    discount_rate = 0.9
+    discount_rate = 0.000009
     step_size = 10 # iterate step to update target_model
     act_function = "relu"
     #frame_skip = 4 # train the model with some frames intervals
