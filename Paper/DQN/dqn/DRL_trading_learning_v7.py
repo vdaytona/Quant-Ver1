@@ -157,7 +157,7 @@ def run():
     epoch = 2000
     max_memory = 1000000
     hidden_size = 600
-    batch_size = 200
+    batch_size = 300
     look_back_term = 300
     training_period_start = -10000
     training_period_stop = -1
