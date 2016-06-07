@@ -217,7 +217,7 @@ def run():
     model.add(Dense(hidden_size, activation=act_function))
     model.add(Dense(num_actions))
     RMSprop = keras.optimizers.RMSprop(lr=0.001, rho=0.9, epsilon=1e-08)
-    model.compile(optimizer= RMSprop, "mse")
+    model.compile(RMSprop, "mse")
     #model.compile(sgd(lr=learning_rate), "mse")
     
     write_model(model, version, time_start)
