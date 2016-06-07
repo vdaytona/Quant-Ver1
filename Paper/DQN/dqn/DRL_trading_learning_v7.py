@@ -26,6 +26,7 @@ os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
 
 import numpy as np
 import pandas as pd
+import keras
 from keras.models import Sequential
 from keras.layers.core import Dense
 from keras.optimizers import sgd
@@ -159,15 +160,15 @@ def run():
     hidden_size = 600
     batch_size = 300
     look_back_term = 300
-    training_period_start = -10000
-    training_period_stop = -1
+    training_period_start = -3000
+    training_period_stop = -1000
     learning_rate = 0.1
     discount_rate = 0.000009
     step_size = 10 # iterate step to update target_model
     act_function = "relu"
     #frame_skip = 4 # train the model with some frames intervals
-    #input_data = "GBPUSD240.csv"
-    input_data = "GBP_USD240_oanda.csv"
+    input_data = "GBPUSD240.csv"
+    #input_data = "GBP_USD240_oanda.csv"
 
     # log
     time_start_epoch = datetime.datetime.now()
@@ -212,7 +213,9 @@ def run():
     model.add(Dense(hidden_size, activation=act_function))
     model.add(Dense(hidden_size, activation=act_function))
     model.add(Dense(num_actions))
-    model.compile(sgd(lr=learning_rate), "mse")
+    RMSprop = keras.optimizers.RMSprop(lr=0.001, rho=0.9, epsilon=1e-08)
+    model.compile(optimizer= RMSprop, "mse")
+    #model.compile(sgd(lr=learning_rate), "mse")
     
     write_model(model, version, time_start)
     target_model = read_model(version, time_start)
