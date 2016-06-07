@@ -160,7 +160,7 @@ def run():
     hidden_size = 600
     batch_size = 300
     look_back_term = 300
-    training_period_start = -3000
+    training_period_start = -4000
     training_period_stop = -1000
     learning_rate = 0.1
     discount_rate = 0.000009
@@ -202,9 +202,9 @@ def run():
     close = data[5].values
     
     # import return data from oanda data
-    data = pd.read_csv("../Data/" + input_data,header=0)
+    #data = pd.read_csv("../Data/" + input_data,header=0)
     #print data
-    close = data["closeAsk"].values
+    #close = data["closeAsk"].values
     #print close
     
     ret_train = (close[1:] - close[:-1])[training_period_start : ]
