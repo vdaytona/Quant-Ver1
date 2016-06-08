@@ -166,7 +166,7 @@ def run():
     discount_rate = 0.000009
     step_size = 10 # iterate step to update target_model
     act_function = "relu"
-    comment = "Learning rate test (SGD)"
+    comment = "Learning rate test (Adam)"
     
     #frame_skip = 4 # train the model with some frames intervals
     input_data = "GBPUSD240.csv"
@@ -218,7 +218,9 @@ def run():
     model.add(Dense(num_actions))
     #RMSprop = keras.optimizers.RMSprop(lr=0.001, rho=0.9, epsilon=1e-08)
     #model.compile(RMSprop, "mse")
-    model.compile(sgd(lr=learning_rate), "mse")
+    Adam = keras.optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08)
+    model.compile(Adam,"mse")
+    #model.compile(sgd(lr=learning_rate), "mse")
     
     write_model(model, version, time_start)
     target_model = read_model(version, time_start)
