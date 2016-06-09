@@ -160,8 +160,8 @@ def run():
     hidden_size = 600
     batch_size = 300
     look_back_term = 300
-    training_period_start = -4000
-    training_period_stop = -1000
+    training_period_start = -10500
+    training_period_stop = -500
     learning_rate = 0.1
     discount_rate = 0.000009
     step_size = 10 # iterate step to update target_model
@@ -207,7 +207,7 @@ def run():
     #close = data["closeAsk"].values
     #print close
     
-    ret_train = (close[1:] - close[:-1])[training_period_start : ]
+    ret_train = (close[1:] - close[:-1])[training_period_start : training_period_stop]
     
     
     #build model : online mode and target model
