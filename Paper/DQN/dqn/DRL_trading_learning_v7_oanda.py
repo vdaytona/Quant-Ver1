@@ -141,9 +141,11 @@ def save_variable(fileName, variable):
     pickle.dump(variable, f)
     f.close
 
-def load_variable(fileName, variable):
-    f = file("../Temp/" + fileName, 'rb')
-    return pickle.load(f)
+def load_variable(fileName):
+    f = file(fileName, 'rb')
+    var =  pickle.load(f)
+    f.close()
+    return var
     
 
 def run():
@@ -166,7 +168,7 @@ def run():
     discount_rate = 0.000009
     step_size = 10 # iterate step to update target_model
     act_function = "relu"
-    comment = "Continue training for DRL_Model_v7_2016-06-06-05--39-06."
+    comment = "Continue training for DRL_Model_v7_11 oanda trading data training."
     
     #frame_skip = 4 # train the model with some frames intervals
     #input_data = "GBPUSD240.csv"
@@ -221,10 +223,12 @@ def run():
     #model.compile(optimizer= RMSprop, "mse")
     
     # read model
-    model_time_start = "2016-06-06-05-39-06"
-    with open("../Temp/DRL_model_v" + version + "_" + model_time_start + ".json", "r") as jfile:
+    serial_No = "11"
+    model_name = "DRL_model_v" + version + "_" + serial_No
+    #model_time_start = "2016-06-06-05-39-06"
+    with open("../Archive_Result/v" + version + "/" + model_name + ".json", "r") as jfile:
         model = model_from_json(json.load(jfile))
-    model.load_weights("../Temp/DRL_model_v" + version + "_" + model_time_start + ".h5")
+    model.load_weights("../Archive_Result/v" + version + "/" + model_name + ".h5")
     model.compile(sgd(lr=learning_rate), "mse")
     
     write_model(model, version, time_start)
@@ -233,7 +237,10 @@ def run():
     # create market
     env = FX_Market(ret_train = ret_train, look_back_term = look_back_term, transaction_cost = transcation_cost)
     # create memory
-    trading_his = Trading_Memory(max_memory = max_memory, discount=discount_rate)
+    #trading_his = Trading_Memory(max_memory = max_memory, discount=discount_rate)
+    # load memory from file
+    trading_his = load_variable("../Temp/memory_2016-06-07-14-34-06.mem")
+    
     
     # Train
     return_list = []
