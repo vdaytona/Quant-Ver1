@@ -220,8 +220,9 @@ def run():
     #model.compile(RMSprop, "mse")
     #Adam = keras.optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08)
     #adadelta = keras.optimizers.Adadelta(lr=1.0, rho=0.95, epsilon=1e-08)
-    Adagrad = keras.optimizers.Adagrad(lr=0.01, epsilon=1e-08)
-    model.compile(Adagrad,"mse")
+    #Adagrad = keras.optimizers.Adagrad(lr=0.01, epsilon=1e-08)
+    Adamax = keras.optimizers.Adamax(lr=0.002, beta_1=0.9, beta_2=0.999, epsilon=1e-08)
+    model.compile(Adamax,"mse")
     #model.compile(sgd(lr=learning_rate), "mse")
     
     write_model(model, version, time_start)
