@@ -83,6 +83,9 @@ class Trading_Memory():
     def get_memory(self):
         return self.__memory
     
+    def set_memory(self, memory):
+        self.__memory = memory
+    
     def memory(self,state, state_new, action, reward):
         self.__memory.append([state, state_new, action, reward])
         if len(self.__memory) > self.__max_memory:
@@ -237,9 +240,9 @@ def run():
     # create market
     env = FX_Market(ret_train = ret_train, look_back_term = look_back_term, transaction_cost = transcation_cost)
     # create memory
-    #trading_his = Trading_Memory(max_memory = max_memory, discount=discount_rate)
+    trading_his = Trading_Memory(max_memory = max_memory, discount=discount_rate)
     # load memory from file
-    trading_his = load_variable("../Temp/memory_2016-06-07-14-34-06.mem")
+    trading_his.set_memory(load_variable("../Temp/memory_2016-06-07-14-34-06.mem"))
     
     
     # Train
