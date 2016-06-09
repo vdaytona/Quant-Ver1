@@ -224,7 +224,7 @@ def run():
     
     # read model
     serial_No = "11"
-    model_name = "DRL_model_v" + version + "_" + serial_No
+    model_name = "DRL_model_oanda_v" + version + "_" + serial_No
     #model_time_start = "2016-06-06-05-39-06"
     with open("../Archive_Result/v" + version + "/" + model_name + ".json", "r") as jfile:
         model = model_from_json(json.load(jfile))
