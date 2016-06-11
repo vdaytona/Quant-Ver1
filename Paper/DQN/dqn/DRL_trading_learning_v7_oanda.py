@@ -296,7 +296,7 @@ def run():
     time_used = float(time_used.seconds) / 3600.0
     logging.info("Processing time : " + str(time_used) + " hours")
     
-    save_variable("../Temp/memory_" + time_start + ".mem", trading_his.get_memory())
+    save_variable("../Temp/memory_oanda_" + time_start + ".mem", trading_his.get_memory())
     
     #output accumulate data
     result = pd.DataFrame()
