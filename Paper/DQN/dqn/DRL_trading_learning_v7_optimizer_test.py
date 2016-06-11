@@ -226,9 +226,9 @@ def run(optimizer_list):
             opti = keras.optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08)
         elif optimizer == "Adadelta" :
             opti = keras.optimizers.Adadelta(lr=1.0, rho=0.95, epsilon=1e-08)
-        elif opti == "Adagrad":
+        elif optimizer == "Adagrad":
             opti = keras.optimizers.Adagrad(lr=0.01, epsilon=1e-08)
-        elif opti == "Adamax" :
+        elif optimizer == "Adamax" :
             opti = keras.optimizers.Adamax(lr=0.002, beta_1=0.9, beta_2=0.999, epsilon=1e-08)
         
         model.compile(opti, "mse")
@@ -312,6 +312,7 @@ def run(optimizer_list):
     print "finished"
 
 if __name__ == '__main__': 
-    optimizer_list = ["SGD","RMSprop","Adam","Adadelta","Adagrad","Adamax"]
+    #optimizer_list = ["SGD","RMSprop","Adam","Adadelta","Adagrad","Adamax"]
+    optimizer_list = ["Adamax"]
     run(optimizer_list)
 
