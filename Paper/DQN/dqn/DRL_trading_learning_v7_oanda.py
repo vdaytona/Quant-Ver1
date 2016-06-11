@@ -226,7 +226,7 @@ def run():
     #model.compile(optimizer= RMSprop, "mse")
     
     # read model
-    serial_No = "11"
+    serial_No = "17"
     model_name = "DRL_model_oanda_v" + version + "_" + serial_No
     #model_time_start = "2016-06-06-05-39-06"
     with open("../Archive_Result/v" + version + "/" + model_name + ".json", "r") as jfile:
@@ -242,7 +242,7 @@ def run():
     # create memory
     trading_his = Trading_Memory(max_memory = max_memory, discount=discount_rate)
     # load memory from file
-    trading_his.set_memory(load_variable("../Temp/memory_2016-06-07-14-34-06.mem"))
+    trading_his.set_memory(load_variable("../Temp/memory_2016-06-10-00-03-14.mem"))
     
     
     # Train
