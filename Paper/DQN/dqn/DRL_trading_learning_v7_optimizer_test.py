@@ -313,6 +313,6 @@ def run(optimizer_list):
 
 if __name__ == '__main__': 
     #optimizer_list = ["SGD","RMSprop","Adam","Adadelta","Adagrad","Adamax"]
-    optimizer_list = ["Adamax"]
+    optimizer_list = ["Adagrad"]
     run(optimizer_list)
 
