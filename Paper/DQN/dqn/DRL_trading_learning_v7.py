@@ -155,7 +155,7 @@ def run():
     epsilon = 0.1  # exploration
     num_actions = len(ACTION_LIST)  # [buy, hold, sell]
     transcation_cost = 0.0005
-    epoch = 500
+    epoch = 3000
     max_memory = 1000000
     hidden_size = 600
     batch_size = 300
@@ -166,7 +166,7 @@ def run():
     discount_rate = 0.000009
     step_size = 10 # iterate step to update target_model
     act_function = "relu"
-    comment = "Learning rate test (Adamax)"
+    comment = "Training by SGD until convergence"
     
     #frame_skip = 4 # train the model with some frames intervals
     input_data = "GBPUSD240.csv"
@@ -209,21 +209,13 @@ def run():
     
     ret_train = (close[1:] - close[:-1])[training_period_start : training_period_stop]
     
-    
     #build model : online mode and target model
     model = Sequential()
     model.add(Dense(hidden_size, input_shape=(look_back_term,), activation=act_function))
     model.add(Dense(hidden_size, activation=act_function))
     model.add(Dense(hidden_size, activation=act_function))
     model.add(Dense(num_actions))
-    #RMSprop = keras.optimizers.RMSprop(lr=0.001, rho=0.9, epsilon=1e-08)
-    #model.compile(RMSprop, "mse")
-    #Adam = keras.optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08)
-    #adadelta = keras.optimizers.Adadelta(lr=1.0, rho=0.95, epsilon=1e-08)
-    #Adagrad = keras.optimizers.Adagrad(lr=0.01, epsilon=1e-08)
-    Adamax = keras.optimizers.Adamax(lr=0.002, beta_1=0.9, beta_2=0.999, epsilon=1e-08)
-    model.compile(Adamax,"mse")
-    #model.compile(sgd(lr=learning_rate), "mse")
+    model.compile(sgd(lr=learning_rate), "mse")
     
     write_model(model, version, time_start)
     target_model = read_model(version, time_start)
