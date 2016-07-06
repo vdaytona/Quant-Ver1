@@ -227,11 +227,11 @@ def run():
     
     # read model
     serial_No = "17"
-    model_name = "DRL_model_oanda_v" + version + "_oanda_" + serial_No
+    model_name = "DRL_model_oanda_v" + version + "_" + serial_No
     #model_time_start = "2016-06-06-05-39-06"
-    with open("../Archive_Result/v" + version + "/" + model_name + ".json", "r") as jfile:
+    with open("../Archive_Result/v" + version + "/oanda/" + model_name + ".json", "r") as jfile:
         model = model_from_json(json.load(jfile))
-    model.load_weights("../Archive_Result/v" + version + "/" + model_name + ".h5")
+    model.load_weights("../Archive_Result/v" + version + "/oanda/" + model_name + ".h5")
     model.compile(sgd(lr=learning_rate), "mse")
     
     write_model(model, version, time_start)
